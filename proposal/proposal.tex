@@ -1,0 +1,77 @@
+% -----
+% COMP2550 proposal
+% CHRISTOPHER CLAOUE-LONG
+% -----
+% -
+% - DOCUMENT GEOMETRY SETUP
+\documentclass[12pt,a4paper]{article}
+\usepackage[margin=20mm]{geometry}
+\usepackage{lastpage} % to display the page number down the bottom
+\makeatletter \renewcommand{\@oddfoot}{\hfil Page \thepage\ of \pageref{LastPage} \hfil} \makeatother % Page X of Y down the bottom
+% -
+% - SECTION FORMATTING
+\renewcommand \thepart{\Roman{part}}
+\renewcommand \thesection{\arabic{section}}
+\renewcommand \thesubsection{\arabic{section}.\arabic{subsection}}
+\renewcommand \thesubsubsection{\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+% -
+% - FONT
+\usepackage{amsmath, amsthm, amssymb,graphicx,epstopdf}
+\DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
+\usepackage[sc]{mathpazo} % Palatino maths fonts - acceptable fonts for typesetting, also sets these fonts for use in math mode
+\linespread{1.05}
+\usepackage[T1]{fontenc}
+\usepackage[bitstream-charter]{mathdesign}
+% -
+% - MISC. PACKAGES
+\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
+\usepackage{datetime}% Current time by \currenttime, date by \today
+\usepackage{multicol} % \begin{multicols}{<n cols>} and \end{multicols}. Star the command (\begin{multicols*}\end{multicols*}) to allow sloppy column balancing
+\usepackage{verbatim}% \verb<delimiter><comments><delimiter> or \begin{verbatim}<comments>\end{verbatim}
+\usepackage{ulem} % \sout{<text>} to strike out text, \xout{<text>} to cross it out with multiple `/'s.
+\usepackage{alltt} % Like verbatim but can use latex commands inside, allowing for colours etc. Useful for code.
+\usepackage{multirow} % \multirow{<n rows>}{<fit type>}{content} in a tabular environment. Like multicolumn
+% -
+\usepackage{hyperref}
+\hypersetup{
+colorlinks,
+citecolor=black,		% - Citation colour
+filecolor=black,		% - File colour
+linkcolor=black,		% - Link colour
+urlcolor=black		% - URL colour
+}
+\urlstyle{same}
+% -
+% -
+% - MISC. SYMBOLS AND COMMANDS
+% - Thick horizontal blue line
+\newcommand{\Hrule}{\textcolor{blue}{\rule{\linewidth}{0.5mm}}} % Defines a new command for the horizontal lines, change thickness here
+% -
+% -
+% -----
+% BEGIN DOCUMENT
+% -----
+\begin{document}
+% -----
+% - Title
+\begin{center}
+\Hrule\vspace{1em}
+\textbf{\Huge COMP2550/COMP3130 ANU\\Main Project Proposal}\\
+\textbf{\large Christopher Claou\'e-Long 
+(\href{mailto:u5183532@anu.edu.au}{\textit{\underline{\smash{u5183532@anu.edu.au}}}})\\
+Jimmy Lin 
+(\href{mailto:u5223173@anu.edu.au}{\textit{\underline{\smash{u5223173@anu.edu.au}}}})\\}
+\textbf{Updated: \currenttime, \today}			% - Date
+\Hrule
+\end{center}
+% -
+% -
+\begin{multicols}{2}
+REPORT GOES HERE
+\end{multicols}
+
+\vfill\Hrule
+\end{document}
+% -----
+% END OF LINE
+% -----
