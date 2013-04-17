@@ -34,7 +34,9 @@ urlcolor=black		% - URL colour
 \newcommand{\ITALIC}[1]{\textit{#1}}
 \newcommand{\BOLDL}[1]{\textbf{\large #1}}
 \newcommand{\BOLD}{\textbf}
-\newcommand{\Hrule}{\textcolor{blue}{\rule{\linewidth}{0.5mm}}} % Defines a new command for the horizontal lines, change thickness here
+\newcommand{\Hrule}{\textcolor{blue}{\rule{\linewidth}{0.5mm}}} 
+% Defines a new command for the horizontal lines, change thickness here
+\newcommand{\htab}{\hspace*{0.63cm}}
 % -
 % -----
 % BEGIN DOCUMENT
@@ -58,7 +60,30 @@ urlcolor=black		% - URL colour
 % -
 % -
 \begin{multicols}{2}
-REPORT GOES HERE
+\section{Introduction}
+    problem motivation, background, application. \\
+    what we are going to achieve?\\ 
+    We are going to use the open-source library OpenCV and Darwin to achieve the framework of the CRF-based saliency detection. 
+
+\section{Related Work}
+    a brief introduction of the alternatives.
+\section{Our Approach}
+
+\subsection{Model Formulation}
+
+\subsection{Feature Extraction}
+
+\section{Possible Improvements}
+
+% References
+\begin{thebibliography}{8}
+    \footnotesize
+    \bibitem 1 Gould, Stephen. "DARWIN: A Framework for Machine Learning and Computer Vision Research and Development." \textit{Journal of Machine Learning Research 13 (2012): 3533-3537}. 
+    \bibitem 2 Liu, Tie, et al. "Learning to detect a salient object." \textit{Pattern Analysis and Machine Intelligence, IEEE Transactions on 33.2 (2011): 353-367}. 
+    \bibitem 3 Itti, Laurent, Christof Koch, and Ernst Niebur. "A model of saliency-based visual attention for rapid scene analysis."\textit{ Pattern Analysis and Machine Intelligence, IEEE Transactions on 20.11 (1998): 1254-1259}.
+    \bibitem 4 Ma, Yu-Fei, and Hong-Jiang Zhang. "Contrast-based image attention analysis by using fuzzy growing."\textit{ Proceedings of the eleventh ACM international conference on Multimedia. ACM, 2003}. 
+\end{thebibliography}
+
 \end{multicols}
 
 \vfill\Hrule
