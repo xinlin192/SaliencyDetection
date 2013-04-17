@@ -6,6 +6,7 @@
 % - DOCUMENT GEOMETRY SETUP
 \documentclass[12pt,a4paper]{article}
 \usepackage[margin=20mm]{geometry}
+\usepackage{wrapfig}
 \usepackage{lastpage} % to display the page number down the bottom
 \makeatletter \renewcommand{\@oddfoot}{\hfil Page \thepage\ of \pageref{LastPage} \hfil} \makeatother % Page X of Y down the bottom
 % -
@@ -61,20 +62,43 @@ urlcolor=black		% - URL colour
 % -
 \begin{multicols}{2}
 \section{Introduction}
-    problem motivation, background, application. \\
-    what we are going to achieve?\\ 
-    We are going to use the open-source library OpenCV and Darwin to achieve the framework of the CRF-based saliency detection. 
-
-\section{Related Work}
-    a brief introduction of the alternatives.
-\section{Our Approach}
-
-\subsection{Model Formulation}
+[problem motivation, background, application...] \\
+% introduce the related work in the area of saliency detection 
+\htab There are a few existing works to achieve the functionality of detecting the salient objects. The mainstream appraoch in the last decade should be the (Itti,1998)'s algorithm (see ref.3). It outputs a feature map and then converts it to a rectangle by winner-take-all algorithm. But the precision of the detection is quite unsatisfying, even though it does hae a good recall. The second approach is the fuzzy-growing approach (see ref.4). But [badness of this approach...]. \\
+\includegraphics[width=3.2in,height=1in]{./pictures/0_imCanvs_Compare.jpg} \\
+\figcaption{\footnotesize (a) FG(Ma,2003) (b) SM(Itti,1998) (c) CRFM(Liu,2007) (d) Ground truth} \\
+% introduce the framework we referred to
+\htab The research we referred to in this experimental project (see ref.2), which is based on conditional random field (CRF) model, has a large portion of perfect detection compared with ground truth data. At first stage, it extracts features in the local, regional and global level, corresponding to multiscale contrast, center-surround histogram and spatial color distribution respectively. And then after normalization and linear/non-linear combination, a master map or a salient map is computed to represent the saliency of each image pixel. Last, a few key locations on the saliency map are identified by winner-take-all or inhibition-of-return, or other non-linear operations.\\
+% declare our work in this project and why we choose this as the topic of project
+\htab Our implementation involves in utilizing the open-source library OpenCV and Darwin to achieve the framework of the CRF-based saliency detection. [why we choose this topic, (1) experience of implementing graphical model (2) it may help to scene understanding...]\\
+\section{Formulation}
+\subsection{CRF Model}
+Model conditional distribution of objective variable 
+    $$ P(A|I) = \frac{1}{Z} exp(-E(A|I)) $$
+Energy function is formualted to be a set of static salient features and one pairwise feature as follows,
+    $$ E(A|I) = \sum_{x} \sum_{k=1}^{K} \lambda_{k} F_{k}(a_{x},I)  
+        + \sum_{x,x'} S(a_{x},a_{x'},I)  $$ \vspace{-0.4cm}
+\begin{center} \footnotesize $\lambda_{k}$: weight of $k$th feature, $x,x'$: two adjacent pixels. \end{center} 
 
 \subsection{Feature Extraction}
+\textbf{Multiscale Contrast}. This static feature captures the high contrast in the boundary of objects . \\[0.1cm]
+\textbf{Center-Surround Histogram}. This static feature captures  \\[0.1cm]
+\textbf{Spatial Color distribution}. This static feature penalizes the pixels with widely distributed color. \\[0.1cm]
+\textbf{Pairwise Feature}. This feature exploits the spatial relationship between two adjacent pixels and can be viewed as one capturing the spatial continuity of saliency, that is, adjacent pixels that are prone to be assigned with different labels. 
+\subsection{Possible Improvements}
+[more features that better capture the saliency...]
 
-\section{Possible Improvements}
-
+\section{Project Timeline}
+Apr. 1st $\Rightarrow$ Apr. 18th \\
+\textbf{Project Proposal}. Read papers to find project of our interest, determine the topic of our second project and collect relevant data sets for training. \\[0.2cm]
+Apr. 19th $\Rightarrow$ Apr. 28th  \\
+ \textbf{Framework Construction}. Familiarize ourself with the related packages in Darwin and OpenCV, set up the interface to accept training data and the framework of CRF model for learning and inference.   \\[0.2cm]
+Apr. 29th $\Rightarrow$ May. 12th \\
+ \textbf{Intensive Coding}. Write codes to implement extraction of various features, and design the algorithm to output a rectangle labeling saliency. \\[0.2cm]
+May. 12th $\Rightarrow$ May. 19th \\
+\textbf{Testing, Enhancement}. Test the framework we would have constructed. Search and implement possible improvements. \\[0.2cm] 
+May. 20th $\Rightarrow$ May. 30th \\
+\textbf{Project Summarization}. Write report to summarize our project and make presentation. \\
 % References
 \begin{thebibliography}{8}
     \footnotesize
