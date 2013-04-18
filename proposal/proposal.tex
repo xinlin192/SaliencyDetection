@@ -42,7 +42,8 @@ urlcolor=black		% - URL colour
 \newenvironment{Figure}
   {\par\medskip\noindent\minipage{\linewidth}}
   {\endminipage\par\medskip}
-\newcommand{\TIMELINE}[3]{#1\\\BOLD{#2} #3\\\\}
+\newcommand{\TIMELINE}[3]{#1\\\BOLD{#2} #3}
+\newcommand{\TIMELINESPACE}{\\[0.3cm]}
 % -
 % -----
 % BEGIN DOCUMENT
@@ -71,19 +72,19 @@ A long-standing problem in the field of computer vision is how to calculate the 
 [needs more on problem motivation, background]\\
 % -
 % introduce related work 
-\htab Today, are a few existing works that achieve a high accuracy in detecting salient objects. The most recognised approach in the last decade is Itti's algorithm from 1998 (see ref.3). It calculates a feature map and then converts it to a rectangle via a winner-take-all algorithm. However, the precision of the detection from this and other algorithms is as yet unsatisfying, even though Itti's algorithm in particular has good object recall. The second approach is the fuzzy-growing approach (see ref.4). But [expand on deficiencies] \\
+\htab Today, are a few existing works that achieve a high accuracy in detecting salient objects. The most recognised approach in the last decade is Itti's algorithm from 1998 (see ref.3). It calculates a feature map and then converts it to a rectangle via a winner-take-all algorithm. However, the precision of the detection from this and other algorithms is as yet unsatisfying, even though Itti's algorithm in particular has good object recall. The second approach is the fuzzy-growing approach (see ref.4). But [expand on deficiencies] 
 % -
 % image outlining salient object detection
 \begin{Figure}
 \includegraphics[width=3.2in,height=1in]{./pictures/0_imCanvs_Compare.jpg} \\
-{\tiny (a) FG(Ma,2003) (b) SM(Itti,1998) (c) CRFM(Liu,2007) (d) Ground truth} \\
+{\htab \tiny (a) FG(Ma,2003) (b) SM(Itti,1998) (c) CRFM(Liu,2007) (d) Ground truth}
 \end{Figure}
 % -
 % framework
-\htab The research we will be referring to to in this experimental project is that of Liu, Tie et al. in 2011 (see ref.2), which is based on a onditional random field (CRF) model.  This allows a large amount of near-perfect saliency detection compared with the ground truth data. To accomplish this, it extracts features on the local, regional and global level, where it calculates multiscale contrast, a centre-surround histogram and spatial color distribution respectively. After normalization and linear/non-linear combination, a master map, better known as a salient map, is computed to represent the saliency of each image pixel. A few key locations on the saliency map are finally identified by winner-take-all or inhibition-of-return, or other non-linear operations that act on the probability of a salient object being present at the location.\\
+The research we will be referring to to in this experimental project is that of Liu, Tie et al. in 2011 (see ref.2), which is based on a onditional random field (CRF) model.  This allows a large amount of near-perfect saliency detection compared with the ground truth data. To accomplish this, it extracts features on the local, regional and global level, where it calculates multiscale contrast, a centre-surround histogram and spatial color distribution respectively. After normalization and linear/non-linear combination, a master map, better known as a salient map, is computed to represent the saliency of each image pixel. A few key locations on the saliency map are finally identified by winner-take-all or inhibition-of-return, or other non-linear operations that act on the probability of a salient object being present at the location.\\
 % -
 % implementation outline and explanation of chice
-\htab Our implementation will employ the  OpenCV library, leveraging on the ANU's open source DARWIN framework to achieve a CRF-based saliency detection algorithm. [why we choose this topic, (1) experience of implementing graphical model (2) it may help to scene understanding...]\\
+\htab Our implementation will employ the  OpenCV library, leveraging on the ANU's open source DARWIN framework to achieve a CRF-based saliency detection algorithm. The reason for selecting CRF-based saliency detection as our project focus is that this project would give us experience of manipulating graphical model in practice, especially learning and inference mechanism of CRF. Another reason sources from the intuition that this may help scene understanding in multiple ways. For instance, under a complex scene understanding algorithm with dozens of classes label, exclusively labelling the salient region and its near neighbourhood within a tremendously large image saves the computational resources. 
 % -
 % implementation details
 \section{Proposed Implementation}
@@ -101,19 +102,17 @@ where $E(A|I)$ is the energy function, formulated to be a set of static salient 
 \textbf{Spatial Color distribution}. This static feature penalizes the pixels with widely distributed color. \\[0.1cm]
 \textbf{Pairwise Feature}. This feature exploits the spatial relationship between two adjacent pixels and can be viewed as one capturing the spatial continuity of saliency, that is, adjacent pixels that are prone to be assigned with different labels. 
 \subsection{Possible Improvements}
-[more features that better capture the saliency...]
-Real time
-Video
-Input into the other COMP2550/COMP3130 project group's implementation on superpixel labelling.
+\htab First and foremost, one possible breakthrough lies in enhancing the quality of extracted features for detecting sliency. From the result presentation of referred approach (Tie, ref.2), the saliency of legs of animals (i.e. horses, elk) are frequently missed even in the feature map. Perhaps this is because of the thinness of the legs.
 
+Input into the other COMP2550/COMP3130 project group's implementation on superpixel labelling.
 \section{Project Timeline}
-\TIMELINE{1\SUPER{st}  - 18\SUPER{th} April}{Project Proposal:}{Research current literature to find papers and inspire a project of interest, determine the topic of our second project and collect relevant datasets for training.}
+\TIMELINE{1\SUPER{st}  - 18\SUPER{th} April}{Project Proposal:}{Research current literature to find papers and inspire a project of interest, determine the topic of our second project and collect relevant datasets for training.}\TIMELINESPACE
 %
-\TIMELINE{19\SUPER{th} April - 28\SUPER{th} April}{Framework Construction:}{Gain familiarity with the packages and existing frameworks and implementations in Darwin and OpenCV, set up the interface to accept training data and the CRF model for saliency learning and inference.}
+\TIMELINE{19\SUPER{th} April - 28\SUPER{th} April}{Framework Construction:}{Gain familiarity with the packages and existing frameworks and implementations in Darwin and OpenCV, set up the interface to accept training data and the CRF model for saliency learning and inference.} \TIMELINESPACE
 %
-\TIMELINE{29\SUPER{th} April - 12\SUPER{th} May}{Implementation:}{Design and implement algorithms to calculate various features and output a rectangle/rectangles labeling the salient object(s).}
+\TIMELINE{29\SUPER{th} April - 12\SUPER{th} May}{Implementation:}{Design and implement algorithms to calculate various features and output a rectangle/rectangles labeling the salient object(s).}\TIMELINESPACE
 %
-\TIMELINE{12\SUPER{th} May- 19\SUPER{th} May}{Testing and Improvements:}{Test the framework, review or research possible improvements and implmenent.}
+\TIMELINE{12\SUPER{th} May- 19\SUPER{th} May}{Testing and Improvements:}{Test the framework, review or research possible improvements and implmenent.}\TIMELINESPACE
 %
 \TIMELINE{20\SUPER{th} May - 30\SUPER{th} May}{Project Review and Report:}{Write up report summarising our project and findings, prepare presentation.}
 % References
