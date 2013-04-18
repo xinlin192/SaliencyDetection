@@ -72,7 +72,7 @@ A long-standing problem in the field of computer vision is how to calculate the 
 [needs more on problem motivation, background]\\
 % -
 % introduce related work 
-\htab Today, are a few existing works that achieve a high accuracy in detecting salient objects. The most recognised approach in the last decade is Itti's algorithm from 1998 (see ref.3). It calculates a feature map and then converts it to a rectangle via a winner-take-all algorithm. However, the precision of the detection from this and other algorithms is as yet unsatisfying, even though Itti's algorithm in particular has good object recall. The second approach is the fuzzy-growing approach (see ref.4). But [expand on deficiencies] 
+\htab Today, are a few existing works that achieve a high accuracy in detecting salient objects. The most recognised approach in the last decade is Itti's algorithm from 1998 (see ref.3). It calculates a feature map and then converts it to a rectangle via a winner-take-all algorithm. However, the precision of the detection from this and other algorithms is as yet unsatisfying, even though Itti's algorithm in particular has good object recall. The second approach is the fuzzy-growing approach (see ref.4), which directly outputs a rectangle to label saliency in a less costly way. But its outcome is worse(as shown in the following comparison).
 % -
 % image outlining salient object detection
 \begin{Figure}
@@ -95,16 +95,14 @@ where $E(A|I)$ is the energy function, formulated to be a set of static salient 
     $$ E(A|I) = \sum_{x} \sum_{k=1}^{K} \lambda_{k} F_{k}(a_{x},I)  
         + \sum_{x,x'} S(a_{x},a_{x'},I)  $$ \vspace{-0.4cm}
 \begin{center} \footnotesize $\lambda_{k}$: weight of $k$th feature, $x,x'$: two adjacent pixels. \end{center} 
-
+%
 \subsection{Feature Extraction Ideas}
-\textbf{Multiscale Contrast}. This static feature captures the high contrast in the boundary of objects . \\[0.1cm]
-\textbf{Center-Surround Histogram}. This static feature captures  \\[0.1cm]
+\textbf{Multiscale Contrast}. This static feature extracts intensity, color, orientation, texture at multiple scales to capture hight contrast in the boundary of objects . \\[0.1cm]
+\textbf{Center-Surround Histogram}. This static feature can be computed using various low-level features by a center-surround operation.  \\[0.1cm]
 \textbf{Spatial Color distribution}. This static feature penalizes the pixels with widely distributed color. \\[0.1cm]
 \textbf{Pairwise Feature}. This feature exploits the spatial relationship between two adjacent pixels and can be viewed as one capturing the spatial continuity of saliency, that is, adjacent pixels that are prone to be assigned with different labels. 
 \subsection{Possible Improvements}
 \htab First and foremost, one possible breakthrough lies in enhancing the quality of extracted features for detecting sliency. From the result presentation of referred approach (Tie, ref.2), the saliency of legs of animals (i.e. horses, elk) are frequently missed even in the feature map. Perhaps this is because of the thinness of the legs.
-
-Input into the other COMP2550/COMP3130 project group's implementation on superpixel labelling.
 \section{Project Timeline}
 \TIMELINE{1\SUPER{st}  - 18\SUPER{th} April}{Project Proposal:}{Research current literature to find papers and inspire a project of interest, determine the topic of our second project and collect relevant datasets for training.}\TIMELINESPACE
 %
@@ -116,17 +114,14 @@ Input into the other COMP2550/COMP3130 project group's implementation on superpi
 %
 \TIMELINE{20\SUPER{th} May - 30\SUPER{th} May}{Project Review and Report:}{Write up report summarising our project and findings, prepare presentation.}
 % References
-\begin{thebibliography}{8}
-    \footnotesize
+\begin{thebibliography}{8} \footnotesize
     \bibitem 1 Gould, Stephen. "DARWIN: A Framework for Machine Learning and Computer Vision Research and Development." \textit{Journal of Machine Learning Research 13 (2012): 3533-3537}. 
     \bibitem 2 Liu, Tie, et al. "Learning to detect a salient object." \textit{Pattern Analysis and Machine Intelligence, IEEE Transactions on 33.2 (2011): 353-367}. 
     \bibitem 3 Itti, Laurent, Christof Koch, and Ernst Niebur. "A model of saliency-based visual attention for rapid scene analysis."\textit{ Pattern Analysis and Machine Intelligence, IEEE Transactions on 20.11 (1998): 1254-1259}.
     \bibitem 4 Ma, Yu-Fei, and Hong-Jiang Zhang. "Contrast-based image attention analysis by using fuzzy growing."\textit{ Proceedings of the eleventh ACM international conference on Multimedia. ACM, 2003}. 
 \end{thebibliography}
-
 \end{multicols}
 \vfill\Hrule
-
 \end{document}
 % -----
 % END OF LINE
