@@ -36,6 +36,7 @@ urlcolor=black		% - URL colour
 \newcommand{\BOLDL}[1]{\textbf{\large #1}}
 \newcommand{\BOLD}{\textbf}
 \newcommand{\Hrule}{\textcolor{blue}{\rule{\linewidth}{0.5mm}}} 
+
 % Defines a new command for the horizontal lines, change thickness here
 \newcommand{\htab}{\hspace*{0.63cm}}
 \newcommand{\SUPER}{\textsuperscript}
@@ -68,7 +69,7 @@ urlcolor=black		% - URL colour
 % -
 \begin{multicols}{2}
 \section{Introduction}
-A long-standing problem in the field of computer vision is how to calculate the saliency of objects in images, that is the prominence of them compared to the background.  Many approaches exist to attempt to solve this issue, however multiple attemps have either transformed into simple object detection algorithms or are not particularly accurate. 
+\htab A long-standing problem in the field of computer vision is how to calculate the saliency of objects in images, that is the prominence of them compared to the background.  Many approaches exist to attempt to solve this issue, however multiple attemps have either transformed into simple object detection algorithms or are not particularly accurate. 
 [needs more on problem motivation, background]\\
 % -
 % introduce related work 
@@ -81,15 +82,14 @@ A long-standing problem in the field of computer vision is how to calculate the 
 \end{Figure}
 % -
 % framework
-The research we will be referring to to in this experimental project is that of Liu, Tie et al. in 2011 (see ref.2), which is based on a onditional random field (CRF) model.  This allows a large amount of near-perfect saliency detection compared with the ground truth data. To accomplish this, it extracts features on the local, regional and global level, where it calculates multiscale contrast, a centre-surround histogram and spatial color distribution respectively. After normalization and linear/non-linear combination, a master map, better known as a salient map, is computed to represent the saliency of each image pixel. A few key locations on the saliency map are finally identified by winner-take-all or inhibition-of-return, or other non-linear operations that act on the probability of a salient object being present at the location.\\
-% -
-% implementation outline and explanation of chice
-\htab Our implementation will employ the  OpenCV library, leveraging on the ANU's open source DARWIN framework to achieve a CRF-based saliency detection algorithm. The reason for selecting CRF-based saliency detection as our project focus is that this project would give us experience of manipulating graphical model in practice, especially learning and inference mechanism of CRF. Another reason sources from the intuition that this may help scene understanding in multiple ways. For instance, under a complex scene understanding algorithm with dozens of classes label, exclusively labelling the salient region and its near neighbourhood within a tremendously large image saves the computational resources. 
+The research we will be referring to to in this experimental project is that of Liu, Tie et al. in 2011 (see ref.2), which is based on a onditional random field (CRF) model.  This allows a large amount of near-perfect saliency detection compared with the ground truth data. To accomplish this, it extracts features on the local, regional and global level, where it calculates multiscale contrast, a centre-surround histogram and spatial color distribution respectively. After normalization and linear/non-linear combination, a master map, better known as a salient map, is computed to represent the saliency of each image pixel. A few key locations on the saliency map are finally identified by winner-take-all or inhibition-of-return, or other non-linear operations that act on the probability of a salient object being present at the location.
 % -
 % implementation details
 \section{Proposed Implementation}
+% implementation outline and explanation of chice
+\htab Our implementation will employ the  OpenCV library, leveraging on the ANU's open source DARWIN framework to achieve a CRF-based saliency detection algorithm. The reason for selecting CRF-based saliency detection as our project focus is that this project would give us experience of manipulating graphical model in practice, especially learning and inference mechanism of CRF. Another reason sources from the intuition that this may help scene understanding in multiple ways. For instance, under a complex scene understanding algorithm with dozens of classes label, exclusively labelling the salient region and its near neighbourhood within a tremendously large image saves the computational resources. 
 \subsection{Conditional Random Fields}
-Conditional Random Fields model the distribution of an objective variable given some ``less global'' factores \BOLDL{EXPAND}.  They can be described by the equation
+\htab Conditional Random Fields model the distribution of an objective variable given some ``less global'' factores \BOLDL{EXPAND}.  They can be described by the equation
     $$ P(A|I) = \frac{1}{Z} \cdot\exp(-E(A|I)) $$
 where $E(A|I)$ is the energy function, formulated to be a set of static salient features and one pairwise feature as follows:
     $$ E(A|I) = \sum_{x} \sum_{k=1}^{K} \lambda_{k} F_{k}(a_{x},I)  
@@ -114,7 +114,7 @@ where $E(A|I)$ is the energy function, formulated to be a set of static salient 
 %
 \TIMELINE{20\SUPER{th} May - 30\SUPER{th} May}{Project Review and Report:}{Write up report summarising our project and findings, prepare presentation.}
 % References
-\begin{thebibliography}{8} \footnotesize
+\begin{thebibliography}{0} \footnotesize   \setlength{\itemsep}{-0.5pt}%
     \bibitem 1 Gould, Stephen. "DARWIN: A Framework for Machine Learning and Computer Vision Research and Development." \textit{Journal of Machine Learning Research 13 (2012): 3533-3537}. 
     \bibitem 2 Liu, Tie, et al. "Learning to detect a salient object." \textit{Pattern Analysis and Machine Intelligence, IEEE Transactions on 33.2 (2011): 353-367}. 
     \bibitem 3 Itti, Laurent, Christof Koch, and Ernst Niebur. "A model of saliency-based visual attention for rapid scene analysis."\textit{ Pattern Analysis and Machine Intelligence, IEEE Transactions on 20.11 (1998): 1254-1259}.
