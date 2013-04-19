@@ -63,17 +63,15 @@ urlcolor=black		% - URL colour
 		(\href{mailto:u5223173@anu.edu.au}
 		{\ITALIC{\underline{\smash{u5223173@anu.edu.au}}}})\\
 	}
-	\BOLD{Last typeset: \currenttime, \today}
-\\\Hrule}}
+\Hrule}}
 %
 % -
 \begin{multicols}{2}
 \section{Introduction}
-\htab A long-standing problem in the field of computer vision is how to calculate the saliency of objects in images, that is the prominence of them compared to the background.  Many approaches exist to attempt to solve this issue, however multiple attemps have either transformed into simple object detection algorithms or are not particularly accurate. 
-[needs more on problem motivation, background]\\
+\htab A long-standing problem in the field of computer vision is how to calculate the saliency of objects in images, that is the prominence of them compared to the background.  This property is important for image recognition via computer vision because it enables automatic image cropping and adaptive image display on small screens as well as enhanced image and video compression.\\
 % -
 % introduce related work 
-\htab Today, are a few existing works that achieve a high accuracy in detecting salient objects. The most recognised approach in the last decade is Itti's algorithm from 1998 (see ref.3). It calculates a feature map and then converts it to a rectangle via a winner-take-all algorithm. However, the precision of the detection from this and other algorithms is as yet unsatisfying, even though Itti's algorithm in particular has good object recall. The second approach is the fuzzy-growing approach (see ref.4), which directly outputs a rectangle to label saliency in a less costly way. But its outcome is worse(as shown in the following comparison).
+\htab Today, there are a few existing works that achieve a high accuracy in detecting salient objects. The most recognised approach in the last decade is Itti's algorithm from 1998 (see ref.3). It calculates a feature map and then converts it to a rectangle via a winner-take-all algorithm. However, the precision of the detection from this and other algorithms is as yet unsatisfying, even though Itti's algorithm in particular has good object recall. Another approach is to use fuzzy-growing (see ref.4), which directly labels saliency in a less costly way. However, it trades accuracy for its speed, shown in the following comparison.
 % -
 % image outlining salient object detection
 \begin{Figure}
@@ -82,27 +80,27 @@ urlcolor=black		% - URL colour
 \end{Figure}
 % -
 % framework
-The research we will be referring to to in this experimental project is that of Liu, Tie et al. in 2011 (see ref.2), which is based on a onditional random field (CRF) model.  This allows a large amount of near-perfect saliency detection compared with the ground truth data. To accomplish this, it extracts features on the local, regional and global level, where it calculates multiscale contrast, a centre-surround histogram and spatial color distribution respectively. After normalization and linear/non-linear combination, a master map, better known as a salient map, is computed to represent the saliency of each image pixel. A few key locations on the saliency map are finally identified by winner-take-all or inhibition-of-return, or other non-linear operations that act on the probability of a salient object being present at the location.
+The research we will be referring to to in this experimental project is that of Liu, Tie et al. in 2011 (see ref.2), which is based on a conditional random field (CRF) model.  This allows a large amount of near-perfect saliency detection compared with the ground truth data. To accomplish this, it extracts features on the local, regional and global levels, where it calculates multiscale contrast, a centre-surround histogram and a spatial color distribution respectively. After normalization and combination via an energy function, a master map, better known as a salient map, is computed to represent the saliency of each pixel in the image. A few key locations on the saliency map are finally identified through a winner-take-all or inhibition-of-return algorithm, as well as  other non-linear operations that act on the probability of a salient object being present at the location.
 % -
 % implementation details
 \section{Proposed Implementation}
 % implementation outline and explanation of chice
-\htab Our implementation will employ the  OpenCV library, leveraging on the ANU's open source DARWIN framework to achieve a CRF-based saliency detection algorithm. The reason for selecting CRF-based saliency detection as our project focus is that this project would give us experience of manipulating graphical model in practice, especially learning and inference mechanism of CRF. Another reason sources from the intuition that this may help scene understanding in multiple ways. For instance, under a complex scene understanding algorithm with dozens of classes label, exclusively labelling the salient region and its near neighbourhood within a tremendously large image saves the computational resources. 
+\htab Our implementation will employ the  OpenCV library, leveraging on the ANU's open source DARWIN framework (see ref.1) to achieve a CRF-based saliency detection algorithm. The reason for selecting CRF-based saliency detection as our project focus is that this project would give us experience in the manipulation of graphical models in practice, especially in the mechanisms of learning and inference by CRFs. Additionally, a scene understanding algorithm with dozens of class labels is expensive and complex compared to exclusively labelling the salient region and its near neighbourhood within a tremendously large image, so employing a CRF-based algorithm will result in a large reduction in the time required to run.
 \subsection{Conditional Random Fields}
-\htab Conditional Random Fields model the distribution of an objective variable given some ``less global'' factores \BOLDL{EXPAND}.  They can be described by the equation
+\htab Conditional Random Fields can model the saliency distribution in an image, given some known features about the surrounding pixels.  They can be described by the equation
     $$ P(A|I) = \frac{1}{Z} \cdot\exp(-E(A|I)) $$
-where $E(A|I)$ is the energy function, formulated to be a set of static salient features and one pairwise feature as follows:
+where $A$ is the binary mask (salient or non-salient), I is the known pixel intensity and $E(A|I)$ is the energy function, formulated to be a set of static salient features and one pairwise feature as follows:
     $$ E(A|I) = \sum_{x} \sum_{k=1}^{K} \lambda_{k} F_{k}(a_{x},I)  
-        + \sum_{x,x'} S(a_{x},a_{x'},I)  $$ \vspace{-0.4cm}
-\begin{center} \footnotesize $\lambda_{k}$: weight of $k$th feature, $x,x'$: two adjacent pixels. \end{center} 
+        + \sum_{x,x'} S(a_{x},a_{x'},I)  $$
+$\lambda_{k}$: weight of $k$th feature, $x,x'$: two adjacent pixels. 
 %
 \subsection{Feature Extraction Ideas}
-\textbf{Multiscale Contrast}. This static feature extracts intensity, color, orientation, texture at multiple scales to capture hight contrast in the boundary of objects . \\[0.1cm]
-\textbf{Center-Surround Histogram}. This static feature can be computed using various low-level features by a center-surround operation.  \\[0.1cm]
+\textbf{Multiscale Contrast}. This static feature extracts intensity, color, orientation, and texture at multiple scales to capture the contrast in the boundary between objects . \\
+\textbf{Center-Surround Histogram}. This static feature can be computed using various low-level features via a center-surround operation.  \\[0.1cm]
 \textbf{Spatial Color distribution}. This static feature penalizes the pixels with widely distributed color. \\[0.1cm]
-\textbf{Pairwise Feature}. This feature exploits the spatial relationship between two adjacent pixels and can be viewed as one capturing the spatial continuity of saliency, that is, adjacent pixels that are prone to be assigned with different labels. 
+\textbf{Pairwise Feature}. This feature exploits the spatial relationship between two adjacent pixels and can be viewed as capturing the spatial continuity of saliency -- that is, adjacent pixels that are prone to be assigned with different labels. 
 \subsection{Possible Improvements}
-\htab First and foremost, one possible breakthrough lies in enhancing the quality of extracted features for detecting sliency. From the result presentation of referred approach (Tie, ref.2), the saliency of legs of animals (i.e. horses, elk) are frequently missed even in the feature map. Perhaps this is because of the thinness of the legs.
+\htab One possible breakthrough lies in enhancing the quality of extracted features for detecting saliency. From the referred approach (Tie, ref.2), the saliency of animal legs (i.e. horses, elk) are frequently missed even in the feature maps, perhaps because of the thin width of the legs. Another possible improvement in this area is to create an algorithm capable of real-time saliency detection for application in video streams.
 \section{Project Timeline}
 \TIMELINE{1\SUPER{st}  - 18\SUPER{th} April}{Project Proposal:}{Research current literature to find papers and inspire a project of interest, determine the topic of our second project and collect relevant datasets for training.}\TIMELINESPACE
 %
