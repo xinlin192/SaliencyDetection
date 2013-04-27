@@ -13,7 +13,6 @@
 #include <fstream>
 #include <iomanip>
 #include <map>
-#include <regex>
 
 // eigen matrix library headers
 #include "Eigen/Core"
@@ -50,19 +49,60 @@ void usage(){
 /* Form a hash map between the filenames and integer vectors representing the 
  * salient rectangle boundaries in the corresponding images. 
  */
-map< string, vector<int> > parseLabel (string filename) {
-    std::map< string, vector<int> > fileLabelPairs;
-    std::string line;
-    std::ifstream input (filename) ;
-    for (; std::getline(input, line); ){
-        // need to normalise the lines somehow to ensure that we will always
-        // get the right data.  Should we just 
+map< string, vector<int> > parseLabel (const char * labelFileName) {
+    map< string, vector<int> > fileLabelPairs;
+    string line;
+    ifstream labelFile ;
+    labelFile.open(labelFileName);
+    while ( !labelFile.eof() ){
+        unsigned int pos;
+        string imagePackage;
+        string imageFilename;
+        int widthOfImage, heightOfImage;
+        vector<int> posRectangle;
+        posRectangle.resize(4);
+        // restore every line of the file
+        getline(labelFile, line); 
+        if (line.find( ".jpg") != std::string::npos) {
+            // PARSE for the first line 
+            // - which stores the image name and package
+            pos = line.find("\\");
+            imageFilename = line.substr(pos+1);
+            imagePackage = line.substr(0, pos);
+            // print for test
+            cout << "imagePackage:" << imagePackage << "\t" << "imageFilename:" << imageFilename << endl;
+
+            // PARSE for the SECOND line
+            //  width and height of that training image
+            getline(labelFile, line);
+            pos = line.find(" ");
+            widthOfImage = atoi(line.substr(0,pos).c_str());
+            heightOfImage = atoi(line.substr(pos+1).c_str());
+            // print for test
+            cout << "Width:" << widthOfImage << "\t" << "Height:" << heightOfImage << endl;
+
+            // PARSE for the third line
+            // three saliency rectangles, each with four parameter
+            getline(labelFile, line);
+            string temp;
+            unsigned int whiteSpacePos;
+            for (int i = 0 ; i < 3; i ++) {
+                pos = line.find(";");
+                temp = line.substr(0, pos);
+                sscanf(temp.c_str(), "%d %d %d %d", &posRectangle[0],
+                        &posRectangle[1], &posRectangle[2], &posRectangle[3]);
+                line = line.substr(pos+1);
+                printf("Left: %3d \t Top: %4d \t Right: %4d \t Bottom: %4d \n",
+                        posRectangle[0], posRectangle[1], posRectangle[2], posRectangle[3]);
+            }
+            cout << endl;
+        }
     }
+    labelFile.close();
     
-    fileLabelPairs.insert(/* stuff */);
+    //fileLabelPairs.insert( );
     return fileLabelPairs;
 }
-
 // main ----------------------------------------------------------------------
 
 int main (int argc, char * argv[]) {
@@ -91,7 +131,9 @@ int main (int argc, char * argv[]) {
     const char *imgDir = DRWN_CMDLINE_ARGV[0];
     const char *lblDir = DRWN_CMDLINE_ARGV[1];
     DRWN_ASSERT_MSG(drwnDirExists(imgDir), "image directory " << imgDir << " does not exist");
-    DRWN_ASSERT_MSG(drwnDirExists(lblDir), "labels directory " << lblDir << " does not exist");
+    // second argument is not directory any more, 
+    // it's a single text file with multiple rectangle
+    //DRWN_ASSERT_MSG(drwnDirExists(lblDir), "labels directory " << lblDir << " does not exist");
 
     // Get a list of images from the image directory.
     vector<string> baseNames = drwnDirectoryListing(imgDir, ".jpg", false, false);
@@ -104,9 +146,10 @@ int main (int argc, char * argv[]) {
     */
     drwnClassifierDataset dataset;
 
+    parseLabel(lblDir);
     for (unsigned i = 0; i < baseNames.size(); i++) {
         DRWN_LOG_STATUS("...processing image " << baseNames[i]);
-        // read the image and compute superpixels
+        // read the image and draw the rectangle of labels of training data
         cv::Mat img = cv::imread(string(imgDir) + DRWN_DIRSEP + baseNames[i] + string(".jpg"));
         cv::rectangle(img, cv::Point(89, 10), cv::Point(371, 252), Scalar(0,0,255));
         cv::rectangle(img, cv::Point(87, 9), cv::Point(379, 279), Scalar(0,255,0));
@@ -115,10 +158,10 @@ int main (int argc, char * argv[]) {
         if (bVisualize) { // draw the current image comparison
             //drwnDrawRegionBoundaries and drwnShowDebuggingImage use OpenCV 1.0 C API
             IplImage cvimg = (IplImage)img;
-            CvMat cvseg = (CvMat)seg;
+            //CvMat cvseg = (CvMat) seg;
             IplImage *canvas = cvCloneImage(&cvimg);
-            drwnDrawRegionBoundaries(canvas, &cvseg, CV_RGB(255, 255, 255), 3);
-            drwnDrawRegionBoundaries(canvas, &cvseg, CV_RGB(255, 0, 0), 1);
+            //drwnDrawRegionBoundaries(canvas, &cvseg, CV_RGB(255, 255, 255), 3);
+            //drwnDrawRegionBoundaries(canvas, &cvseg, CV_RGB(255, 0, 0), 1);
             drwnShowDebuggingImage(canvas, "image", false);
             cvReleaseImage(&canvas);
         }
