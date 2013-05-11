@@ -36,7 +36,7 @@ using namespace Eigen;
 // copied from Stephen Gould's trainCOMP3130Model.cpp 2013 version
 void usage(){
     cerr << DRWN_USAGE_HEADER << endl;
-    cerr << "USAGE: ./trainModel [OPTIONS] <imgDir> <lblDir>\n";
+    cerr << "USAGE: ./trainModel [OPTIONS] <imgDir> <lblFile>\n";
     cerr << "OPTIONS:\n"
          << "  -o <model>        :: output model\n"
          << "  -x                :: visualize\n"
@@ -50,7 +50,7 @@ void usage(){
  * salient rectangle boundaries in the corresponding images. 
  */
 map< string, vector<int> > parseLabel (const char * labelFileName) {
-    map< string, vector<int> > fileLabelPairs;
+    map< string, vector<int> > fileLabelPairs; // MAP FROM FILENAME TO RECTANGLE
     string line;
     ifstream labelFile ;
     labelFile.open(labelFileName);
@@ -67,35 +67,41 @@ map< string, vector<int> > parseLabel (const char * labelFileName) {
             // PARSE for the first line 
             // - which stores the image name and package
             pos = line.find("\\");
-            imageFilename = line.substr(pos+1);
-            imagePackage = line.substr(0, pos);
-            // print for test
-            cout << "imagePackage:" << imagePackage << "\t" << "imageFilename:" << imageFilename << endl;
+            imageFilename = line.substr(pos+1); // get filename
+            imagePackage = line.substr(0, pos); // get package number
+            imageFilename = imageFilename.substr(0, imageFilename.size() - 1); // truncate string
+            // test for printing
+            //cout << "imageFilename:" << imageFilename  << endl;
+            //cout << imageFilename.size() << endl;
 
             // PARSE for the SECOND line
             //  width and height of that training image
+            //  use c lib's string 2 integer
             getline(labelFile, line);
             pos = line.find(" ");
-            widthOfImage = atoi(line.substr(0,pos).c_str());
-            heightOfImage = atoi(line.substr(pos+1).c_str());
+            widthOfImage = atoi(line.substr(0,pos).c_str()); 
+            heightOfImage = atoi(line.substr(pos+1).c_str()); 
             // print for test
-            cout << "Width:" << widthOfImage << "\t" << "Height:" << heightOfImage << endl;
+            //cout << "Width:" << widthOfImage << "\t" << "Height:" << heightOfImage << endl;
 
             // PARSE for the third line
             // three saliency rectangles, each with four parameter
             getline(labelFile, line);
             string temp;
-            unsigned int whiteSpacePos;
             for (int i = 0 ; i < 3; i ++) {
                 pos = line.find(";");
                 temp = line.substr(0, pos);
                 sscanf(temp.c_str(), "%d %d %d %d", &posRectangle[0],
                         &posRectangle[1], &posRectangle[2], &posRectangle[3]);
                 line = line.substr(pos+1);
-                printf("Left: %3d \t Top: %4d \t Right: %4d \t Bottom: %4d \n",
-                        posRectangle[0], posRectangle[1], posRectangle[2], posRectangle[3]);
+                // printing for test
+                //printf("Left: %3d \t Top: %4d \t Right: %4d \t Bottom: %4d \n",
+                        //posRectangle[0], posRectangle[1], posRectangle[2], posRectangle[3]);
+                if (i == 1) { // we choose second data here.
+                    fileLabelPairs[imageFilename] = posRectangle;
+                }
             }
-            cout << endl;
+            //cout << endl;
         }
     }
     labelFile.close();
@@ -129,11 +135,11 @@ int main (int argc, char * argv[]) {
      * ".txt". 
      */
     const char *imgDir = DRWN_CMDLINE_ARGV[0];
-    const char *lblDir = DRWN_CMDLINE_ARGV[1];
-    DRWN_ASSERT_MSG(drwnDirExists(imgDir), "image directory " << imgDir << " does not exist");
+    const char *lblFile = DRWN_CMDLINE_ARGV[1];
+    //DRWN_ASSERT_MSG(drwnDirExists(imgDir), "image directory " << imgDir << " does not exist");
     // second argument is not directory any more, 
     // it's a single text file with multiple rectangle
-    //DRWN_ASSERT_MSG(drwnDirExists(lblDir), "labels directory " << lblDir << " does not exist");
+    //DRWN_ASSERT_MSG(drwnDirExists(lblFile), "labels directory " << lblFile << " does not exist");
 
     // Get a list of images from the image directory.
     vector<string> baseNames = drwnDirectoryListing(imgDir, ".jpg", false, false);
@@ -145,18 +151,27 @@ int main (int argc, char * argv[]) {
      as well (maybe as superpixels??? unsure.
     */
     drwnClassifierDataset dataset;
+    //  MAP FROM FILENAME TO RECTANGLE
+    map< string, vector<int> > fileLabelPairs = parseLabel(lblFile);
+    int left, top, right, bottom;
+    vector<int> tempRectangle;
 
-    parseLabel(lblDir);
     for (unsigned i = 0; i < baseNames.size(); i++) {
+        String processedImage = baseNames[i] + ".jpg";
         DRWN_LOG_STATUS("...processing image " << baseNames[i]);
         // read the image and draw the rectangle of labels of training data
-        cv::Mat img = cv::imread(string(imgDir) + DRWN_DIRSEP + baseNames[i] + string(".jpg"));
-        cv::rectangle(img, cv::Point(89, 10), cv::Point(371, 252), Scalar(0,0,255));
-        cv::rectangle(img, cv::Point(87, 9), cv::Point(379, 279), Scalar(0,255,0));
-        cv::rectangle(img, cv::Point(89, 11), cv::Point(376, 275), Scalar(255,0,0));
+        cv::Mat img = cv::imread(string(imgDir) + DRWN_DIRSEP + processedImage);
+        tempRectangle = fileLabelPairs.find(processedImage)->second ;
+        left =  tempRectangle [0];
+        top = tempRectangle [1];
+        right = tempRectangle [2];
+        bottom = tempRectangle[3];
+        // printing for test
+        //printf ("%d %d %d %d \n", left, top, right,bottom);
         // show the image and superpixels
         if (bVisualize) { // draw the current image comparison
             //drwnDrawRegionBoundaries and drwnShowDebuggingImage use OpenCV 1.0 C API
+            cv::rectangle(img, cv::Point(left, top), cv::Point(right, bottom), Scalar(0,0,255));
             IplImage cvimg = (IplImage)img;
             //CvMat cvseg = (CvMat) seg;
             IplImage *canvas = cvCloneImage(&cvimg);
@@ -165,6 +180,7 @@ int main (int argc, char * argv[]) {
             drwnShowDebuggingImage(canvas, "image", false);
             cvReleaseImage(&canvas);
         }
+        //sleep(1);
     }
 
     // Clean up by freeing memory and printing profile information.
