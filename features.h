@@ -37,7 +37,7 @@ cv::Mat contrast(cv::Mat img){
         
             intensity = img.at<Vec3b>(y,x);
             intpix = 0; // reset to 0, new pixel
-            for(int i = 0; i < 3; i++{
+            for(int i = 0; i < 3; i++){
                 intpix += intensity.val[i];
             }
             intpix = abs(intpix - avgint);
