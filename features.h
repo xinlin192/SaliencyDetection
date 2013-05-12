@@ -99,8 +99,8 @@ CentreSurround centreSurround(cv::Mat img, vector<int> rect1, int bins){
         histogramBins2.at(i)[2] = 0;
     }
     
-    // create a rectangle around rect1 such that its area - area of rect1 is equal to that of rect1
-    // for the moment, a really approximate method so we have something working.
+    // TODO create a rectangle around rect1 such that its area - area of rect1 is equal to that of rect1
+    // for the moment, a really approximate method is here so we have something working.
     // we can maybe modify this to do away with correct aspect ratio choice by some clever formula too...?
     
     vector<int> rect2(4);
