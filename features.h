@@ -33,7 +33,7 @@ cv::Mat contrast(cv::Mat img){
     double intpix;
     Vec3b intensity;
     for (int y = 0; y < img.rows; y++){
-        for (int x = 0; x < seg.cols; x++){
+        for (int x = 0; x < img.cols; x++){
         
             intensity = img.at<Vec3b>(y,x);
             intpix = 0; // reset to 0, new pixel
@@ -62,7 +62,7 @@ cv::Mat multiScaleContrast(cv::Mat img){
     pyramid[0] = cont; // the original contrasted image, base of the gaussian pyramid
     tmp = cont;
     dst = tmp; // initialised
-    for(int i = 1; i < 6; i++{
+    for(int i = 1; i < 6; i++){
         pyrDown(tmp, dst, Size(tmp.cols/2, tmp.rows/2) );
         pyramid[i] = tmp;
         tmp = dst; // to perform gaussian modelling again
@@ -82,8 +82,8 @@ struct CentreSurround {
 // rect1 is (xval, yval, widthtoright, heightdown), 255 must divide into bins exactly - eg 15 works, 16 does not.
 CentreSurround centreSurround(cv::Mat img, vector<int> rect1, int bins){
     CentreSurround csv; // centre-surround distance and appropriate rectangle
-    vector<vector<int>> histogramBins1(bins);
-    vector<vector<int>> histogramBins2(bins);
+    vector<vector<int> > histogramBins1(bins);
+    vector<vector<int> > histogramBins2(bins);
     int binDelimiter=255/bins;
     Vec3b pixColour;
     
@@ -124,13 +124,13 @@ CentreSurround centreSurround(cv::Mat img, vector<int> rect1, int bins){
             pixColour[2] /= binDelimiter;
 
             if (y >= rect1.at(1) & y <= rect1.at(1)+rect1.at(3) & x >= rect1.at(0) & x <= rect1.at(2) ) { // pixel in rect1
-                histogram1.at((int) pixColour[0])[0]++;
-                histogram1.at((int) pixColour[1])[1]++;
-                histogram1.at((int) pixColour[2])[2]++;
+                histogramBins1.at((int) pixColour[0])[0]++;
+                histogramBins1.at((int) pixColour[1])[1]++;
+                histogramBins1.at((int) pixColour[2])[2]++;
             } else { // pixel in rect2
-                histogram2.at((int) pixColour[0])[0]++;
-                histogram2.at((int) pixColour[1])[1]++;
-                histogram2.at((int) pixColour[2])[2]++;
+                histogramBins2.at((int) pixColour[0])[0]++;
+                histogramBins2.at((int) pixColour[1])[1]++;
+                histogramBins2.at((int) pixColour[2])[2]++;
             }   
         }
 
@@ -139,13 +139,25 @@ CentreSurround centreSurround(cv::Mat img, vector<int> rect1, int bins){
     // calculate the chi-squared value
     float sum = 0.0;
     for(int i = 0; i < bins; i++){
-        for(int j = 0; j < 3; j++{
-            sum+= (pow((histogram1.at(i)[j]-histogram2.at(i)[j]), 2))/(histogram1.at(i)[j]+histogram2.at(i)[j])
+        for(int j = 0; j < 3; j++){
+            sum+= (pow((float)(histogramBins1.at(i)[j]-histogramBins2.at(i)[j]), 2))/(histogramBins1.at(i)[j]+histogramBins2.at(i)[j]);
         }
     }
-    csv.dist = sum/2 // calculated 1/2*sum_i[(histR1_i-histR2_i)^2/(histR1_i+histR2_i)]
+    csv.dist = sum/2; // calculated 1/2*sum_i[(histR1_i-histR2_i)^2/(histR1_i+histR2_i)]
     csv.rect = rect2;
     return csv;
+}
+
+vector<vector<double> > getFeatures(cv::Mat img){
+    vector<vector<double> > featureList;
+    featureList.resize(img.rows*img.cols);
+    for(int y = 0; y < img.rows; y++){
+        for(int x = 0; x < img.cols; x++){
+            // TODO CV library feature calculations on pixels?
+        }
+    }
+    
+    return featureList;
 }
 
 // Get the colour spatial distribution as a gaussian mixture model
@@ -167,14 +179,3 @@ cv::Mat colourDist(cv::Mat img){
     return cdi;
 }
 
-vector<vector<double> > getFeatures(cv::Mat img){
-    vector<vector<double> > featureList;
-    featureList.resize(img.rows*img.cols);
-    for(int y = 0; y < img.rows; y++){
-        for(int x = 0; x < img.cols; x++{
-            // TODO CV library feature calculations on pixels?
-        }
-    }
-    
-    return featureList;
-}
