@@ -72,13 +72,14 @@ cv::Mat multiScaleContrast(cv::Mat img){
     return msc;   
 }
 
-// Get the value from a center-surround histogram
+// struct for centre-surround histogram feature
 struct CentreSurround {
     double dist;
     vector<int> rect;
 };
 
-// rect1 is (xval, yval, widthtoright, heightdown)
+// Get the value from a center-surround histogram
+// rect1 is (xval, yval, widthtoright, heightdown), 255 must divide into bins exactly - eg 15 works, 16 does not.
 CentreSurround centreSurround(cv::Mat img, vector<int> rect1, int bins){
     CentreSurround csv; // centre-surround distance and appropriate rectangle
     vector<vector<int>> histogramBins1(bins);
@@ -115,16 +116,21 @@ CentreSurround centreSurround(cv::Mat img, vector<int> rect1, int bins){
         for(int x = 0; x < img.cols; x++){
             if (y < rect2.at(1) | y > rect2.at(1)+rect2.at(3) | x < rect2.at(0) | x > rect2.at(0)+rect2.at(2) ){ continue; }
             pixColour=img.at<Vec3b>(y,x);
-            // TODO convert pixColour into correct bin delimiters for its B, G and R values
+            
+            // really simplistic algorithm to convert the pixel BGR values into their destination bin
+            // can be from 0 to bins
+            pixColour[0] /= binDelimiter;
+            pixColour[1] /= binDelimiter;
+            pixColour[2] /= binDelimiter;
 
             if (y >= rect1.at(1) & y <= rect1.at(1)+rect1.at(3) & x >= rect1.at(0) & x <= rect1.at(2) ) { // pixel in rect1
-                histogram1.at(pixColour[0])[0]++;
-                histogram1.at(pixColour[1])[1]++;
-                histogram1.at(pixColour[2])[2]++;
+                histogram1.at((int) pixColour[0])[0]++;
+                histogram1.at((int) pixColour[1])[1]++;
+                histogram1.at((int) pixColour[2])[2]++;
             } else { // pixel in rect2
-                histogram2.at(pixColour[0])[0]++;
-                histogram2.at(pixColour[1])[1]++;
-                histogram2.at(pixColour[2])[2]++;
+                histogram2.at((int) pixColour[0])[0]++;
+                histogram2.at((int) pixColour[1])[1]++;
+                histogram2.at((int) pixColour[2])[2]++;
             }   
         }
 
@@ -143,6 +149,7 @@ CentreSurround centreSurround(cv::Mat img, vector<int> rect1, int bins){
 }
 
 // Get the colour spatial distribution as a gaussian mixture model
+// TODO
 cv::Mat colourDist(cv::Mat img){
     cv::Mat cdi;
     
@@ -150,7 +157,7 @@ cv::Mat colourDist(cv::Mat img){
     drwnGaussianMixture gmm(features[0].size(), 10); // 10? mixture components
     gmm.train(features); // train the mixture model on the features given
     
-    // generate 10 samples from the model
+    // generate 10 samples from the model (EXAMPLE CODE)
     vector<double> s;
     for (int i = 0; i < 10; i++) {
         gmm.sample(s);
@@ -165,7 +172,7 @@ vector<vector<double> > getFeatures(cv::Mat img){
     featureList.resize(img.rows*img.cols);
     for(int y = 0; y < img.rows; y++){
         for(int x = 0; x < img.cols; x++{
-            // CV library feature calculations on pixels?
+            // TODO CV library feature calculations on pixels?
         }
     }
     
