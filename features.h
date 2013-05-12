@@ -71,16 +71,38 @@ cv::Mat multiScaleContrast(cv::Mat img){
     return msc;   
 }
 
-// Get the center-surround histogram
-cv::Mat centerSurround(cv::Mat img){
-    cv::Mat csi;
-    
-    return csi;
+// Get the value from a center-surround histogram
+struct CentreSurround {
+    double distance;
+    vector<int> rect;
+};
+
+CentreSurround centreSurround(cv::Mat img, vector<int> rect){
+    CentreSurround csv; // centre-surround value
+    vector<int> rect = null;
+    // create a rectangle around such that its area - area of rect is equal to that of rect
+    // different aspect ratios...I think just use x-width/2, x+width/2 etc since this will result in the right one?
+    // perform an RGB histogram on both rectangle and its border
+    double dist = 0.0; // calculate 1/2*\sum[(histR1i-histR2i)^2/(histR1i+histR2i)]
+    csv.distance = 0.0; // calculate 1/2*\sum[(histR1i-histR2i)^2/(histR1i+histR2i)]
+    csv.rect = currRect;
+    return csv;
 }
 
 // Get the colour spatial distribution as a gaussian mixture model
 cv::Mat colourDist(cv::Mat img){
     cv::Mat cdi;
+    
+    vector<vector<double> > features = getFeatures(img);
+    drwnGaussianMixture gmm(features[0].size(), 10); // 10? mixture components
+    gmm.train(features); // train the mixture model on the features given
+    
+    // generate 10 samples from the model
+    vector<double> s;
+    for (int i = 0; i < 10; i++) {
+        gmm.sample(s);
+        DRWN_LOG_MESSAGE("sample " << (i + 1) << " is " << toString(s));
+    }
     
     return cdi;
 }
