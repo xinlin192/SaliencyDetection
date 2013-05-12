@@ -28,7 +28,7 @@ float avgintensity(cv::Mat img){
 cv::Mat contrast(cv::Mat img){
     cv::Mat contrasted = img; // initialised to the same thing to begin with
     float avgint = avgintensity(img);
-    float normaliser = 1/(img.rows * img.cols) // TODO check this is valid float divide
+    float normaliser = 1/(img.rows * img.cols);
     
     double intpix;
     Vec3b intensity;
@@ -47,7 +47,8 @@ cv::Mat contrast(cv::Mat img){
     return contrasted;
 }
 
-// Get the multiscale contrast map of the image (to 6 scales) TODO NOT QUITE FINISHED.
+// Get the multiscale contrast map of the image (to 6 scales) 
+// TODO NOT QUITE FINISHED.
 cv::Mat multiScaleContrast(cv::Mat img){
     cv::Mat msc = img; // the return matrix, initialised to the input by default
     cv::Mat cont;
@@ -73,20 +74,71 @@ cv::Mat multiScaleContrast(cv::Mat img){
 
 // Get the value from a center-surround histogram
 struct CentreSurround {
-    double distance;
+    double dist;
     vector<int> rect;
 };
 
-// expects 
-CentreSurround centreSurround(cv::Mat img, vector<int> rect){
-    CentreSurround csv; // centre-surround value
-    vector<int> rect = null;
-    // create a rectangle around such that its area - area of rect is equal to that of rect
-    // different aspect ratios...I think just use x-width/2, x+width/2 etc since this will result in the right one?
-    // perform an RGB histogram on both rectangle and its border
-    double dist = 0.0; // calculate 1/2*\sum[(histR1i-histR2i)^2/(histR1i+histR2i)]
-    csv.distance = 0.0; // calculate 1/2*\sum[(histR1i-histR2i)^2/(histR1i+histR2i)]
-    csv.rect = currRect;
+// rect1 is (xval, yval, widthtoright, heightdown)
+CentreSurround centreSurround(cv::Mat img, vector<int> rect1, int bins){
+    CentreSurround csv; // centre-surround distance and appropriate rectangle
+    vector<vector<int>> histogramBins1(bins);
+    vector<vector<int>> histogramBins2(bins);
+    int binDelimiter=255/bins;
+    Vec3b pixColour;
+    
+    // initialise to 0 for all bins in the histogram
+    for(long i = 0; i < bins; i++){
+        histogramBins1.at(i).resize(3);
+        histogramBins1.at(i)[0] = 0;
+        histogramBins1.at(i)[1] = 0;
+        histogramBins1.at(i)[2] = 0;
+        histogramBins2.at(i).resize(3);
+        histogramBins2.at(i)[0] = 0;
+        histogramBins2.at(i)[1] = 0;
+        histogramBins2.at(i)[2] = 0;
+    }
+    
+    // create a rectangle around rect1 such that its area - area of rect1 is equal to that of rect1
+    // for the moment, a really approximate method so we have something working.
+    // we can maybe modify this to do away with correct aspect ratio choice by some clever formula too...?
+    
+    vector<int> rect2(4);
+    rect2.at(0)=rect1.at(0)-(rect1.at(2)/2);
+    if(rect2.at(0)<0) { rect2.at(0)=0; } // ensure positive values only
+    rect2.at(1)=rect1.at(1)-(rect1.at(3)/2);
+    if(rect2.at(1)<0) { rect2.at(1)=0; }
+    rect2.at(2)=rect1.at(2)*2;
+    rect2.at(3)=rect1.at(3)*2;
+    
+    // perform RGB histogram calculation
+    for(int y = 0; y < img.rows; y++){
+        for(int x = 0; x < img.cols; x++){
+            if (y < rect2.at(1) | y > rect2.at(1)+rect2.at(3) | x < rect2.at(0) | x > rect2.at(0)+rect2.at(2) ){ continue; }
+            pixColour=img.at<Vec3b>(y,x);
+            // TODO convert pixColour into correct bin delimiters for its B, G and R values
+
+            if (y >= rect1.at(1) & y <= rect1.at(1)+rect1.at(3) & x >= rect1.at(0) & x <= rect1.at(2) ) { // pixel in rect1
+                histogram1.at(pixColour[0])[0]++;
+                histogram1.at(pixColour[1])[1]++;
+                histogram1.at(pixColour[2])[2]++;
+            } else { // pixel in rect2
+                histogram2.at(pixColour[0])[0]++;
+                histogram2.at(pixColour[1])[1]++;
+                histogram2.at(pixColour[2])[2]++;
+            }   
+        }
+
+    }
+    
+    // calculate the chi-squared value
+    float sum = 0.0;
+    for(int i = 0; i < bins; i++){
+        for(int j = 0; j < 3; j++{
+            sum+= (pow((histogram1.at(i)[j]-histogram2.at(i)[j]), 2))/(histogram1.at(i)[j]+histogram2.at(i)[j])
+        }
+    }
+    csv.dist = sum/2 // calculated 1/2*sum_i[(histR1_i-histR2_i)^2/(histR1_i+histR2_i)]
+    csv.rect = rect2;
     return csv;
 }
 
