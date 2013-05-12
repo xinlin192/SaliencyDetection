@@ -18,7 +18,7 @@ using namespace Eigen;
 // feature extraction algorithms -----------------------------------------------
 
 // Average intensity of an image (for contrast mapping) TODO NOT QUITE FINISHED.
-loat avgintensity(cv::Mat img){
+float avgintensity(cv::Mat img){
     float avgint = 0.0;
     
 }
@@ -77,6 +77,7 @@ struct CentreSurround {
     vector<int> rect;
 };
 
+// expects 
 CentreSurround centreSurround(cv::Mat img, vector<int> rect){
     CentreSurround csv; // centre-surround value
     vector<int> rect = null;
@@ -105,4 +106,16 @@ cv::Mat colourDist(cv::Mat img){
     }
     
     return cdi;
+}
+
+vector<vector<double> > getFeatures(cv::Mat img){
+    vector<vector<double> > featureList;
+    featureList.resize(img.rows*img.cols);
+    for(int y = 0; y < img.rows; y++){
+        for(int x = 0; x < img.cols; x++{
+            // CV library feature calculations on pixels?
+        }
+    }
+    
+    return featureList;
 }
