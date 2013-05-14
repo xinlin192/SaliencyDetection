@@ -49,7 +49,7 @@ cv::Mat contrast(cv::Mat img){
 
 // Get the multiscale contrast map of the image (to 6 scales) 
 // TODO NOT QUITE FINISHED.
-cv::Mat multiScaleContrast(cv::Mat img){
+cv::Mat getMultiScaleContrast(cv::Mat img){
     cv::Mat msc = img; // the return matrix, initialised to the input by default
     cv::Mat cont;
     cv::Mat tmp;
@@ -80,7 +80,7 @@ struct CentreSurround {
 
 // Get the value from a center-surround histogram
 // rect1 is (xval, yval, widthtoright, heightdown), 255 must divide into bins exactly - eg 15 works, 16 does not.
-CentreSurround centreSurround(cv::Mat img, vector<int> rect1, int bins){
+CentreSurround getCentreSurround(cv::Mat img, vector<int> rect1, int bins){
     CentreSurround csv; // centre-surround distance and appropriate rectangle
     vector<vector<int> > histogramBins1(bins);
     vector<vector<int> > histogramBins2(bins);
@@ -162,11 +162,11 @@ vector<vector<double> > getFeatures(cv::Mat img){
 
 // Get the colour spatial distribution as a gaussian mixture model
 // TODO
-cv::Mat colourDist(cv::Mat img){
+cv::Mat getSpatialDistribution(cv::Mat img){
     cv::Mat cdi;
     
     vector<vector<double> > features = getFeatures(img);
-    drwnGaussianMixture gmm(features[0].size(), 10); // 10? mixture components
+    drwnGaussianMixture gmm(features[0].size(), 10); // 10 mixture components
     gmm.train(features); // train the mixture model on the features given
     
     // generate 10 samples from the model (EXAMPLE CODE)
