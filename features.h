@@ -149,6 +149,7 @@ CentreSurround getCentreSurround(cv::Mat img, vector<int> rect1, int bins){
 
 // Get the colour spatial distribution as a gaussian mixture model
 cv::Mat getSpatialDistribution(cv::Mat img){
+/*{{{*/
     // constant declaration
     const int nComponents = 10;
     const int nDimensions = 3;
@@ -178,16 +179,6 @@ cv::Mat getSpatialDistribution(cv::Mat img){
     // train the mixture model on the features given
     gmm.train(features); 
 
-    /*
-    // show the parameters of each gaussian component
-    for (int k = 0 ; k < nComponents; k ++ ) {
-        cout << "Component " << k << " :" << endl;
-        cout << "    Mean: " << toString(gmm.mean(k)) << endl; 
-        cout << "    Covariance: " << endl; 
-        cout << toString(gmm.covariance(k)) << endl;
-        cout << endl;
-    }
-    */
     // create table of responsibilities p(c|I_x) 
     vector<vector<double> > responsibilities(nComponents, vector<double>(nPixels, 0.0) );
     for (int k = 0; k < nComponents; k++) {
@@ -259,8 +250,9 @@ cv::Mat getSpatialDistribution(cv::Mat img){
         for (int x = 0; x < imageWidth; x ++) {
             index = y * imageWidth + x;
             cdi.at<double>(y,x) = (unfs[index] - *minfs) / range;
+        }
     }
-
+/*}}}*/
     return cdi;
 }
 

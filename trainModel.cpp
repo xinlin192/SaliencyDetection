@@ -27,9 +27,7 @@
 #include "drwnIO.h"
 #include "drwnML.h"
 #include "drwnVision.h"
-
 #include "features.h"
-
 using namespace std;
 using namespace Eigen;
 
@@ -180,7 +178,20 @@ int main (int argc, char * argv[]) {
             //drwnDrawRegionBoundaries(canvas, &cvseg, CV_RGB(255, 0, 0), 1);
             drwnShowDebuggingImage(canvas, "image", false);
             cvReleaseImage(&canvas);
-            cv::Mat cdi= getSpatialDistribution(img);
+            cv::Mat cdi = getSpatialDistribution(img);
+            cv::Mat pres (img.rows, img.cols, CV_8UC3);
+            double grayscale;
+            for (int y = 0 ; y < cdi.rows; y ++) {
+                for (int x = 0 ; x < cdi.cols; x ++) {
+                    grayscale = cdi.at<double>(y,x);
+                    cout << grayscale << endl;
+                    pres.at<Vec3b>(y,x) = Vec3b(grayscale*255, grayscale*255, grayscale*255);
+                }
+            }
+            IplImage pcvimg = (IplImage) pres;
+            IplImage *present = cvCloneImage(&pcvimg);
+            drwnShowDebuggingImage(present, "Color Spatial Distribution", false);
+            cvReleaseImage(&present);
         }
     }
 
