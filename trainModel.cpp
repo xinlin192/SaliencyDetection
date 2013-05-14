@@ -28,13 +28,15 @@
 #include "drwnML.h"
 #include "drwnVision.h"
 
+#include "features.h"
+
 using namespace std;
 using namespace Eigen;
 
 // usage ---------------------------------------------------------------------
 
 // copied from Stephen Gould's trainCOMP3130Model.cpp 2013 version
-void usage(){
+void usage() {
     cerr << DRWN_USAGE_HEADER << endl;
     cerr << "USAGE: ./trainModel [OPTIONS] <imgDir> <lblFile>\n";
     cerr << "OPTIONS:\n"
@@ -106,7 +108,6 @@ map< string, vector<int> > parseLabel (const char * labelFileName) {
     }
     labelFile.close();
     
-    //fileLabelPairs.insert( );
     return fileLabelPairs;
 }
 // main ----------------------------------------------------------------------
@@ -166,12 +167,12 @@ int main (int argc, char * argv[]) {
         top = tempRectangle [1];
         right = tempRectangle [2];
         bottom = tempRectangle[3];
-        // printing for test
-        //printf ("%d %d %d %d \n", left, top, right,bottom);
-        // show the image and superpixels
+
+        // show the image and feature maps 
         if (bVisualize) { // draw the current image comparison
             //drwnDrawRegionBoundaries and drwnShowDebuggingImage use OpenCV 1.0 C API
-            cv::rectangle(img, cv::Point(left, top), cv::Point(right, bottom), Scalar(0,0,255));
+            cv::rectangle(img, cv::Point(left-1, top-1), cv::Point(right+1, bottom+1), Scalar(255,255,255));
+            cv::rectangle(img, cv::Point(left, top), cv::Point(right, bottom), Scalar(0,0,0));
             IplImage cvimg = (IplImage)img;
             //CvMat cvseg = (CvMat) seg;
             IplImage *canvas = cvCloneImage(&cvimg);
@@ -179,8 +180,8 @@ int main (int argc, char * argv[]) {
             //drwnDrawRegionBoundaries(canvas, &cvseg, CV_RGB(255, 0, 0), 1);
             drwnShowDebuggingImage(canvas, "image", false);
             cvReleaseImage(&canvas);
+            cv::Mat cdi= getSpatialDistribution(img);
         }
-        //sleep(1);
     }
 
     // Clean up by freeing memory and printing profile information.

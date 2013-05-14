@@ -20,9 +20,7 @@ using namespace Eigen;
 // Average intensity of an image (for contrast mapping) TODO NOT QUITE FINISHED.
 float avgintensity(cv::Mat img){
     float avgint = 0.0;
-    
 }
-
 
 // Get the contrast of the image
 cv::Mat contrast(cv::Mat img){
@@ -37,7 +35,7 @@ cv::Mat contrast(cv::Mat img){
         
             intensity = img.at<Vec3b>(y,x);
             intpix = 0; // reset to 0, new pixel
-            for(int i = 0; i < 3; i++){
+            for(int i = 0; i < 3; i++) {
                 intpix += intensity.val[i];
             }
             intpix = abs(intpix - avgint);
@@ -148,34 +146,121 @@ CentreSurround getCentreSurround(cv::Mat img, vector<int> rect1, int bins){
     return csv;
 }
 
-vector<vector<double> > getFeatures(cv::Mat img){
-    vector<vector<double> > featureList;
-    featureList.resize(img.rows*img.cols);
-    for(int y = 0; y < img.rows; y++){
-        for(int x = 0; x < img.cols; x++){
-            // TODO CV library feature calculations on pixels?
-        }
-    }
-    
-    return featureList;
-}
 
 // Get the colour spatial distribution as a gaussian mixture model
-// TODO
 cv::Mat getSpatialDistribution(cv::Mat img){
-    cv::Mat cdi;
-    
-    vector<vector<double> > features = getFeatures(img);
-    drwnGaussianMixture gmm(features[0].size(), 10); // 10 mixture components
-    gmm.train(features); // train the mixture model on the features given
-    
-    // generate 10 samples from the model (EXAMPLE CODE)
-    vector<double> s;
-    for (int i = 0; i < 10; i++) {
-        gmm.sample(s);
-        DRWN_LOG_MESSAGE("sample " << (i + 1) << " is " << toString(s));
+    // constant declaration
+    const int nComponents = 10;
+    const int nDimensions = 3;
+    const int imageWidth = img.cols;
+    const int imageHeight = img.rows;
+    const int nPixels = imageHeight * imageWidth;
+    // initialise objective matrix.
+    cv::Mat cdi = cv::Mat(imageHeight, imageWidth, CV_64F);
+    // local variable 
+    vector<vector<double> > features(nPixels, vector<double>(3, 0.0));
+    // temporary variable used in the loop
+    int index = -1;
+    Vec3b intensity;
+    // loop to read data from an image
+    for(int y = 0; y < imageHeight; y++){
+        for(int x = 0; x < imageWidth; x++){
+            index = y * imageWidth + x;
+            intensity = img.at<Vec3b>(y,x);
+            // load RGB value to each row
+            features[index][0] = intensity.val[0];
+            features[index][1] = intensity.val[1];
+            features[index][2] = intensity.val[2];
+        }
     }
-    
+    // initialise gaussian model
+    drwnGaussianMixture gmm(nDimensions, nComponents); 
+    // train the mixture model on the features given
+    gmm.train(features); 
+
+    /*
+    // show the parameters of each gaussian component
+    for (int k = 0 ; k < nComponents; k ++ ) {
+        cout << "Component " << k << " :" << endl;
+        cout << "    Mean: " << toString(gmm.mean(k)) << endl; 
+        cout << "    Covariance: " << endl; 
+        cout << toString(gmm.covariance(k)) << endl;
+        cout << endl;
+    }
+    */
+    // create table of responsibilities p(c|I_x) 
+    vector<vector<double> > responsibilities(nComponents, vector<double>(nPixels, 0.0) );
+    for (int k = 0; k < nComponents; k++) {
+        gmm.component(k).evaluate(features, responsibilities[k]);
+    }
+    // compute horizontal mean and vertical mean
+    vector<double> hMean(nComponents, 0.0); // horizontal mean
+    vector<double> vMean(nComponents, 0.0); // vertical mean
+    vector<double> eNumber(nComponents, 0.0); // effective number of assignment
+    for (int y = 0; y < imageHeight; y ++) {
+        for (int x = 0; x < imageWidth; x ++) {
+            index = y * imageWidth + x;
+            for (int k = 0; k < nComponents; k ++) {
+                hMean[k] += x * responsibilities[k][index];
+                vMean[k] += y * responsibilities[k][index];
+                eNumber[k] += responsibilities[k][index];
+            }
+        }
+    }
+    // average all the values
+    for (int k = 0; k < nComponents; k ++) {
+        hMean[k] /= eNumber[k];
+        vMean[k] /= eNumber[k];
+    }
+    // compute horizontal covariance and vertical covariance
+    vector<double> hCovariance(nComponents, 0.0);
+    vector<double> vCovariance(nComponents, 0.0);
+    for (int y = 0; y < imageHeight; y ++) {
+        for (int x = 0; x < imageWidth; x ++) {
+            index = y * imageWidth + x;
+            for (int k = 0; k < nComponents; k ++) {
+                hCovariance[k] += pow((x-hMean[k]), 2) * responsibilities[k][index];
+                vCovariance[k] += pow((y-vMean[k]), 2)* responsibilities[k][index];
+            }
+        }
+    }
+    // average all values 
+    for (int k = 0; k < nComponents; k ++) {
+        hCovariance[k] /= eNumber[k];
+        vCovariance[k] /= eNumber[k];
+    }
+    // sum up to get overall covariance of each component
+    vector<double> oCovariance(nComponents, 0.0);
+    for (int k = 0; k < nComponents; k ++) {
+        oCovariance[k] = hCovariance[k] + vCovariance[k] ;
+    }
+    // normalisation
+    std::vector<double>::iterator max = std::max_element(oCovariance.begin(), oCovariance.end());
+	std::vector<double>::iterator min = std::min_element(oCovariance.begin(), oCovariance.end());
+    double range = *max - *min;
+    for (int k = 0 ; k < nComponents; k ++) {
+        oCovariance[k] = (oCovariance[k] - *min) / range;
+    }
+    // assign color spatial feature to each pixel
+    vector<double> unfs(nPixels, 0.0); // unnormalised spatial feature map
+    for (int y = 0; y < imageHeight; y ++) {
+        for (int x = 0; x < imageWidth; x ++) {
+            index = y * imageWidth + x;
+            for (int k = 0; k < nComponents; k ++) {
+                unfs[index] += responsibilities[k][index] * (1 - oCovariance[k]);
+            }
+        }
+    }
+    // normalise the spatial feature
+    std::vector<double>::iterator maxfs = std::max_element(unfs.begin(), unfs.end());
+	std::vector<double>::iterator minfs = std::min_element(unfs.begin(), unfs.end());
+    range = *maxfs - *minfs;
+    for (int y = 0; y < imageHeight; y ++) {
+        for (int x = 0; x < imageWidth; x ++) {
+            index = y * imageWidth + x;
+            cdi.at<double>(y,x) = (unfs[index] - *minfs) / range;
+    }
+
     return cdi;
 }
 
