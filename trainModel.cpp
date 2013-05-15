@@ -122,7 +122,7 @@ int main (int argc, char * argv[]) {
     DRWN_END_CMDLINE_PROCESSING(usage());
 
     // Check for the correct number of required arguments
-    if (DRWN_CMDLINE_ARGC != 2) {
+    if (DRWN_CMDLINE_ARGC != 3) {
         usage();
         return -1;
     }
@@ -135,6 +135,7 @@ int main (int argc, char * argv[]) {
      */
     const char *imgDir = DRWN_CMDLINE_ARGV[0];
     const char *lblFile = DRWN_CMDLINE_ARGV[1];
+    const char *outputDir = DRWN_CMDLINE_ARGV[2];
     //DRWN_ASSERT_MSG(drwnDirExists(imgDir), "image directory " << imgDir << " does not exist");
     // second argument is not directory any more, 
     // it's a single text file with multiple rectangle
@@ -169,8 +170,8 @@ int main (int argc, char * argv[]) {
         // show the image and feature maps 
         if (bVisualize) { // draw the current image comparison
             //drwnDrawRegionBoundaries and drwnShowDebuggingImage use OpenCV 1.0 C API
-            cv::rectangle(img, cv::Point(left-1, top-1), cv::Point(right+1, bottom+1), Scalar(255,255,255));
-            cv::rectangle(img, cv::Point(left, top), cv::Point(right, bottom), Scalar(0,0,0));
+            //cv::rectangle(img, cv::Point(left-1, top-1), cv::Point(right+1, bottom+1), Scalar(255,255,255));
+            //cv::rectangle(img, cv::Point(left, top), cv::Point(right, bottom), Scalar(0,0,0));
             IplImage cvimg = (IplImage)img;
             //CvMat cvseg = (CvMat) seg;
             IplImage *canvas = cvCloneImage(&cvimg);
@@ -184,7 +185,6 @@ int main (int argc, char * argv[]) {
             for (int y = 0 ; y < cdi.rows; y ++) {
                 for (int x = 0 ; x < cdi.cols; x ++) {
                     grayscale = cdi.at<double>(y,x);
-                    cout << grayscale << endl;
                     pres.at<Vec3b>(y,x) = Vec3b(grayscale*255, grayscale*255, grayscale*255);
                 }
             }
@@ -192,6 +192,8 @@ int main (int argc, char * argv[]) {
             IplImage *present = cvCloneImage(&pcvimg);
             drwnShowDebuggingImage(present, "Color Spatial Distribution", false);
             cvReleaseImage(&present);
+            cvSaveImage((string(outputDir) + baseNames[i] + ".jpg").c_str(), present);
+            cv::imwrite(string(outputDir) + baseNames[i] + ".jpg", pres);
         }
     }
 

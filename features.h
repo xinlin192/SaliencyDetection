@@ -151,7 +151,7 @@ CentreSurround getCentreSurround(cv::Mat img, vector<int> rect1, int bins){
 cv::Mat getSpatialDistribution(cv::Mat img){
 /*{{{*/
     // constant declaration
-    const int nComponents = 10;
+    const int nComponents = 5;
     const int nDimensions = 3;
     const int imageWidth = img.cols;
     const int imageHeight = img.rows;
@@ -164,6 +164,7 @@ cv::Mat getSpatialDistribution(cv::Mat img){
     int index = -1;
     Vec3b intensity;
     // loop to read data from an image
+    // TODO use less data to train the mixture of Gaussian
     for(int y = 0; y < imageHeight; y++){
         for(int x = 0; x < imageWidth; x++){
             index = y * imageWidth + x;
@@ -181,8 +182,18 @@ cv::Mat getSpatialDistribution(cv::Mat img){
 
     // create table of responsibilities p(c|I_x) 
     vector<vector<double> > responsibilities(nComponents, vector<double>(nPixels, 0.0) );
-    for (int k = 0; k < nComponents; k++) {
-        gmm.component(k).evaluate(features, responsibilities[k]);
+    for (int y = 0; y < imageHeight; y ++) {
+        for (int x = 0; x < imageWidth; x ++) {
+            index = y * imageWidth + x;
+            double normalisation = 0;
+            for (int k = 0; k < nComponents; k ++) {
+                 responsibilities[k][index] = exp( gmm.component(k).evaluateSingle(features[index])) * gmm.weight(k);
+                 normalisation += responsibilities[k][index];
+            }
+            for (int k = 0; k < nComponents; k ++) {
+                 responsibilities[k][index] = responsibilities[k][index] / normalisation;
+            }
+        }
     }
     // compute horizontal mean and vertical mean
     vector<double> hMean(nComponents, 0.0); // horizontal mean
