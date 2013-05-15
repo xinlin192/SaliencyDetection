@@ -158,17 +158,19 @@ cv::Mat getSpatialDistribution(cv::Mat img){
     const int nPixels = imageHeight * imageWidth;
     // initialise objective matrix.
     cv::Mat cdi = cv::Mat(imageHeight, imageWidth, CV_64F);
-    // local variable 
-    vector<vector<double> > features(nPixels, vector<double>(3, 0.0));
     // temporary variable used in the loop
     int index = -1;
     Vec3b intensity;
-    // loop to read data from an image
-    // TODO use less data to train the mixture of Gaussian
-    for(int y = 0; y < imageHeight; y++){
-        for(int x = 0; x < imageWidth; x++){
+    // use scale down to construct a small size of data set for 
+    // training mixture of gaussians
+    cv::Mat smallImg;
+    cv::pyrDown( img, smallImg, Size( imageWidth/2 , imageHeight/2 ) );
+    // loop to read data from an scaled image
+    vector<vector<double> > features(nPixels, vector<double>(3, 0.0));
+    for(int y = 0; y < smallImg.rows; y++){
+        for(int x = 0; x < smallImg.cols; x++){
             index = y * imageWidth + x;
-            intensity = img.at<Vec3b>(y,x);
+            intensity = smallImg.at<Vec3b>(y,x);
             // load RGB value to each row
             features[index][0] = intensity.val[0];
             features[index][1] = intensity.val[1];
@@ -182,16 +184,21 @@ cv::Mat getSpatialDistribution(cv::Mat img){
 
     // create table of responsibilities p(c|I_x) 
     vector<vector<double> > responsibilities(nComponents, vector<double>(nPixels, 0.0) );
+    vector<double> temp(nDimensions, 0.0); // vector storing RGB value
     for (int y = 0; y < imageHeight; y ++) {
         for (int x = 0; x < imageWidth; x ++) {
             index = y * imageWidth + x;
             double normalisation = 0;
             for (int k = 0; k < nComponents; k ++) {
-                 responsibilities[k][index] = exp( gmm.component(k).evaluateSingle(features[index])) * gmm.weight(k);
-                 normalisation += responsibilities[k][index];
+                intensity = img.at<Vec3b>(y,x);
+                temp[0] = intensity.val[0];
+                temp[1] = intensity.val[1];
+                temp[2] = intensity.val[2];
+                responsibilities[k][index] = exp( gmm.component(k).evaluateSingle(temp)) * gmm.weight(k);
+                normalisation += responsibilities[k][index];
             }
             for (int k = 0; k < nComponents; k ++) {
-                 responsibilities[k][index] = responsibilities[k][index] / normalisation;
+                responsibilities[k][index] = responsibilities[k][index] / normalisation;
             }
         }
     }
@@ -238,7 +245,7 @@ cv::Mat getSpatialDistribution(cv::Mat img){
     }
     // normalisation
     std::vector<double>::iterator max = std::max_element(oCovariance.begin(), oCovariance.end());
-	std::vector<double>::iterator min = std::min_element(oCovariance.begin(), oCovariance.end());
+    std::vector<double>::iterator min = std::min_element(oCovariance.begin(), oCovariance.end());
     double range = *max - *min;
     for (int k = 0 ; k < nComponents; k ++) {
         oCovariance[k] = (oCovariance[k] - *min) / range;
@@ -255,7 +262,7 @@ cv::Mat getSpatialDistribution(cv::Mat img){
     }
     // normalise the spatial feature
     std::vector<double>::iterator maxfs = std::max_element(unfs.begin(), unfs.end());
-	std::vector<double>::iterator minfs = std::min_element(unfs.begin(), unfs.end());
+    std::vector<double>::iterator minfs = std::min_element(unfs.begin(), unfs.end());
     range = *maxfs - *minfs;
     for (int y = 0; y < imageHeight; y ++) {
         for (int x = 0; x < imageWidth; x ++) {
@@ -263,7 +270,7 @@ cv::Mat getSpatialDistribution(cv::Mat img){
             cdi.at<double>(y,x) = (unfs[index] - *minfs) / range;
         }
     }
-/*}}}*/
+    /*}}}*/
     return cdi;
 }
 
