@@ -179,7 +179,7 @@ int main (int argc, char * argv[]) {
             //drwnDrawRegionBoundaries(canvas, &cvseg, CV_RGB(255, 0, 0), 1);
             drwnShowDebuggingImage(canvas, "image", false);
             cvReleaseImage(&canvas);
-            cv::Mat cdi = getSpatialDistribution(img);
+            cv::Mat cdi = getMultiScaleContrast(img, 3, 3);
             cv::Mat pres (img.rows, img.cols, CV_8UC3);
             double grayscale;
             for (int y = 0 ; y < cdi.rows; y ++) {
@@ -190,9 +190,8 @@ int main (int argc, char * argv[]) {
             }
             IplImage pcvimg = (IplImage) pres;
             IplImage *present = cvCloneImage(&pcvimg);
-            drwnShowDebuggingImage(present, "Color Spatial Distribution", false);
+            drwnShowDebuggingImage(present, "Multiscale Contrast", false);
             cvReleaseImage(&present);
-            cvSaveImage((string(outputDir) + baseNames[i] + ".jpg").c_str(), present);
             cv::imwrite(string(outputDir) + baseNames[i] + ".jpg", pres);
         }
     }

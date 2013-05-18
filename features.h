@@ -17,57 +17,119 @@ using namespace Eigen;
 
 // feature extraction algorithms -----------------------------------------------
 
-// Average intensity of an image (for contrast mapping) TODO NOT QUITE FINISHED.
-float avgintensity(cv::Mat img){
-    float avgint = 0.0;
-}
-
 // Get the contrast of the image
-cv::Mat contrast(cv::Mat img){
-    cv::Mat contrasted = img; // initialised to the same thing to begin with
-    float avgint = avgintensity(img);
-    float normaliser = 1/(img.rows * img.cols);
-    
-    double intpix;
+cv::Mat getContrast(cv::Mat img, int windowSize){
+    int imageWidth = img.cols;
+    int imageHeight = img.rows;
+    // temporary variable used in the loop
+    int tempx, tempy;
+    double contrast;
+    double green, red, blue;
+    double redNeighbours, greenNeighbours, blueNeighbours;
     Vec3b intensity;
-    for (int y = 0; y < img.rows; y++){
-        for (int x = 0; x < img.cols; x++){
-        
-            intensity = img.at<Vec3b>(y,x);
-            intpix = 0; // reset to 0, new pixel
-            for(int i = 0; i < 3; i++) {
-                intpix += intensity.val[i];
+    Vec3b intensityNeighbours;
+    // initialise objective matrix
+    cv::Mat contrastMap = cv::Mat::zeros(imageHeight, imageWidth, CV_64F);
+
+    for (int y = 0; y < imageHeight; y++){
+        for (int x = 0; x < imageWidth; x++){
+            std::set< pair<int, int> > neighbours;
+            int nNeighbours = 0;
+            // add neighbour to set
+            for (int offsetx = -1 * windowSize + 1 ; offsetx < windowSize; offsetx ++) {
+                tempx = x + offsetx;  
+                for (int offsety = -1 * windowSize + 1; offsety < windowSize; offsety ++) {
+                    tempy = y + offsety;
+                    if (tempx >= 0 && tempx < imageWidth && tempy >= 0 && tempy < imageHeight) {
+                        neighbours.insert(std::pair<int,int>(tempy, tempx));
+                        nNeighbours ++;
+                    } 
+                }
             }
-            intpix = abs(intpix - avgint);
+            // get intensity of currently objective point.
+            intensity = img.at<Vec3b>(y,x);
+            red = intensity.val[0];
+            green = intensity.val[1];
+            blue = intensity.val[2];
+            // traverse all neighbour in the set.
+            contrast = 0.0;
+            for (std::set< pair<int,int> >::iterator it = neighbours.begin(); it != neighbours.end(); ++ it) {
+                intensityNeighbours = img.at<Vec3b>(it -> first, it -> second); // pair(y,x)
+                redNeighbours = intensityNeighbours.val[0];
+                greenNeighbours = intensityNeighbours.val[1];
+                blueNeighbours = intensityNeighbours.val[2];
+                contrast += abs(redNeighbours - red) + 
+                    abs(greenNeighbours - green) + abs(blueNeighbours - blue);
+            }
+            contrast /= nNeighbours;
+            contrastMap.at<double>(y, x) = contrast;
         }
     }
-
-    return contrasted;
+    return contrastMap;
 }
 
 // Get the multiscale contrast map of the image (to 6 scales) 
-// TODO NOT QUITE FINISHED.
-cv::Mat getMultiScaleContrast(cv::Mat img){
-    cv::Mat msc = img; // the return matrix, initialised to the input by default
-    cv::Mat cont;
-    cv::Mat tmp;
-    cv::Mat dst;
-    vector<cv::Mat> pyramid;
-    pyramid.resize(6); // 6 images in this gaussian pyramid
-    
-    cont = contrast(img);
-    
-    pyramid[0] = cont; // the original contrasted image, base of the gaussian pyramid
-    tmp = cont;
-    dst = tmp; // initialised
-    for(int i = 1; i < 6; i++){
-        pyrDown(tmp, dst, Size(tmp.cols/2, tmp.rows/2) );
-        pyramid[i] = tmp;
-        tmp = dst; // to perform gaussian modelling again
+cv::Mat getMultiScaleContrast(cv::Mat img, const int windowSize, const int nPyLevel){
+    // constant declaration
+    const int imageWidth = img.cols;
+    const int imageHeight = img.rows;
+    // initialise objective matrix, data type of entry is float.
+    cv::Mat msc = cv::Mat(imageHeight, imageWidth, CV_64F);
+    // generate the width and height of image in each pyramid level 
+    vector<int> heights(nPyLevel, imageHeight);
+    vector<int> widths(nPyLevel, imageWidth);
+    for (int i = 1; i < nPyLevel; i ++) {
+        // no change for i = 0, orginal image
+        heights[i] = heights[i-1] / 2;
+        widths[i] = widths[i-1] / 2;
     }
-    
-    // run the multiscale contrast thingummy to flatten the image, put into msc
-    return msc;   
+    // vector to restore pointer to multiscale image
+    vector< cv::Mat > pyramid(nPyLevel, img);
+    pyramid[0] = img;
+    // work out all scaled image 
+    for (int i = 1; i < nPyLevel; i ++) {
+        // no change for i = 0, orginal image
+        cv::pyrDown( pyramid[i-1], pyramid[i], Size( widths[i] , heights[i] ) );
+    }
+    // vector to store pointer to multiscale contrast map
+    vector< cv::Mat > contrastMaps(nPyLevel, img);
+    // work out constrast of all scaled image
+    for (int i = 0; i < nPyLevel; i ++ ) {
+        contrastMaps[i] = getContrast( pyramid[i], windowSize);
+    }
+
+    // calculate the feature map incorporates all level of constrast.
+    int scaling = 0;
+    int tempx, tempy;
+    double tempContrast, multiContrast;
+    double maxContrast = -1, minContrast = 1e6;
+    Vec3b intensity;
+    for (int y = 0; y < imageHeight; y ++ ) {
+        for (int x = 0; x < imageWidth; x ++) {
+            multiContrast = 0;
+            for (int l = 0 ; l < nPyLevel; l ++) {
+                scaling = (int) pow(2.0, l);
+                tempy = y / scaling;
+                tempx = x / scaling;
+                tempContrast = contrastMaps[l].at<double>(tempy, tempx);
+                multiContrast += tempContrast;
+            }
+            msc.at<double>(y,x) = multiContrast;
+            // participate max and min selection
+            if (multiContrast < minContrast) minContrast = multiContrast;
+            if (multiContrast > maxContrast) maxContrast = multiContrast;
+        }
+    }
+    cout << minContrast << ", " << maxContrast << endl;
+    // normalisation
+    double range = maxContrast - minContrast;
+    for (int y = 0; y < imageHeight; y ++ ) {
+        for (int x = 0; x < imageWidth; x ++) {
+            msc.at<double>(y,x) = (msc.at<double>(y,x) - minContrast) / range ;
+        }
+    }
+
+    return msc;
 }
 
 // struct for centre-surround histogram feature
@@ -84,7 +146,7 @@ CentreSurround getCentreSurround(cv::Mat img, vector<int> rect1, int bins){
     vector<vector<int> > histogramBins2(bins);
     int binDelimiter=255/bins;
     Vec3b pixColour;
-    
+
     // initialise to 0 for all bins in the histogram
     for(long i = 0; i < bins; i++){
         histogramBins1.at(i).resize(3);
@@ -96,11 +158,11 @@ CentreSurround getCentreSurround(cv::Mat img, vector<int> rect1, int bins){
         histogramBins2.at(i)[1] = 0;
         histogramBins2.at(i)[2] = 0;
     }
-    
+
     // TODO create a rectangle around rect1 such that its area - area of rect1 is equal to that of rect1
     // for the moment, a really approximate method is here so we have something working.
     // we can maybe modify this to do away with correct aspect ratio choice by some clever formula too...?
-    
+
     vector<int> rect2(4);
     rect2.at(0)=rect1.at(0)-(rect1.at(2)/2);
     if(rect2.at(0)<0) { rect2.at(0)=0; } // ensure positive values only
@@ -108,13 +170,13 @@ CentreSurround getCentreSurround(cv::Mat img, vector<int> rect1, int bins){
     if(rect2.at(1)<0) { rect2.at(1)=0; }
     rect2.at(2)=rect1.at(2)*2;
     rect2.at(3)=rect1.at(3)*2;
-    
+
     // perform RGB histogram calculation
     for(int y = 0; y < img.rows; y++){
         for(int x = 0; x < img.cols; x++){
             if (y < rect2.at(1) | y > rect2.at(1)+rect2.at(3) | x < rect2.at(0) | x > rect2.at(0)+rect2.at(2) ){ continue; }
             pixColour=img.at<Vec3b>(y,x);
-            
+
             // really simplistic algorithm to convert the pixel BGR values into their destination bin
             // can be from 0 to bins
             pixColour[0] /= binDelimiter;
@@ -133,7 +195,7 @@ CentreSurround getCentreSurround(cv::Mat img, vector<int> rect1, int bins){
         }
 
     }
-    
+
     // calculate the chi-squared value
     float sum = 0.0;
     for(int i = 0; i < bins; i++){
@@ -149,7 +211,7 @@ CentreSurround getCentreSurround(cv::Mat img, vector<int> rect1, int bins){
 
 // Get the colour spatial distribution as a gaussian mixture model
 cv::Mat getSpatialDistribution(cv::Mat img){
-/*{{{*/
+    /*{{{*/
     // constant declaration
     const int nComponents = 5;
     const int nDimensions = 3;
