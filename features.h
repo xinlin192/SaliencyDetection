@@ -17,8 +17,9 @@ using namespace Eigen;
 
 // feature extraction algorithms -----------------------------------------------
 
-// Get the contrast of the image
+// Get the contrast of one single image (one scale only)
 cv::Mat getContrast(cv::Mat img, int windowSize){
+/*{{{*/
     int imageWidth = img.cols;
     int imageHeight = img.rows;
     // temporary variable used in the loop
@@ -65,11 +66,13 @@ cv::Mat getContrast(cv::Mat img, int windowSize){
             contrastMap.at<double>(y, x) = contrast;
         }
     }
+/*}}}*/
     return contrastMap;
 }
 
 // Get the multiscale contrast map of the image (to 6 scales) 
 cv::Mat getMultiScaleContrast(cv::Mat img, const int windowSize, const int nPyLevel){
+/*{{{*/
     // constant declaration
     const int imageWidth = img.cols;
     const int imageHeight = img.rows;
@@ -99,7 +102,6 @@ cv::Mat getMultiScaleContrast(cv::Mat img, const int windowSize, const int nPyLe
     }
 
     // calculate the feature map incorporates all level of constrast.
-    int scaling = 0;
     int tempx, tempy;
     double tempContrast, multiContrast;
     double maxContrast = -1, minContrast = 1e6;
@@ -108,19 +110,27 @@ cv::Mat getMultiScaleContrast(cv::Mat img, const int windowSize, const int nPyLe
         for (int x = 0; x < imageWidth; x ++) {
             multiContrast = 0;
             for (int l = 0 ; l < nPyLevel; l ++) {
-                scaling = (int) pow(2.0, l);
-                tempy = y / scaling;
-                tempx = x / scaling;
+                //scaling = (int) pow(2.0, l);
+                // decide the horizontal and vertical coordinate 
+                // in current scale image.
+                tempy = y >> l;
+                tempx = x >> l;
+                // to avoid exception 
+                tempy =(tempy >= contrastMaps[l].rows)?contrastMaps[l].rows-1:tempy; 
+                tempx =(tempx >= contrastMaps[l].cols)?contrastMaps[l].cols-1:tempx; 
+                // get contrast map of that scaled image
                 tempContrast = contrastMaps[l].at<double>(tempy, tempx);
+                // add to accumulation variable
                 multiContrast += tempContrast;
             }
+            // set msc matrix of that entry to derived multi-scale Contrast
             msc.at<double>(y,x) = multiContrast;
-            // participate max and min selection
+            // participate max and min selection for latter normalisation
             if (multiContrast < minContrast) minContrast = multiContrast;
             if (multiContrast > maxContrast) maxContrast = multiContrast;
         }
     }
-    cout << minContrast << ", " << maxContrast << endl;
+    //cout << minContrast << ", " << maxContrast << endl;
     // normalisation
     double range = maxContrast - minContrast;
     for (int y = 0; y < imageHeight; y ++ ) {
@@ -128,7 +138,7 @@ cv::Mat getMultiScaleContrast(cv::Mat img, const int windowSize, const int nPyLe
             msc.at<double>(y,x) = (msc.at<double>(y,x) - minContrast) / range ;
         }
     }
-
+/*}}}*/
     return msc;
 }
 
@@ -142,8 +152,8 @@ struct CentreSurround {
 // rect1 is (xval, yval, widthtoright, heightdown), 255 must divide into bins exactly - eg 15 works, 16 does not.
 CentreSurround getCentreSurround(cv::Mat img, vector<int> rect1, int bins){
     CentreSurround csv; // centre-surround distance and appropriate rectangle
-    vector<vector<int> > histogramBins1(bins);
-    vector<vector<int> > histogramBins2(bins);
+    vector< vector<int> > histogramBins1(bins);
+    vector< vector<int> > histogramBins2(bins);
     int binDelimiter=255/bins;
     Vec3b pixColour;
 
