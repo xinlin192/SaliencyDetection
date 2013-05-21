@@ -18,7 +18,7 @@ PROJ_PATH := $(shell pwd)
 # add project source files here
 #######################################################################
 
-APP_SRC = trainModel.cpp 
+APP_SRC = trainModel.cpp testColorSpatialDistribution.cpp testMultiscaleContrast.cpp getLabelledImages.cpp
 
 #######################################################################
 
@@ -32,10 +32,6 @@ PROJ_DEP = ${APP_OBJ:.o=.d}
 all: ${addprefix ${BIN_PATH}/,$(APP_PROG_NAMES)}
 
 #
-run:
-	./../../bin/trainModel -verbose -x -o model.xml dataset/images/A/0 dataset/labels/A
-
-
 # applications
 $(BIN_PATH)/%: %.o $(LIBDRWN)
 	${CCC} $*.o -o $(@:.o=) $(LFLAGS)
@@ -47,8 +43,8 @@ $(LIBDRWN):
 
 # dependencies and object files
 %.o : %.cpp
-	${CCC} -MM -MF $(subst .o,.d,$@) -MP -MT $@ $(CFLAGS) $<
-	${CCC} ${CFLAGS} -c $< -o $@
+	${CCC} -g -MM -MF $(subst .o,.d,$@) -MP -MT $@ $(CFLAGS) $<
+	${CCC} -g ${CFLAGS} -c $< -o $@
 
 # clear
 clean:
