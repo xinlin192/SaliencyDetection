@@ -2,13 +2,14 @@
 % package list
 \usepackage{./Amsterdam}
 \usepackage{graphicx}
+\usepackage[framemethod=TikZ]{mdframed}
 \usepackage{wrapfig}
 % setting 
 \definecolor{MidnightBlue}{RGB}{0,103,149}
 \setbeamertemplate{frametitle}{\hspace{-0.5cm}\bf\insertframetitle}
 % prensentation info
 \title[Application of Conditional Random Fields in Salient Object Detection]
-{\bf Application of Conditional Random Fields in \\Salient Object Detection within an Image,\\using Local, Regional, and Global Features}
+{\bf {Application of Conditional Random Fields in \\Salient Object Detection within an Image,\\using Local, Regional, and Global Features}}
 \author[Jimmy Lin and Chris Claoue Long]{\bf Jimmy Lin \\Chris Claoue Long}
 \institute{\bf Dr. Stephen Gould\\[0.3cm] College of Engineering and Computer Science \\Australian National University}
 \date{\bf \today}
@@ -19,7 +20,7 @@
 %%% beginning of document
 \begin{document}
 \begin{large}
-\frame{\titlepage }
+\frame{\begin{mdframed}[roundcorner=10pt]\maketitle\end{mdframed}}%\titlepage}
 \end{large}
 
 %{{{ Introduction
@@ -131,7 +132,14 @@ PICTURES HERE?
     f_c(x,I) = \SUM_{n = 1}^{N}\SUM_{x'\in W(x)}||I^n(x)-I^n(x')||^2
     $$
     where W(x) is a window that delineates which area to consider for neighbouring pixels to compare contrast values.\\[10pt]
-    PICTURES HERE
+    \begin{center}
+    \includegraphics[width=0.72in,height=0.52in]{contrast/1orig.jpg}
+    \includegraphics[width=0.72in,height=0.52in]{contrast/2orig.jpg}
+    \includegraphics[width=0.72in,height=0.52in]{contrast/3orig.jpg}\\
+    \includegraphics[width=0.72in,height=0.52in]{contrast/1cont.jpg}
+    \includegraphics[width=0.72in,height=0.52in]{contrast/2cont.jpg}
+    \includegraphics[width=0.72in,height=0.52in]{contrast/3cont.jpg}
+    \end{center}
 }
 \frame{
     \frametitle{Regional: Center-Surround Histogram}
