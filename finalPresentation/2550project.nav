@@ -1,4 +1,4 @@
-\beamer@endinputifotherversion {3.20pt}
+\beamer@endinputifotherversion {3.26pt}
 \headcommand {\slideentry {0}{0}{1}{1/1}{}{0}}
 \headcommand {\beamer@framepages {1}{1}}
 \headcommand {\sectionentry {1}{Introduction}{2}{Introduction}{0}}
@@ -27,14 +27,14 @@
 \headcommand {\beamer@framepages {7}{7}}
 \headcommand {\slideentry {4}{0}{8}{8/8}{}{0}}
 \headcommand {\beamer@framepages {8}{8}}
-\headcommand {\sectionentry {5}{Conditional Random Field}{9}{Conditional Random Field}{0}}
+\headcommand {\sectionentry {5}{Conditional Random Fields}{9}{Conditional Random Fields}{0}}
 \headcommand {\beamer@sectionpages {5}{8}}
 \headcommand {\beamer@subsectionpages {5}{8}}
 \headcommand {\slideentry {5}{0}{9}{9/9}{}{0}}
 \headcommand {\beamer@framepages {9}{9}}
 \headcommand {\slideentry {5}{0}{10}{10/10}{}{0}}
 \headcommand {\beamer@framepages {10}{10}}
-\headcommand {\sectionentry {6}{Reference}{11}{Reference}{0}}
+\headcommand {\sectionentry {6}{References}{11}{References}{0}}
 \headcommand {\beamer@sectionpages {9}{10}}
 \headcommand {\beamer@subsectionpages {9}{10}}
 \headcommand {\slideentry {6}{0}{11}{11/11}{}{0}}

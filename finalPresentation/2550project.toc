@@ -1,7 +1,7 @@
-\beamer@endinputifotherversion {3.20pt}
+\beamer@endinputifotherversion {3.26pt}
 \beamer@sectionintoc {1}{Introduction}{2}{0}{1}
 \beamer@sectionintoc {2}{Related Works}{3}{0}{2}
 \beamer@sectionintoc {3}{Problem Formulation}{4}{0}{3}
 \beamer@sectionintoc {4}{Feature Extraction}{5}{0}{4}
-\beamer@sectionintoc {5}{Conditional Random Field}{9}{0}{5}
-\beamer@sectionintoc {6}{Reference}{11}{0}{6}
+\beamer@sectionintoc {5}{Conditional Random Fields}{9}{0}{5}
+\beamer@sectionintoc {6}{References}{11}{0}{6}

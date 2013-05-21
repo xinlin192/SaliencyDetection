@@ -7,14 +7,15 @@
 \definecolor{MidnightBlue}{RGB}{0,103,149}
 \setbeamertemplate{frametitle}{\hspace{-0.5cm}\bf\insertframetitle}
 % prensentation info
-\title[Application of Conditional Random Field in Image Salient Object Detection]
-{\bf Application of Conditional Random Field in \\Image Salient Object Detection with \\Local, Regional, Global Feature Extraction}
+\title[Application of Conditional Random Fields in Salient Object Detection]
+{\bf Application of Conditional Random Fields in \\Salient Object Detection within an Image,\\using Local, Regional, and Global Features}
 \author[Jimmy Lin and Chris Claoue Long]{\bf Jimmy Lin \\Chris Claoue Long}
 \institute{\bf Dr. Stephen Gould\\[0.3cm] College of Engineering and Computer Science \\Australian National University}
 \date{\bf \today}
 % new command definition
 \DeclareMathOperator*{\argmin}{arg\,min}
 \DeclareMathOperator*{\argmax}{arg\,max}
+\newcommand{\SUM}{\sum\limits}
 %%% beginning of document
 \begin{document}
 \begin{large}
@@ -24,7 +25,14 @@
 %{{{ Introduction
 \section{Introduction}
 \frame{
-    \frametitle{Introduction}
+    \frametitle{Introduction and Motivation}
+    \begin{center}
+    \includegraphics[width=1.6in,height=1.15in]{salientExample/PM1.jpg} \hspace{0.1cm}
+    \includegraphics[width=1.6in,height=1.15in]{salientExample/PM.jpg}\\
+    {\footnotesize Images from MSRA dataset B}
+    \end{center}
+    Saliency is the prominence of an object in an image.\\[10pt]  Often detected by its high contrast to its boundary with the background, its unique colour distribution compared to its surrounds, and the break in spatial continuity of colour that it represents in the image.\\[10pt]
+    Salient object detection is useful in numerous areas!
 }
 %}}}
 
@@ -38,7 +46,11 @@
 %{{{ Problem Formulation
 \section{Problem Formulation}
 \frame{
+    {\bf \sectionpage}
     \frametitle{Formulation}
+    Given an image, we calculate the local, regional and global features.\\
+    In our program, we used contrast (local), centre-surround histogram comparisons around potentially salient areas (regional) and the colour spatial distribution of the image (global).\\[10pt] 
+    We then run CRF inference over the outcome of these calculations, and select the region that seems most probable to be salient, effectively a winner-takes-all approach. Finally, we output a bounding box rectangle that encompasses this region.
 }
 %}}}
 
@@ -46,7 +58,8 @@
 \section{Feature Extraction}
 \frame{
     \newcommand{\imageVSpacing}{\vspace*{0.5cm}}
-    {\bf \sectionpage}
+%    {\bf \sectionpage}
+    \frametitle{Feature Extraction}
     \begin{center}
     \includegraphics[width=0.72in,height=0.52in]{./MC_image/1.jpg}
     \includegraphics[width=0.72in,height=0.52in]{./MC_image/2.jpg}
@@ -69,25 +82,40 @@
 }
 \frame{
     \frametitle{Local: Multiscale Contrast}
-}
+    Create a contrast map from the linear combination of image contrast at all levels of an N-level gaussian image pyramid, using the pixels $x$ in the image $I$:
+    $$
+    f_c(x,I) = \SUM_{n = 1}^{N}\SUM_{x'\in W(x)}||I^n(x)-I^n(x')||^2
+    $$
+    where W(x) is a window that delineates which area to consider for neighbouring pixels to compare contrast values.}
 
 \frame{
     \frametitle{Regional: Center-Surround Histogram}
+    Given a rectangle $R_s(x)$around a potentially salient region, create a frame $R(x)$ around it so that the area of the frame is equal to that of the rectangle (this is displaced as needed to fit into the image dimensions), at a suitable aspect ratio.\\[10pt]
+    Create a colour RGB histogram for both the rectangle and the surrounding frame with a certain resolution (number of ``bins''), and calculate how many pixels fall into each colour's bins in the frame and the rectangle.\\[10pt]
+    Finally, calculate the $\chi^2$ value to obtain the differences between the rectangle and the surrounding frame.  Do this for multiple aspect ratios, and return the largest $\chi^2$ value and the frame that formed it:
+    $$
+    f_s(x,I) = \argmax\limits_{R(x)}\chi^2(R(x), R_s(x)) =\argmax\limits_{R(x)}\frac{1}{2}\cdot\SUM_{i\in bins}\frac{(hist_{R(x)_i}-hist_{R_s(x)_i})^2}{hist_{R(x)_i}+hist_{R_s(x)_i}}
+    $$
 
 }
 \frame{
     \frametitle{Global: Color Spatial Distribution}
+    
+    Create a Gaussian Mixture Model to compute the spatial variance of colour in an image; this model is not created from every pixel but a subset to save on computing time without sacrificing much accuracy.\\[10pt]
+    Average all the values, sum them up to get the overall covariance of the image, then assign a normalised spatial feature to each pixel based on its colour.\\[10pt]
+    \begin{center}
     \includegraphics[width=0.72in,height=0.52in]{./CSD_image/1.jpg}
-    \includegraphics[width=0.72in,height=0.52in]{./CSD_image/1_CSD.jpg}
     \includegraphics[width=0.72in,height=0.52in]{./CSD_image/2.jpg}
+    \includegraphics[width=0.72in,height=0.52in]{./CSD_image/3.jpg}\\
+    \includegraphics[width=0.72in,height=0.52in]{./CSD_image/1_CSD.jpg}
     \includegraphics[width=0.72in,height=0.52in]{./CSD_image/2_CSD.jpg}
-    \includegraphics[width=0.72in,height=0.52in]{./CSD_image/3.jpg}
     \includegraphics[width=0.72in,height=0.52in]{./CSD_image/3_CSD.jpg}
+    \end{center}
 }
 %}}}
 
 %{{{ CRF content
-\section{Conditional Random Field}
+\section{Conditional Random Fields}
 \frame{
     \frametitle{Learning}
 }
@@ -97,9 +125,9 @@
 %}}}
 
 %{{{ Reference
-\section{Reference}
+\section{References}
 \frame{
-    \frametitle{Reference}
+    \frametitle{References}
     \begin{thebibliography}{9}
         \bibitem{ConcreteMath} Liu, Tie, et al. "Learning to detect a salient object."\textit{ Computer Vision and Pattern Recognition, 2007. CVPR'07. IEEE Conference on. IEEE, 2007. }
         \bibitem{ConcreteMath} Liu, Tie, et al. "Learning to detect a salient object."\textit{ Pattern Analysis and Machine Intelligence, IEEE Transactions on 33.2 (2011): 353-367.}
