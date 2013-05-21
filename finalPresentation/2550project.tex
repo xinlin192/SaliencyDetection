@@ -6,13 +6,13 @@
 \usepackage{wrapfig}
 % setting 
 \definecolor{MidnightBlue}{RGB}{0,103,149}
-\setbeamertemplate{frametitle}{\hspace{-0.5cm}\bf\insertframetitle}
+\setbeamertemplate{frametitle}{\vspace{0.2cm}\hspace{-0.5cm}\bf\insertframetitle}
 \setbeamertemplate{blocks}[rounded][shadow=true]
 \setbeamercolor*{title}{use=structure,fg=white,bg=structure.fg,}
 \setbeamertemplate{title page}[default][colsep=-4bp,rounded=true,shadow=true]
 % prensentation info
-\title[Application of Conditional Random Fields in Salient Object Detection]
-{ {Application of Conditional Random Fields in \\Salient Object Detection within an Image,\\using Local, Regional, and Global Features}}
+\title[Conditional Random Field: Pixel-Level Saliency Detection]
+{ {Application of Conditional Random Fields in \\Pixel-Level Salient Object Detection within Image\\using Local, Regional, and Global Features}}
 \author[Jimmy Lin and Chris Claoue Long]{\bf Jimmy Lin \\Chris Claoue Long}
 \institute{\bf Dr. Stephen Gould\\[0.3cm] College of Engineering and Computer Science \\Australian National University}
 \date{\bf \today}
@@ -31,9 +31,9 @@
 \frame{
     \frametitle{Introduction and Motivation}
     \begin{center}
-    \includegraphics[width=1.6in,height=1.15in]{salientExample/PM1.jpg} \hspace{0.1cm}
-    \includegraphics[width=1.6in,height=1.15in]{salientExample/PM.jpg}\\
-    {\footnotesize Images from MSRA dataset B}
+    \includegraphics[width=1.6in,height=1.15in]{./intro_image/motor_label.jpg} \hspace{0.1cm}
+    \includegraphics[width=1.6in,height=1.15in]{./intro_image/flower_label.jpg} \hspace{0.1cm} \\
+    {\footnotesize Fig.1 Images from MSRA dataset B}
     \end{center}
     Saliency is the prominence of an object in an image.\\[10pt]  Often detected by its high contrast to its boundary with the background, its unique colour distribution compared to its surrounds, and the break in spatial continuity of colour that it represents in the image.\\[10pt]
     Salient object detection is useful in numerous areas!
@@ -63,42 +63,83 @@
             \bibitem Liu, Tie, et al. "Learning to detect a salient object."\textit{ Pattern Analysis and Machine Intelligence, IEEE Transactions on 33.2 (2011): 353-367.}
         \end{thebibliography}
     \end{itemize}
-PICTURES HERE?
+}
+\frame{
+    \frametitle{Comparisons between Existing Approaches}
+    \begin{center}
+    \includegraphics[width=2in,height=0.8in]{./related_work/perfectComparison/0_imCanvs_Compare.jpg} 
+    \includegraphics[width=2in,height=0.8in]{./related_work/perfectComparison/3_imCanvs_Compare.jpg} \\
+    \includegraphics[width=2in,height=0.8in]{./related_work/perfectComparison/18_imCanvs_Compare.jpg} 
+    \includegraphics[width=2in,height=0.8in]{./related_work/perfectComparison/153_imCanvs_Compare.jpg} \\
+    \includegraphics[width=2in,height=0.8in]{./related_work/sosoComparison/13_imCanvs_Compare.jpg} 
+    \includegraphics[width=2in,height=0.8in]{./related_work/sosoComparison/159_imCanvs_Compare.jpg} \\ 
+    {\footnotesize (a) FG(Ma,2003) (b) SM(Itti,1998) (c) CRFM(Liu,2007) (d) Ground truth\vspace{0.3cm}  \\}
+    \end{center}
 }
 %}}}
 
 %{{{ Problem Formulation
 \section{Problem Formulation}
 \frame{
-    {\bf \sectionpage}
     \frametitle{Formulation}
     Given an image $I$, we want to compute the location of a salient object.\\[10pt]
-    Binary labelling task -- for each pixel $x$, indicate whether it belongs to the salient object (1) or not (0)\\[10pt]
-    Build up a probabilistic model $P(A|I)=\frac{1}{Z}e^{-E(A|I)}$, where $\frac{1}{Z}$ is the normalising factor, and $E(A|I)$ is the energy function incorporating both unary/static and pairwise potentials between pixels.\\[10pt]
+    Binary labelling task -- for each pixel $x$, indicate whether it belongs to the salient object (1) or not (0). 
+    Thus, our objective is to have corresponding map $A$, indicating binary saliency of one pixel. \\[10pt]
+    \begin{center}
+        \includegraphics[width=1.8in,height=1in]{./intro_image/mrf.jpg} \\
+        \footnotesize Fig.2 Conditional Random Field
+        \end{center}
+    Build up a probabilistic model $P(A|I)=\frac{1}{Z}e^{-E(A|I)}$, where $\frac{1}{Z}$ is the normalising factor, and $E(A|I)$ is the energy function incorporating both unary and pairwise potentials between pixels.
+}
     
     
 %    calculate the local, regional and global features.\\
 %    In our program, we used contrast (local), centre-surround histogram comparisons around potentially salient areas (regional) and the colour spatial distribution of the image (global).\\[10pt] 
 %    We then run CRF inference over the outcome of these calculations, and select the region that seems most probable to be salient, effectively a winner-takes-all approach. Finally, we output a bounding box rectangle that encompasses this region.
-}
 \frame{
-    \frametitle{Energy function in more detail}
+    \frametitle{Pairwise Feature}
+    Formally, the energy function can be represented as
     $$
-    E(A|I) = \SUM_x \SUM_{k=1}^K \lambda_k \cdot F_k(a_x,I) + \SUM_{x,x'}S(a_x,a_{x'},I)
+    E(A|I) = \SUM_x S_{unary}(a_x,I) + \lambda_0 \SUM_{x,x'}S_{pair}(a_x,a_{x'},I)
     $$
-    where $\lambda_k$ is the weight of the $k^{th}$ feature and $x,x'$ represent two adjacent, or neighbouring, pixels
-}
-\frame{
-    \frametitle{Energy function in more detail}
-    The unary/static feature $F_k(a_x,I)$ is a normalised feature map $f_k(x,I)\in[0,1]$ for each pixel:
-    $$
-    F_k(a_x,I) = \left\{\begin{matrix}f_k(x,I), & a_x=0\\1-f_k(x,I), & a_x=1\end{matrix}\right.
-    $$ 
+    where $\lambda$ is the relative weight between the summary of multiple unary features and pairwise features. \\[10pt]
     The pairwise feature $S(a_x,a_{x'},I)$ exploits the spatial relationship between two adjacent pixels.  It can be viewed as a ``penalty'' for labelling adjacent pixels the same or differently.
     $$
     S(a_x,a_{x'},I) = |a_x-a_{x'}| \cdot e^{-\beta d_{x,x'}}
     $$
-    where $d_{x,x'}$ is the L2-norm (standard norm) representing the colour difference between the two pixels, and $\beta=(2\langle||I_x-I_{x'}||^2\rangle)^{-1}$ is a robust parameter to weight the colour contrast.
+    where $x,x'$ represent two adjacent pixels, $d_{x,x'}$ is the L2-norm (standard norm) representing the colour difference between the two pixels, and $\beta=(2\langle||I_x-I_{x'}||^2\rangle)^{-1}$ is a robust parameter to weight the colour contrast.
+}
+\frame{
+    \frametitle{Unary Features Combination}
+    The unary potential for combination of three features is specified as 
+    $$
+    S_{unary}(a_x,I) = \SUM_{k=1}^K \lambda_k \cdot F_k(a_x,I)
+    $$
+    where $\lambda_k$ is the weight of the $k^{th}$ feature conforming to $\sum_{k}^{K} \lambda_k = 1$.
+    \begin{center}
+    \includegraphics[width=0.72in,height=0.52in]{./MC_image/8.jpg}
+    \includegraphics[width=0.72in,height=0.52in]{./MC_image/8_MC.jpg}
+    %\includegraphics[width=0.72in,height=0.52in]{./MC_image/8_CSH.jpg} 
+    \includegraphics[width=0.72in,height=0.52in]{./MC_image/8_CSD.jpg} \\
+    {\footnotesize Fig.3 Preview of feature maps}
+    \end{center}
+    The value of each feature $F_k(a_x,I)$ comes from a normalised feature map $f_k(x,I)\in[0,1]$, and for each pixel:
+    $$
+    F_k(a_x,I) = \left\{\begin{matrix}f_k(x,I), & a_x=0\\1-f_k(x,I), & a_x=1\end{matrix}\right. 
+    $$
+
+    }
+%}}}
+
+%{{{ CRF content
+\section{Conditional Random Field}
+\frame{
+    \frametitle{Learning}
+    The values from the before-mentioned features are accumulated in a CRF model, which the dataset then trains on. MORE DETAIL HERE
+}
+\frame{
+    \frametitle{Inference}
+    CRF INFERENCE HERE
 }
 %}}}
 
@@ -106,7 +147,6 @@ PICTURES HERE?
 \section{Feature Extraction}
 \frame{
     \newcommand{\imageVSpacing}{\vspace*{0.5cm}}
-%    {\bf \sectionpage}
     \frametitle{Feature Extraction}
     \begin{center}
     \includegraphics[width=0.72in,height=0.52in]{./MC_image/1.jpg}
@@ -131,7 +171,9 @@ PICTURES HERE?
     \includegraphics[width=0.72in,height=0.52in]{./MC_image/2_CSD.jpg}
     \includegraphics[width=0.72in,height=0.52in]{./MC_image/3_CSD.jpg}
     \includegraphics[width=0.72in,height=0.52in]{./MC_image/4_CSD.jpg}
-    \includegraphics[width=0.72in,height=0.52in]{./MC_image/5_CSD.jpg}
+    \includegraphics[width=0.72in,height=0.52in]{./MC_image/5_CSD.jpg} \\
+    {\footnotesize From Top to Bottom Row: (1) Original Image (2) Local: MultiScale Contrast \\
+    (3) Regional: Center-Surround Histogram (4) Global: Color Spatial Distribution}
 \end{center}
 }
 \frame{
@@ -142,12 +184,12 @@ PICTURES HERE?
     $$
     where W(x) is a window that delineates which area to consider for neighbouring pixels to compare contrast values.\\[10pt]
     \begin{center}
-    \includegraphics[width=0.72in,height=0.52in]{contrast/1orig.jpg}
-    \includegraphics[width=0.72in,height=0.52in]{contrast/2orig.jpg}
-    \includegraphics[width=0.72in,height=0.52in]{contrast/3orig.jpg}\\
-    \includegraphics[width=0.72in,height=0.52in]{contrast/1cont.jpg}
-    \includegraphics[width=0.72in,height=0.52in]{contrast/2cont.jpg}
-    \includegraphics[width=0.72in,height=0.52in]{contrast/3cont.jpg}
+    \includegraphics[width=0.8in,height=0.72in]{contrast/1orig.jpg}
+    \includegraphics[width=0.8in,height=0.72in]{contrast/2orig.jpg}
+    \includegraphics[width=0.8in,height=0.72in]{contrast/3orig.jpg}\\
+    \includegraphics[width=0.8in,height=0.72in]{contrast/1cont.jpg}
+    \includegraphics[width=0.8in,height=0.72in]{contrast/2cont.jpg}
+    \includegraphics[width=0.8in,height=0.72in]{contrast/3cont.jpg}
     \end{center}
 }
 \frame{
@@ -168,11 +210,10 @@ PICTURES HERE?
     $$
     f_h(x,I)\propto\SUM_{x'|x\in R(x')}w_{xx'}\chi^2(R(x'),R_s(x'))
     $$
-
 }
+
 \frame{
     \frametitle{Global: Colour Spatial Distribution}
-    
     Create a Gaussian Mixture Model to compute the spatial variance and continuity of colour in an image.\\[10pt]
     The component model is created from only a subset of the pixels in the image, and the maximum number of iterations is limited in order to reduce the time taken to compute this feature without sacrificing too much accuracy.\\[10pt]
     \begin{center}
@@ -193,21 +234,9 @@ PICTURES HERE?
     where $\omega_c$ is the weight, $\mu_c$ is the mean colour, $\sigma_c$ is the covariance, and $\mathcal N(I_x|\mu_c,\sigma_c)$ is the multivariate normal distribution of the $c^{th} component$\\[10pt]
     The final colour spatial distribution feature is defined as a weighted sum:
     $$
-    f_s(x,I)\propto\SUM_c p(c|I_x)]\cdot(1-V(c))
+    f_s(x,I)\propto\SUM_c p(c|I_x)\cdot(1-V(c))
     $$
     where $V(c)$ is the normalised covariance (horizontal and vertical variances) of the $c^{th}$ component, contained between 0 and 1.
-}
-%}}}
-
-%{{{ CRF content
-\section{Conditional Random Fields}
-\frame{
-    \frametitle{Learning}
-    The values from the before-mentioned features are accumulated in a CRF model, which the dataset then trains on. MORE DETAIL HERE
-}
-\frame{
-    \frametitle{Inference}
-    CRF INFERENCE HERE
 }
 %}}}
 
@@ -222,6 +251,14 @@ PICTURES HERE?
         \bibitem{ConcreteMath} Ma, Yu-Fei, and Hong-Jiang Zhang. "Contrast-based image attention analysis by using fuzzy growing."\textit{ Proceedings of the eleventh ACM international conference on Multimedia. ACM, 2003.} 
         \bibitem{ConcreteMath} Stephen Gould, "DARWIN: A Framework for Machine Learning and Computer Vision Research and Development", \textit{Journal of Machine Learning Research (JMLR), 13(Dec):3533−3537, 2012}.
     \end{thebibliography}
+}
+%}}}
+
+%{{{ Acknowledgement
+\section{Acknowledgement}
+\frame{
+    \frametitle{Thank you! Questions?}
+
 }
 %}}}
 \end{document}
