@@ -179,18 +179,20 @@ int main (int argc, char * argv[]) {
             //drwnDrawRegionBoundaries(canvas, &cvseg, CV_RGB(255, 0, 0), 1);
             drwnShowDebuggingImage(canvas, "image", false);
             cvReleaseImage(&canvas);
-            cv::Mat cdi = getMultiScaleContrast(img, 3, 3);
+            cv::Mat csv = getCenterSurround(img);
             cv::Mat pres (img.rows, img.cols, CV_8UC3);
             double grayscale;
-            for (int y = 0 ; y < cdi.rows; y ++) {
-                for (int x = 0 ; x < cdi.cols; x ++) {
-                    grayscale = cdi.at<double>(y,x);
-                    pres.at<Vec3b>(y,x) = Vec3b(grayscale*255, grayscale*255, grayscale*255);
+            int tempRGB;
+            for (int y = 0 ; y < csv.rows; y ++) {
+                for (int x = 0 ; x < csv.cols; x ++) {
+                    grayscale = csv.at<double>(y,x);
+                    tempRGB = (int) floor(grayscale * 255.0);
+                    pres.at<Vec3b>(y,x) = Vec3b(tempRGB, tempRGB, tempRGB);
                 }
             }
             IplImage pcvimg = (IplImage) pres;
             IplImage *present = cvCloneImage(&pcvimg);
-            drwnShowDebuggingImage(present, "Multiscale Contrast", false);
+            drwnShowDebuggingImage(present, "Center Surround Histogram", false);
             cvReleaseImage(&present);
             cv::imwrite(string(outputDir) + baseNames[i] + ".jpg", pres);
         }
