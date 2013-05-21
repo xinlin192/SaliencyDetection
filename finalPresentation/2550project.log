@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.4-1.40.13 (TeX Live 2012) (format=pdflatex 2013.4.18)  21 MAY 2013 13:15
+This is pdfTeX, Version 3.1415926-2.4-1.40.13 (TeX Live 2012) (format=pdflatex 2013.4.18)  21 MAY 2013 17:37
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -922,170 +922,173 @@ Package pdftex.def Info: salientExample/PM.jpg used on input line 36.
 
  <./salientExample/PM1.jpg> <./salientExample/PM.jpg>] [3
 
-] [4
+]
+LaTeX Font Info:    Try loading font information for U+msa on input line 59.
+ (/usr/local/texlive/2012/texmf-dist/tex/latex/amsfonts/umsa.fd
+File: umsa.fd 2013/01/14 v3.01 AMS symbols A
+)
+LaTeX Font Info:    Try loading font information for U+msb on input line 59.
 
-] <./MC_image/1.jpg, id=182, 301.125pt x 201.00093pt>
+(/usr/local/texlive/2012/texmf-dist/tex/latex/amsfonts/umsb.fd
+File: umsb.fd 2013/01/14 v3.01 AMS symbols B
+) [4
+
+] [5
+
+]
+[6
+
+] <./MC_image/1.jpg, id=256, 301.125pt x 201.00093pt>
 File: ./MC_image/1.jpg Graphic file (type jpg)
-
-<use ./MC_image/1.jpg>
-Package pdftex.def Info: ./MC_image/1.jpg used on input line 82.
+ <use ./MC_image/1.jpg>
+Package pdftex.def Info: ./MC_image/1.jpg used on input line 106.
 (pdftex.def)             Requested size: 52.03142pt x 37.58023pt.
- <./MC_image/2.jpg, id=183, 301.125pt x 215.30438pt>
+
+<./MC_image/2.jpg, id=257, 301.125pt x 215.30438pt>
 File: ./MC_image/2.jpg Graphic file (type jpg)
-
-<use ./MC_image/2.jpg>
-Package pdftex.def Info: ./MC_image/2.jpg used on input line 82.
+ <use ./MC_image/2.jpg>
+Package pdftex.def Info: ./MC_image/2.jpg used on input line 106.
 (pdftex.def)             Requested size: 52.03142pt x 37.58026pt.
- <./MC_image/3.jpg, id=184, 301.125pt x 225.84375pt>
+
+<./MC_image/3.jpg, id=258, 301.125pt x 225.84375pt>
 File: ./MC_image/3.jpg Graphic file (type jpg)
-
-<use ./MC_image/3.jpg>
-Package pdftex.def Info: ./MC_image/3.jpg used on input line 82.
+ <use ./MC_image/3.jpg>
+Package pdftex.def Info: ./MC_image/3.jpg used on input line 106.
 (pdftex.def)             Requested size: 52.03142pt x 37.57964pt.
- <./MC_image/4.jpg, id=185, 301.125pt x 201.00093pt>
+
+<./MC_image/4.jpg, id=259, 301.125pt x 201.00093pt>
 File: ./MC_image/4.jpg Graphic file (type jpg)
-
-<use ./MC_image/4.jpg>
-Package pdftex.def Info: ./MC_image/4.jpg used on input line 82.
+ <use ./MC_image/4.jpg>
+Package pdftex.def Info: ./MC_image/4.jpg used on input line 106.
 (pdftex.def)             Requested size: 52.03142pt x 37.58023pt.
- <./MC_image/5.jpg, id=186, 301.125pt x 201.75375pt>
+
+<./MC_image/5.jpg, id=260, 301.125pt x 201.75375pt>
 File: ./MC_image/5.jpg Graphic file (type jpg)
-
-<use ./MC_image/5.jpg>
-Package pdftex.def Info: ./MC_image/5.jpg used on input line 82.
+ <use ./MC_image/5.jpg>
+Package pdftex.def Info: ./MC_image/5.jpg used on input line 106.
 (pdftex.def)             Requested size: 52.03142pt x 37.57936pt.
- <./MC_image/1_MC.jpg, id=187, 401.5pt x 268.00125pt>
+
+<./MC_image/1_MC.jpg, id=261, 401.5pt x 268.00125pt>
 File: ./MC_image/1_MC.jpg Graphic file (type jpg)
-
-<use ./MC_image/1_MC.jpg>
-Package pdftex.def Info: ./MC_image/1_MC.jpg used on input line 82.
+ <use ./MC_image/1_MC.jpg>
+Package pdftex.def Info: ./MC_image/1_MC.jpg used on input line 106.
 (pdftex.def)             Requested size: 52.03142pt x 37.57716pt.
- <./MC_image/2_MC.jpg, id=188, 401.5pt x 287.0725pt>
+
+<./MC_image/2_MC.jpg, id=262, 401.5pt x 287.0725pt>
 File: ./MC_image/2_MC.jpg Graphic file (type jpg)
-
-<use ./MC_image/2_MC.jpg>
-Package pdftex.def Info: ./MC_image/2_MC.jpg used on input line 82.
+ <use ./MC_image/2_MC.jpg>
+Package pdftex.def Info: ./MC_image/2_MC.jpg used on input line 106.
 (pdftex.def)             Requested size: 52.03142pt x 37.57916pt.
- <./MC_image/3_MC.jpg, id=189, 401.5pt x 301.125pt>
+
+<./MC_image/3_MC.jpg, id=263, 401.5pt x 301.125pt>
 File: ./MC_image/3_MC.jpg Graphic file (type jpg)
-
-<use ./MC_image/3_MC.jpg>
-Package pdftex.def Info: ./MC_image/3_MC.jpg used on input line 82.
+ <use ./MC_image/3_MC.jpg>
+Package pdftex.def Info: ./MC_image/3_MC.jpg used on input line 106.
 (pdftex.def)             Requested size: 52.03142pt x 37.5808pt.
- <./MC_image/4_MC.jpg, id=190, 401.5pt x 268.00125pt>
+
+<./MC_image/4_MC.jpg, id=264, 401.5pt x 268.00125pt>
 File: ./MC_image/4_MC.jpg Graphic file (type jpg)
-
-<use ./MC_image/4_MC.jpg>
-Package pdftex.def Info: ./MC_image/4_MC.jpg used on input line 82.
+ <use ./MC_image/4_MC.jpg>
+Package pdftex.def Info: ./MC_image/4_MC.jpg used on input line 106.
 (pdftex.def)             Requested size: 52.03142pt x 37.57716pt.
- <./MC_image/5_MC.jpg, id=191, 401.5pt x 269.005pt>
-File: ./MC_image/5_MC.jpg Graphic file (type jpg)
 
-<use ./MC_image/5_MC.jpg>
-Package pdftex.def Info: ./MC_image/5_MC.jpg used on input line 82.
+<./MC_image/5_MC.jpg, id=265, 401.5pt x 269.005pt>
+File: ./MC_image/5_MC.jpg Graphic file (type jpg)
+ <use ./MC_image/5_MC.jpg>
+Package pdftex.def Info: ./MC_image/5_MC.jpg used on input line 106.
 (pdftex.def)             Requested size: 52.03142pt x 37.57834pt.
 
-<./MC_image/1_CSD.jpg, id=192, 401.5pt x 268.00125pt>
+<./MC_image/1_CSD.jpg, id=266, 401.5pt x 268.00125pt>
 File: ./MC_image/1_CSD.jpg Graphic file (type jpg)
 
 <use ./MC_image/1_CSD.jpg>
-Package pdftex.def Info: ./MC_image/1_CSD.jpg used on input line 82.
+Package pdftex.def Info: ./MC_image/1_CSD.jpg used on input line 106.
 (pdftex.def)             Requested size: 52.03142pt x 37.57716pt.
 
-<./MC_image/2_CSD.jpg, id=193, 401.5pt x 287.0725pt>
+<./MC_image/2_CSD.jpg, id=267, 401.5pt x 287.0725pt>
 File: ./MC_image/2_CSD.jpg Graphic file (type jpg)
 
 <use ./MC_image/2_CSD.jpg>
-Package pdftex.def Info: ./MC_image/2_CSD.jpg used on input line 82.
+Package pdftex.def Info: ./MC_image/2_CSD.jpg used on input line 106.
 (pdftex.def)             Requested size: 52.03142pt x 37.57916pt.
- <./MC_image/3_CSD.jpg, id=194, 401.5pt x 301.125pt>
+ <./MC_image/3_CSD.jpg, id=268, 401.5pt x 301.125pt>
 File: ./MC_image/3_CSD.jpg Graphic file (type jpg)
 
 <use ./MC_image/3_CSD.jpg>
-Package pdftex.def Info: ./MC_image/3_CSD.jpg used on input line 82.
+Package pdftex.def Info: ./MC_image/3_CSD.jpg used on input line 106.
 (pdftex.def)             Requested size: 52.03142pt x 37.5808pt.
 
-<./MC_image/4_CSD.jpg, id=195, 401.5pt x 268.00125pt>
+<./MC_image/4_CSD.jpg, id=269, 401.5pt x 268.00125pt>
 File: ./MC_image/4_CSD.jpg Graphic file (type jpg)
 
 <use ./MC_image/4_CSD.jpg>
-Package pdftex.def Info: ./MC_image/4_CSD.jpg used on input line 82.
+Package pdftex.def Info: ./MC_image/4_CSD.jpg used on input line 106.
 (pdftex.def)             Requested size: 52.03142pt x 37.57716pt.
- <./MC_image/5_CSD.jpg, id=196, 401.5pt x 269.005pt>
+ <./MC_image/5_CSD.jpg, id=270, 401.5pt x 269.005pt>
 File: ./MC_image/5_CSD.jpg Graphic file (type jpg)
 
 <use ./MC_image/5_CSD.jpg>
-Package pdftex.def Info: ./MC_image/5_CSD.jpg used on input line 82.
+Package pdftex.def Info: ./MC_image/5_CSD.jpg used on input line 106.
 (pdftex.def)             Requested size: 52.03142pt x 37.57834pt.
- [5
+ [7
 
  <./MC_image/1.jpg> <./MC_image/2.jpg> <./MC_image/3.jpg> <./MC_image/4.jpg> <.
 /MC_image/5.jpg> <./MC_image/1_MC.jpg> <./MC_image/2_MC.jpg> <./MC_image/3_MC.j
 pg> <./MC_image/4_MC.jpg> <./MC_image/5_MC.jpg> <./MC_image/1_CSD.jpg> <./MC_im
 age/2_CSD.jpg> <./MC_image/3_CSD.jpg> <./MC_image/4_CSD.jpg> <./MC_image/5_CSD.
-jpg>]
-LaTeX Font Info:    Try loading font information for U+msa on input line 89.
+jpg>] [8
 
-(/usr/local/texlive/2012/texmf-dist/tex/latex/amsfonts/umsa.fd
-File: umsa.fd 2013/01/14 v3.01 AMS symbols A
-)
-LaTeX Font Info:    Try loading font information for U+msb on input line 89.
-
-(/usr/local/texlive/2012/texmf-dist/tex/latex/amsfonts/umsb.fd
-File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-) [6
-
-] [7
+] [9
 
 ]
-<./CSD_image/1.jpg, id=302, 301.125pt x 240.9pt>
+<./CSD_image/1.jpg, id=368, 301.125pt x 240.9pt>
 File: ./CSD_image/1.jpg Graphic file (type jpg)
  <use ./CSD_image/1.jpg>
-Package pdftex.def Info: ./CSD_image/1.jpg used on input line 114.
+Package pdftex.def Info: ./CSD_image/1.jpg used on input line 138.
 (pdftex.def)             Requested size: 52.03142pt x 37.57803pt.
 
-<./CSD_image/2.jpg, id=303, 301.125pt x 242.40562pt>
+<./CSD_image/2.jpg, id=369, 301.125pt x 242.40562pt>
 File: ./CSD_image/2.jpg Graphic file (type jpg)
  <use ./CSD_image/2.jpg>
-Package pdftex.def Info: ./CSD_image/2.jpg used on input line 114.
+Package pdftex.def Info: ./CSD_image/2.jpg used on input line 138.
 (pdftex.def)             Requested size: 52.03142pt x 37.57986pt.
 
-<./CSD_image/3.jpg, id=304, 301.125pt x 240.9pt>
+<./CSD_image/3.jpg, id=370, 301.125pt x 240.9pt>
 File: ./CSD_image/3.jpg Graphic file (type jpg)
  <use ./CSD_image/3.jpg>
-Package pdftex.def Info: ./CSD_image/3.jpg used on input line 114.
+Package pdftex.def Info: ./CSD_image/3.jpg used on input line 138.
 (pdftex.def)             Requested size: 52.03142pt x 37.57803pt.
 
-<./CSD_image/1_CSD.jpg, id=305, 401.5pt x 321.2pt>
+<./CSD_image/1_CSD.jpg, id=371, 401.5pt x 321.2pt>
 File: ./CSD_image/1_CSD.jpg Graphic file (type jpg)
  <use ./CSD_image/1_CSD.jpg>
-Package pdftex.def Info: ./CSD_image/1_CSD.jpg used on input line 114.
+Package pdftex.def Info: ./CSD_image/1_CSD.jpg used on input line 138.
 (pdftex.def)             Requested size: 52.03142pt x 37.57681pt.
 
-<./CSD_image/2_CSD.jpg, id=306, 401.5pt x 323.2075pt>
+<./CSD_image/2_CSD.jpg, id=372, 401.5pt x 323.2075pt>
 File: ./CSD_image/2_CSD.jpg Graphic file (type jpg)
 
 <use ./CSD_image/2_CSD.jpg>
-Package pdftex.def Info: ./CSD_image/2_CSD.jpg used on input line 114.
+Package pdftex.def Info: ./CSD_image/2_CSD.jpg used on input line 138.
 (pdftex.def)             Requested size: 52.03142pt x 37.57988pt.
- <./CSD_image/3_CSD.jpg, id=307, 401.5pt x 321.2pt>
+ <./CSD_image/3_CSD.jpg, id=373, 401.5pt x 321.2pt>
 File: ./CSD_image/3_CSD.jpg Graphic file (type jpg)
 
 <use ./CSD_image/3_CSD.jpg>
-Package pdftex.def Info: ./CSD_image/3_CSD.jpg used on input line 114.
+Package pdftex.def Info: ./CSD_image/3_CSD.jpg used on input line 138.
 (pdftex.def)             Requested size: 52.03142pt x 37.57681pt.
- [8
+ [10
 
  <./CSD_image/1.jpg> <./CSD_image/2.jpg> <./CSD_image/3.jpg> <./CSD_image/1_CSD
-.jpg> <./CSD_image/2_CSD.jpg> <./CSD_image/3_CSD.jpg>] [9
+.jpg> <./CSD_image/2_CSD.jpg> <./CSD_image/3_CSD.jpg>] [11
 
-] [10
+] [12
 
 ]
 Missing character: There is no â in font cmssi9!
 Missing character: There is no ˆ in font cmssi9!
 Missing character: There is no ’ in font cmssi9!
- [11
+ [13
 
  </usr/local/texlive/2012/texmf-dist/tex/latex/beamer/art/beamericonarticle.pdf
 >]
@@ -1098,11 +1101,11 @@ Missing character: There is no ’ in font cmssi9!
 \tf@snm=\write8
 \openout8 = `2550project.snm'.
 
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 140.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 140.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 166.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 166.
  (./2550project.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 140.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 140.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 166.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 166.
 Package rerunfilecheck Info: File `2550project.out' has not changed.
 (rerunfilecheck)             Checksum: 52E51BF9183FEC80F36EA63005EAD908;307.
 
@@ -1110,30 +1113,32 @@ Package rerunfilecheck Info: File `2550project.out' has not changed.
 LaTeX Font Warning: Size substitutions with differences
 (Font)              up to 1.0pt have occurred.
 
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 140.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 166.
  ) 
 Here is how much of TeX's memory you used:
- 15907 strings out of 493481
- 299686 string characters out of 3140965
+ 15915 strings out of 493481
+ 299756 string characters out of 3140965
  371451 words of memory out of 3000000
- 18780 multiletter control sequences out of 15000+200000
+ 18784 multiletter control sequences out of 15000+200000
  10843 words of font info for 40 fonts, out of 3000000 for 9000
  957 hyphenation exceptions out of 8191
  49i,15n,53p,424b,658s stack positions out of 5000i,500n,10000p,200000b,50000s
 </usr/local/texlive/2012/texmf-dist/fonts/type1/public/amsfonts/cmextra/cmex9
-.pfb></usr/local/texlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.p
-fb></usr/local/texlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmss8.pfb
-></usr/local/texlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmss9.pfb><
-/usr/local/texlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmssbx10.pfb>
-</usr/local/texlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmssi8.pfb><
-/usr/local/texlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmssi9.pfb></
-usr/local/texlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb></us
-r/local/texlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/
-local/texlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy9.pfb>
-Output written on 2550project.pdf (11 pages, 705424 bytes).
+.pfb></usr/local/texlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.p
+fb></usr/local/texlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb
+></usr/local/texlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb><
+/usr/local/texlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmss8.pfb></u
+sr/local/texlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmss9.pfb></usr
+/local/texlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmssbx10.pfb></us
+r/local/texlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmssi8.pfb></usr
+/local/texlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmssi9.pfb></usr/
+local/texlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/lo
+cal/texlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/loca
+l/texlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy9.pfb>
+Output written on 2550project.pdf (13 pages, 728962 bytes).
 PDF statistics:
- 484 PDF objects out of 1000 (max. 8388607)
- 417 compressed objects within 5 object streams
- 30 named destinations out of 1000 (max. 500000)
+ 558 PDF objects out of 1000 (max. 8388607)
+ 487 compressed objects within 5 object streams
+ 34 named destinations out of 1000 (max. 500000)
  206 words of extra memory for PDF output out of 10000 (max. 10000000)
 

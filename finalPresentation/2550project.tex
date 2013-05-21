@@ -48,9 +48,33 @@
 \frame{
     {\bf \sectionpage}
     \frametitle{Formulation}
-    Given an image, we calculate the local, regional and global features.\\
-    In our program, we used contrast (local), centre-surround histogram comparisons around potentially salient areas (regional) and the colour spatial distribution of the image (global).\\[10pt] 
-    We then run CRF inference over the outcome of these calculations, and select the region that seems most probable to be salient, effectively a winner-takes-all approach. Finally, we output a bounding box rectangle that encompasses this region.
+    Given an image $I$, we want to compute the location of a salient object.\\[10pt]
+    Binary labelling task -- for each pixel $x$, indicate whether it belongs to the salient object (1) or not (0)\\[10pt]
+    Build up a probabilistic model $P(A|I)=\frac{1}{Z}e^{-E(A|I)}$, where $\frac{1}{Z}$ is the normalising factor, and $E(A|I)$ is the energy function incorporating both unary/static and pairwise potentials between pixels.\\[10pt]
+    
+    
+%    calculate the local, regional and global features.\\
+%    In our program, we used contrast (local), centre-surround histogram comparisons around potentially salient areas (regional) and the colour spatial distribution of the image (global).\\[10pt] 
+%    We then run CRF inference over the outcome of these calculations, and select the region that seems most probable to be salient, effectively a winner-takes-all approach. Finally, we output a bounding box rectangle that encompasses this region.
+}
+\frame{
+    \frametitle{Energy function in more detail}
+    $$
+    E(A|I) = \SUM_x \SUM_{k=1}^K \lambda_k \cdot F_k(a_x,I) + \SUM_{x,x'}S(a_x,a_{x'},I)
+    $$
+    where $\lambda_k$ is the weight of the $k^th$ feature and $x,x'$ represent two adjacent, or neighbouring, pixels
+}
+\frame{
+    \frametitle{Energy function in more detail}
+    The unary/static feature $F_k(a_x,I)$ is a normalised feature map $f_k(x,I)\in[0,1]$ for each pixel:
+    $$
+    F_k(a_x,I) = \left\{\begin{matrix}f_k(x,I), & a_x=0\\1-f_k(x,I), & a_x=1\end{matrix}\right.
+    $$ 
+    The pairwise feature $S(a_x,a_{x'},I)$ exploits the spatial relationship between two adjacent pixels.  It can be viewed as a ``penalty'' for labelling adjacent pixels the same or differently.
+    $$
+    S(a_x,a_{x'},I) = |a_x-a_{x'}| \cdot e^{-\beta d_{x,x'}}
+    $$
+    where $d_x,x'$ is the L2-norm (standard norm) representing the colour difference between the two pixels, and $\beta=(2\langle||I_x-I_{x'}||^2\rangle)^{-1}$ is a robust parameter to weight the colour contrast.
 }
 %}}}
 
@@ -90,9 +114,9 @@
 
 \frame{
     \frametitle{Regional: Center-Surround Histogram}
-    Given a rectangle $R_s(x)$around a potentially salient region, create a frame $R(x)$ around it so that the area of the frame is equal to that of the rectangle (this is displaced as needed to fit into the image dimensions), at a suitable aspect ratio.\\[10pt]
-    Create a colour RGB histogram for both the rectangle and the surrounding frame with a certain resolution (number of ``bins''), and calculate how many pixels fall into each colour's bins in the frame and the rectangle.\\[10pt]
-    Finally, calculate the $\chi^2$ value to obtain the differences between the rectangle and the surrounding frame.  Do this for multiple aspect ratios, and return the largest $\chi^2$ value and the frame that formed it:
+    Given a rectangle $R_s(x)$around a salient region, create a frame $R(x)$ around it so that the area of the frame is equal to that of the rectangle (this is displaced as needed to fit into the image dimensions), at a suitable aspect ratio.\\[10pt]
+    Create a colour RGB histogram for both the rectangle and the surrounding frame with a certain resolution (number of ``bins'' for each colour), and calculate how many pixels fall into each colour's bins in the frame and the rectangle.\\[10pt]
+    Finally, calculate the $\chi^2$ value between the two histograms to obtain the differences between the rectangle and the surrounding frame.  Do this for multiple aspect ratios, and return the largest $\chi^2$ value and the frame that formed it:
     $$
     f_s(x,I) = \argmax\limits_{R(x)}\chi^2(R(x), R_s(x)) =\argmax\limits_{R(x)}\frac{1}{2}\cdot\SUM_{i\in bins}\frac{(hist_{R(x)_i}-hist_{R_s(x)_i})^2}{hist_{R(x)_i}+hist_{R_s(x)_i}}
     $$
@@ -101,7 +125,7 @@
 \frame{
     \frametitle{Global: Color Spatial Distribution}
     
-    Create a Gaussian Mixture Model to compute the spatial variance of colour in an image; this model is not created from every pixel but a subset to save on computing time without sacrificing much accuracy.\\[10pt]
+    Create a Gaussian Mixture Model to compute the spatial variance of colour in an image; this model is not created from every pixel but a subset in order to improve computational time without sacrificing much accuracy.\\[10pt]
     Average all the values, sum them up to get the overall covariance of the image, then assign a normalised spatial feature to each pixel based on its colour.\\[10pt]
     \begin{center}
     \includegraphics[width=0.72in,height=0.52in]{./CSD_image/1.jpg}
@@ -118,9 +142,11 @@
 \section{Conditional Random Fields}
 \frame{
     \frametitle{Learning}
+    The values from the before-mentioned features are accumulated in a CRF model, which the dataset then trains on. MORE DETAIL HERE
 }
 \frame{
     \frametitle{Inference}
+    CRF INFERENCE HERE
 }
 %}}}
 
