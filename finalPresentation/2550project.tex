@@ -40,6 +40,26 @@
 \section{Related Works}
 \frame{
     \frametitle{Related Works}
+    \begin{itemize}
+        \item Salient-based Model (SM,1998) \\
+        \begin{thebibliography}{9}
+        \footnotesize
+        \bibitem{ConcreteMath} Itti, Laurent, Christof Koch, and Ernst Niebur. "A model of saliency-based visual attention for rapid scene analysis."\textit{ Pattern Analysis and Machine Intelligence, IEEE Transactions on 20.11 (1998): 1254-1259.}
+    \end{thebibliography}
+
+    \item Fuzzy Growing Method (FG,2003) \\
+        \begin{thebibliography}{9}
+            \footnotesize
+            \bibitem{ConcreteMath} Ma, Yu-Fei, and Hong-Jiang Zhang. "Contrast-based image attention analysis by using fuzzy growing."\textit{ Proceedings of the eleventh ACM international conference on Multimedia. ACM, 2003.} 
+            \end{thebibliography}
+    \item CRF-based Model (CRFM,2007)
+        \begin{thebibliography}{9}
+            \footnotesize 
+            \bibitem{ConcreteMath} Liu, Tie, et al. "Learning to detect a salient object."\textit{ Computer Vision and Pattern Recognition, 2007. CVPR'07. IEEE Conference on. IEEE, 2007. }
+            \bibitem Liu, Tie, et al. "Learning to detect a salient object."\textit{ Pattern Analysis and Machine Intelligence, IEEE Transactions on 33.2 (2011): 353-367.}
+        \end{thebibliography}
+    \end{itemize}
+PICTURES HERE?
 }
 %}}}
 
@@ -62,7 +82,7 @@
     $$
     E(A|I) = \SUM_x \SUM_{k=1}^K \lambda_k \cdot F_k(a_x,I) + \SUM_{x,x'}S(a_x,a_{x'},I)
     $$
-    where $\lambda_k$ is the weight of the $k^th$ feature and $x,x'$ represent two adjacent, or neighbouring, pixels
+    where $\lambda_k$ is the weight of the $k^{th}$ feature and $x,x'$ represent two adjacent, or neighbouring, pixels
 }
 \frame{
     \frametitle{Energy function in more detail}
@@ -74,7 +94,7 @@
     $$
     S(a_x,a_{x'},I) = |a_x-a_{x'}| \cdot e^{-\beta d_{x,x'}}
     $$
-    where $d_x,x'$ is the L2-norm (standard norm) representing the colour difference between the two pixels, and $\beta=(2\langle||I_x-I_{x'}||^2\rangle)^{-1}$ is a robust parameter to weight the colour contrast.
+    where $d_{x,x'}$ is the L2-norm (standard norm) representing the colour difference between the two pixels, and $\beta=(2\langle||I_x-I_{x'}||^2\rangle)^{-1}$ is a robust parameter to weight the colour contrast.
 }
 %}}}
 
@@ -110,23 +130,34 @@
     $$
     f_c(x,I) = \SUM_{n = 1}^{N}\SUM_{x'\in W(x)}||I^n(x)-I^n(x')||^2
     $$
-    where W(x) is a window that delineates which area to consider for neighbouring pixels to compare contrast values.}
-
+    where W(x) is a window that delineates which area to consider for neighbouring pixels to compare contrast values.\\[10pt]
+    PICTURES HERE
+}
 \frame{
     \frametitle{Regional: Center-Surround Histogram}
     Given a rectangle $R_s(x)$around a salient region, create a frame $R(x)$ around it so that the area of the frame is equal to that of the rectangle (this is displaced as needed to fit into the image dimensions), at a suitable aspect ratio.\\[10pt]
-    Create a colour RGB histogram for both the rectangle and the surrounding frame with a certain resolution (number of ``bins'' for each colour), and calculate how many pixels fall into each colour's bins in the frame and the rectangle.\\[10pt]
-    Finally, calculate the $\chi^2$ value between the two histograms to obtain the differences between the rectangle and the surrounding frame.  Do this for multiple aspect ratios, and return the largest $\chi^2$ value and the frame that formed it:
+    PICTURES HERE.
+}
+\frame{
+    \frametitle{Regional: Center-Surround Histogram}
+    Create a colour RGB histogram for both the rectangle and the surrounding frame with a certain resolution (number of ``bins'' for each colour)\\[10pt]
+%, and calculate how many pixels fall into each colour's bins in the frame and the rectangle.\\[10pt]
+%    Finally, c
+    Calculate the $\chi^2$ value between the two histograms to obtain the differences between the rectangle and the surrounding frame.  Do this for multiple aspect ratios, and keep the largest $\chi^2$ value: %and the frame that formed it:
     $$
-    f_s(x,I) = \argmax\limits_{R(x)}\chi^2(R(x), R_s(x)) =\argmax\limits_{R(x)}\frac{1}{2}\cdot\SUM_{i\in bins}\frac{(hist_{R(x)_i}-hist_{R_s(x)_i})^2}{hist_{R(x)_i}+hist_{R_s(x)_i}}
+    R(x) = \argmax\limits_{R(x)}\chi^2(R(x), R_s(x)) =\argmax\limits_{R(x)}\frac{1}{2}\cdot\SUM_{i\in bins}\frac{(hist_{R(x)_i}-hist_{R_s(x)_i})^2}{hist_{R(x)_i}+hist_{R_s(x)_i}}
+    $$
+    The center-surround histogram feature is finally calculated as:
+    $$
+    f_h(x,I)\propto\SUM_{x'|x\in R(x')}w_{xx'}\chi^2(R(x'),R_s(x'))
     $$
 
 }
 \frame{
-    \frametitle{Global: Color Spatial Distribution}
+    \frametitle{Global: Colour Spatial Distribution}
     
-    Create a Gaussian Mixture Model to compute the spatial variance of colour in an image; this model is not created from every pixel but a subset in order to improve computational time without sacrificing much accuracy.\\[10pt]
-    Average all the values, sum them up to get the overall covariance of the image, then assign a normalised spatial feature to each pixel based on its colour.\\[10pt]
+    Create a Gaussian Mixture Model to compute the spatial variance and continuity of colour in an image.\\[10pt]
+    The component model is created from only a subset of the pixels in the image, and the maximum number of iterations is limited in order to reduce the time taken to compute this feature without sacrificing too much accuracy.\\[10pt]
     \begin{center}
     \includegraphics[width=0.72in,height=0.52in]{./CSD_image/1.jpg}
     \includegraphics[width=0.72in,height=0.52in]{./CSD_image/2.jpg}
@@ -135,6 +166,19 @@
     \includegraphics[width=0.72in,height=0.52in]{./CSD_image/2_CSD.jpg}
     \includegraphics[width=0.72in,height=0.52in]{./CSD_image/3_CSD.jpg}
     \end{center}
+}
+\frame{
+    \frametitle{Global: Colour Spatial Distribution}
+    Each pixel is associated to a colour component with the probability
+    $$
+    P(c|I_x) = \frac{\omega_c\mathcal{N}(I_x|\mu_c,\sigma_c)}{\SUM_c \omega_c \mathcal{N}(I_x|\mu_c,\Sigma_c)}
+    $$
+    where $\omega_c$ is the weight, $\mu_c$ is the mean colour, $\sigma_c$ is the covariance, and $\mathcal N(I_x|\mu_c,\sigma_c)$ is the multivariate normal distribution of the $c^{th} component$\\[10pt]
+    The final colour spatial distribution feature is defined as a weighted sum:
+    $$
+    f_s(x,I)\propto\SUM_c p(c|I_x)]\cdot(1-V(c))
+    $$
+    where $V(c)$ is the normalised covariance (horizontal and vertical variances) of the $c^{th}$ component, contained between 0 and 1.
 }
 %}}}
 

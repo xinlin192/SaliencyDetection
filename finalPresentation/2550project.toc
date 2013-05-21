@@ -3,5 +3,5 @@
 \beamer@sectionintoc {2}{Related Works}{3}{0}{2}
 \beamer@sectionintoc {3}{Problem Formulation}{4}{0}{3}
 \beamer@sectionintoc {4}{Feature Extraction}{7}{0}{4}
-\beamer@sectionintoc {5}{Conditional Random Fields}{11}{0}{5}
-\beamer@sectionintoc {6}{References}{13}{0}{6}
+\beamer@sectionintoc {5}{Conditional Random Fields}{13}{0}{5}
+\beamer@sectionintoc {6}{References}{15}{0}{6}
