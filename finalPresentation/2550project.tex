@@ -35,8 +35,9 @@
     \includegraphics[width=1.6in,height=1.15in]{./intro_image/flower_label.jpg} \hspace{0.1cm} \\
     {\footnotesize Fig.1 Images from MSRA dataset B}
     \end{center}
-    Saliency is the prominence of an object in an image.\\[10pt]  Often detected by its high contrast to its boundary with the background, its unique colour distribution compared to its surrounds, and the break in spatial continuity of colour that it represents in the image.\\[10pt]
-    Salient object detection is useful in numerous areas!
+    Saliency is the prominence of an object in an image.\\[10pt]
+    Salient object detection is useful in numerous areas! For instance, Simulate the human vision by robots. Augmented Reality. 3D surface reconstruction. \\[10pt]
+    Often detected by its \textbf{boundary of high contrast} to its near neighbours, \textbf{distinct to its surrounded block}, \textbf{intensive colour distribution} compared to all other color component in candidate image and \textbf{space continuity of saliency}.\\[10pt]
 }
 %}}}
 
@@ -195,7 +196,16 @@
 \frame{
     \frametitle{Regional: Center-Surround Histogram}
     Given a rectangle $R_s(x)$around a salient region, create a frame $R(x)$ around it so that the area of the frame is equal to that of the rectangle (this is displaced as needed to fit into the image dimensions), at a suitable aspect ratio.\\[10pt]
-    PICTURES HERE.
+ \begin{center}
+     \includegraphics[width=2in,height=1in]{./hist_feature/Histogram.png} \hspace{0.1cm}
+    \includegraphics[width=2in,height=1in]{./hist_feature/Histogram_featuremaps.png}
+    \end{center}
+    \vspace{0.05cm}
+    \hrule 
+    \begin{thebibliography}{9}
+            \tiny 
+        \bibitem{ConcreteMath} Liu, Tie, et al. "Learning to detect a salient object."\textit{ Computer Vision and Pattern Recognition, 2007. CVPR'07. IEEE Conference on. IEEE, 2007. }
+    \end{thebibliography}
 }
 \frame{
     \frametitle{Regional: Center-Surround Histogram}
@@ -240,8 +250,32 @@
 }
 %}}}
 
-%{{{ Acknowledgement
+%{{{ Epilogue
 \section{Epilogue}
+\frame{
+    \frametitle{Our Project Progress}
+    \begin{center}
+        \includegraphics[width=0.72in,height=0.52in]{./aknowledgement/5_157_157174Origin.jpg}
+        \includegraphics[width=0.72in,height=0.52in]{./aknowledgement/5_157_157174MC.jpg}
+        \includegraphics[width=0.72in,height=0.52in]{./aknowledgement/question.jpg}
+        \includegraphics[width=0.72in,height=0.52in]{./aknowledgement/5_157_157174CSD.jpg}
+        \includegraphics[width=0.72in,height=0.52in]{./aknowledgement/question.jpg}
+        \includegraphics[width=0.72in,height=0.52in]{./aknowledgement/5_157_157174Label.jpg} \\
+        \includegraphics[width=0.72in,height=0.52in]{./aknowledgement/5_161_161904Origin.jpg}
+        \includegraphics[width=0.72in,height=0.52in]{./aknowledgement/5_161_161904MC.jpg}
+        \includegraphics[width=0.72in,height=0.52in]{./aknowledgement/question.jpg}
+        \includegraphics[width=0.72in,height=0.52in]{./aknowledgement/5_161_161904CSD.jpg}
+        \includegraphics[width=0.72in,height=0.52in]{./aknowledgement/question.jpg}
+        \includegraphics[width=0.72in,height=0.52in]{./aknowledgement/5_161_161904Label.jpg} \\
+        \includegraphics[width=0.72in,height=0.52in]{./aknowledgement/5_162_162166Origin.jpg}
+        \includegraphics[width=0.72in,height=0.52in]{./aknowledgement/5_162_162166MC.jpg}
+        \includegraphics[width=0.72in,height=0.52in]{./aknowledgement/question.jpg}
+        \includegraphics[width=0.72in,height=0.52in]{./aknowledgement/5_162_162166CSD.jpg}
+        \includegraphics[width=0.72in,height=0.52in]{./aknowledgement/question.jpg}
+        \includegraphics[width=0.72in,height=0.52in]{./aknowledgement/5_162_162166Label.jpg} \\
+        {\footnotesize Fig.5 Our implementation}
+    \end{center}
+}
 \frame{
     \frametitle{Thank you! Questions?}
     \begin{center}
