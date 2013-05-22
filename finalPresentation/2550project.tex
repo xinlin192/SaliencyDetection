@@ -36,8 +36,8 @@
     {\footnotesize Fig.1 Images from MSRA dataset B}
     \end{center}
     Saliency is the prominence of an object in an image.\\[10pt]
-    Salient object detection is useful in numerous areas! For instance, Simulate the human vision by robots. Augmented Reality. 3D surface reconstruction. \\[10pt]
-    Often detected by its \textbf{boundary of high contrast} to its near neighbours, \textbf{distinct to its surrounded block}, \textbf{intensive colour distribution} compared to all other color component in candidate image and \textbf{space continuity of saliency}.\\[10pt]
+    Salient object detection is useful in numerous areas, for instance, in siimulating human vision by robots, augmented Reality, 3D surface reconstruction and more. \\[10pt]
+    Often detected by its \textbf{high contrast boundary} to its near neighbours, \textbf{distinction from its surrounds}, \textbf{intensive colour distribution} compared to all other color component in candidate image and \textbf{space continuity of saliency}.\\[10pt]
 }
 %}}}
 
@@ -267,6 +267,16 @@
 %}}}
 
 %{{{ Epilogue
+\frame{
+    \frametitle{Our variations to previous works}
+    Separate learning of parameters in the CRF model\\[10pt]
+    Improved speed and performance of the given feature extraction processes
+    \begin{itemize} 
+    \item Reducing the resolution of the image before calculating its colour spatial distribution, and limiting the complexity of the gaussian model fitting without reducing overall quality of the feature map:
+    \item Accounting for center-surround histograms that would otherwise exceed the boundary of the image, especially in corners
+    \item Improved calculation of the aspect ratio to use when calculating the center-surround histogram frame
+    \end{itemize}
+}
 \section{Epilogue}
 \frame{
     \frametitle{Our Project Progress}
