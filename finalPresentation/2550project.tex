@@ -65,6 +65,39 @@
         \end{thebibliography}
     \end{itemize}
 }
+
+
+\frame{
+    \frametitle{Evaluation Criteria}
+    \begin{itemize}
+        \item Region-based measurement \\
+            \begin{center}
+            \includegraphics[width=1.0in,height=0.8in]{Picture/Creteria/A.jpg} \hspace{0.1cm}
+            \includegraphics[width=1.0in,height=0.8in]{Picture/Creteria/B.jpg} \hspace{0.1cm}
+            \includegraphics[width=1.0in,height=0.8in]{Picture/Creteria/C.jpg} \hspace{0.1cm} \\
+            {\footnotesize (a) arbitrary labelling (b) large prec but low recall (c) large recall but low prec}
+            \end{center}
+            \begin{itemize}
+                \item Ratio of Precision to Recall \\
+                    Precision: \% of pixels that are correctly detected in ground truth\\ 
+                    Recall: \% of pixels that are correctly detected in resulted detection\\
+                \item F-Measure
+    $$ F_{\alpha} = \frac{(1+\alpha) \times{Precision}\times{Recall}} {\alpha \times Precision + Recall} $$
+            \end{itemize}
+        \item Boundary-based measurement
+            \begin{itemize}
+                \item Boundary Displacement Error (BDE) \\
+                    Measures the average of positional difference of ground truth and resulted detection.
+
+            \end{itemize}
+    \end{itemize}
+
+            \hrule
+    \begin{thebibliography}{9}
+        \tiny
+        \bibitem{ConcreteMath} Liu, Tie, et al. "Learning to detect a salient object."\textit{ Computer Vision and Pattern Recognition, 2007. CVPR'07. IEEE Conference on. IEEE, 2007. }
+    \end{thebibliography}
+}
 \frame{
     \frametitle{Comparisons between Existing Approaches}
     \begin{center}
@@ -264,6 +297,8 @@
     $$
     where $V(c)$ is the normalised covariance (horizontal and vertical variances) of the $c^{th}$ component, contained between 0 and 1.
 }
+
+
 %}}}
 
 %{{{ Epilogue
