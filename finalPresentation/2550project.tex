@@ -88,7 +88,7 @@
     Thus, our objective is to have corresponding map $A$, indicating binary saliency of one pixel. \\[10pt]
     \begin{center}
         \includegraphics[width=1.8in,height=1in]{./intro_image/mrf.jpg} \\
-        \footnotesize Fig.2 Conditional Random Field
+        \footnotesize Fig.2 graph for Conditional Random Field
         \end{center}
     Build up a probabilistic model $P(A|I)=\frac{1}{Z}e^{-E(A|I)}$, where $\frac{1}{Z}$ is the normalising factor, and $E(A|I)$ is the energy function incorporating both unary and pairwise potentials between pixels.
 }
@@ -116,7 +116,7 @@
     $$
     S_{unary}(a_x,I) = \SUM_{k=1}^K \lambda_k \cdot F_k(a_x,I)
     $$
-    where $\lambda_k$ is the weight of the $k^{th}$ feature conforming to $\sum_{k}^{K} \lambda_k = 1$.
+    where $\lambda_k$ is the weight of the $k^{th}$ feature conforming to $\sum_{k=1}^{K} \lambda_k = 1$.
     \begin{center}
     \includegraphics[width=0.72in,height=0.52in]{./MC_image/8.jpg}
     \includegraphics[width=0.72in,height=0.52in]{./MC_image/8_MC.jpg}
@@ -128,7 +128,6 @@
     $$
     F_k(a_x,I) = \left\{\begin{matrix}f_k(x,I), & a_x=0\\1-f_k(x,I), & a_x=1\end{matrix}\right. 
     $$
-
     }
 %}}}
 
@@ -136,11 +135,28 @@
 \section{Conditional Random Field}
 \frame{
     \frametitle{Learning}
-    The values from the before-mentioned features are accumulated in a CRF model, which the dataset then trains on. MORE DETAIL HERE
+    It is technically difficult to directly compute the optimisation of the following,
+    $$
+    E(A|I) = \SUM_x \SUM_{k=1}^K \lambda_k \cdot F_k(a_x,I) + \lambda_0 \SUM_{x,x'}S_{pair}(a_x,a_{x'},I)
+    $$
+    Thus, we separate the optimisation objective to derive approximate solution
+    $$
+    S_{unary}(a_x,I) = \SUM_{k=1}^K \lambda_k \cdot F_k(a_x,I)
+    $$
+    This can be achieved by the logistic regression. \\[10pt]
+    Then we optimise $\lambda_0$ as an ordinary CRF learning task.
+    $$
+    E(A|I) = \SUM_x S_{unary}(a_x,I) + \lambda_0 \SUM_{x,x'}S_{pair}(a_x,a_{x'},I)
+    $$
+    It is somewhat similar to the Coordinate Descent Method with one iteration.
 }
 \frame{
     \frametitle{Inference}
-    CRF INFERENCE HERE
+    After linear coefficient $\lambda$ is determined, we can infer the binary saliency mask of testing image. \\[10pt]
+    CRF inference is to find the assignment of binary saliency of each pixel $a_x$, which minimise the energy function
+    $$
+    E(A|I) = \SUM_x \SUM_{k=1}^K \lambda_k \cdot F_k(a_x,I) + \lambda_0 \SUM_{x,x'}S_{pair}(a_x,a_{x'},I)
+    $$
 }
 %}}}
 
