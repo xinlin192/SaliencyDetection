@@ -12,7 +12,7 @@
 *****************************************************************************/
 #include <cmath>
 #include <set>
-#include "math.h"
+#include <math.h> 
 using namespace std;
 using namespace Eigen;
 
@@ -143,95 +143,70 @@ cv::Mat getMultiScaleContrast(cv::Mat img, const int windowSize, const int nPyLe
 }
 
 // ----------------------- Center Surround Histogram-----------------------------------------------
+typedef struct { 
+    // surround rectangle parameter
+    int SLeft, STop;
+    int SWidth, SHeight;
+    // center rectangle parameter
+    int CLeft, CTop;
+    int CWidth, CHeight;
+    // chi square distance
+    double chiDistance; 
+} CSRectangle;
 
-class CSRectangle { 
-    public:
-        // surround rectangle parameter
-        int SLeft, STop;
-        int SWidth, SHeight;
-        // center rectangle parameter
-        int CLeft, CTop;
-        int CWidth, CHeight;
-        // chi square distance
-        double chiDistance; 
-        CSRectangle () {
-            SLeft = -1;
-            STop = -1;
-            SWidth = -1;
-            SHeight = -1;
-            CLeft = -1;
-            CTop = -1;
-            CWidth = -1;
-            CHeight = -1;
-            chiDistance = -1;
-        };
-        void setChiDistance(double val) { chiDistance = val; }
-};
-
-double getChiDistance(CSRectangle csr, cv::Mat img) {
+double getChiDistance(CSRectangle csr, cv::Mat histImage, const int nBinsPerDim) {
+/*{{{*/
+    // initialise the objective variable
     double chidist = 0.0;
-    const int nBinsPerDim = 4;
+    // initialise parameters
     const int nBins =  nBinsPerDim * nBinsPerDim *nBinsPerDim;
-    const int binWidth = 255 / nBinsPerDim;
-    Vec3b intensity;
-    int RED, BLUE, GREEN;
-    // get histogram for center rectangle 
-    vector<double> SHistorgram(nBins, 0.0);
-    vector<double> CHistorgram(nBins, 0.0);
-    // intensity features
+    // initialise histogram for center rectangle 
+    vector<double> SHistogram(nBins, 0.0);
+    vector<double> CHistogram(nBins, 0.0);
+    // compute the histogram for center and surround histogram
     for (int y = csr.STop; y < csr.STop + csr.SHeight; y ++) {
         for (int x = csr.SLeft; x < csr.SLeft + csr.SWidth; x ++) {
-            // get intensity of each pixel
-            intensity = img.at<Vec3b>(y, x);
-            RED = intensity.val[0];
-            GREEN = intensity.val[1];
-            BLUE = intensity.val[2];
-            // get index of bin
-            RED /= binWidth;
-            GREEN /= binWidth;
-            BLUE /= binWidth;
-            RED=(RED>=nBinsPerDim)?(nBinsPerDim-1):RED;
-            GREEN=(GREEN>=nBinsPerDim)?(nBinsPerDim-1):GREEN;
-            BLUE=(BLUE>=nBinsPerDim)?(nBinsPerDim-1):BLUE;
-            SHistorgram[RED + nBinsPerDim*GREEN+ nBinsPerDim*nBinsPerDim*BLUE] += 1;
             // for center histogram
             if (y < csr.CTop + csr.CHeight && y >= csr.CTop && 
                     x < csr.CLeft + csr.SWidth && x >= csr.CLeft) {
-                CHistorgram[RED + nBinsPerDim*GREEN+ nBinsPerDim*nBinsPerDim*BLUE] += 1;
+                CHistogram[ histImage.at<short>(y,x) ] += 1;
+                continue;
             }
+            // for surround histogram
+            SHistogram[ histImage.at<short>(y,x) ] += 1;
         }
     }
 
-    int numOfPixelsCenter = csr.CWidth * csr.CHeight;
-    int numOfPixelsSurround = csr.SWidth * csr.SHeight;
-
+    int nCenterPixels = csr.CWidth * csr.CHeight;
     // compute chi squre distance chidist
     double tempC, tempS;
     for (int i = 0 ; i < nBins ; i ++) {
-        tempC = 1.0 * CHistorgram[i] / (1.0 * numOfPixelsCenter);
-        tempS = 1.0 * SHistorgram[i] / (1.0 * numOfPixelsSurround);
+        //  surround is the surrounding region of the rectangle, which 
+        //  is not a rectangle, but has the same area with center
+        tempC = 1.0 * CHistogram[i] / (float)nCenterPixels;
+        tempS = 1.0 * SHistogram[i] / (float)nCenterPixels;
         if (tempC != 0 || tempS != 0 ) {
-            chidist += abs(tempC-tempS) / (tempC + tempS);
+            chidist += (tempC-tempS) *(tempC-tempS) / (tempC + tempS);
         }
     }
 
     // get histogram for surround rectangle
+/*}}}*/
     return chidist;
 }
 
 
-CSRectangle getMostDistinctCSRectangle(const int ordinate, const int abscissa, cv::Mat img) {
-    const int imageHeight = img.rows;
-    const int imageWidth = img.cols;
+CSRectangle getMostDistinctCSRectangle(const int ordinate, const int abscissa, cv::Mat histImage, const int nBinsPerDim) {
+/*{{{*/
+    const int imageHeight = histImage.rows;
+    const int imageWidth = histImage.cols;
     const int nAspectRatio = 5;
-    const int nSizeChoice = 6;
+    const int nSizeChoice = 12;
     const int minOfSide = (imageWidth>imageHeight)?imageHeight:imageWidth;
     double aspectRatio [] = {0.5, 0.75, 1.0, 1.5, 2.0};
-    double sizeRange [] = { 0.15, 0.2, 0.25, 0.3, 0.35, 0.4};
-    double SMCRatio = 0.03; // surround minus Center ratio
+    double sizeRange [] = {0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75};
     std::list<CSRectangle> CSRs;
 
-    CSRectangle tempRect;
     int tempSWidth, tempSHeight, tempSLeft, tempSTop;
     for (int i = 0 ; i < nAspectRatio; i ++) {
         for (int j = 0; j < nSizeChoice; j ++) {
@@ -245,15 +220,17 @@ CSRectangle getMostDistinctCSRectangle(const int ordinate, const int abscissa, c
                 continue;
             } else {
                 // construct center surround rectangle object
-                tempRect = CSRectangle();
+                CSRectangle tempRect = {-1, -1, -1, -1, -1, -1, -1, -1, -1};
                 tempRect.STop = tempSTop;
                 tempRect.SLeft = tempSLeft;
                 tempRect.SWidth = tempSWidth;
                 tempRect.SHeight = tempSHeight;
-                tempRect.CWidth = (int) (minOfSide * (sizeRange[j] - SMCRatio*2));
-                tempRect.CHeight = (int) (aspectRatio[i] * tempRect.CWidth);
+                tempRect.CWidth = (int) ( tempRect.SWidth/sqrt(2) );
+                tempRect.CHeight = (int) ( tempRect.SHeight/sqrt(2) );
                 tempRect.CLeft = (int) (abscissa - tempRect.CWidth / 2);
                 tempRect.CTop = (int) (ordinate - tempRect.CHeight / 2);
+               // cout << tempRect.STop << "," << tempRect.SLeft << "," << tempRect.SWidth << "," << tempRect.SHeight << 
+                 //   " : "<< tempRect.CTop << "," << tempRect.CLeft <<"," << tempRect.CWidth << "," << tempRect.CHeight << endl;
                 // add to set and to be traverse
                 CSRs.push_back(tempRect);
             }
@@ -267,44 +244,72 @@ CSRectangle getMostDistinctCSRectangle(const int ordinate, const int abscissa, c
     // traverse all possible triangle
     double tempChi;
     for (std::list<CSRectangle>::iterator it = CSRs.begin(); it != CSRs.end() ; ++it) {
-        tempChi = getChiDistance(*it, img);
-        (*it).setChiDistance(tempChi);
+        tempChi = getChiDistance(*it, histImage, nBinsPerDim);
         if (tempChi > mostDistinctCSR.chiDistance ) {
+            (*it).chiDistance = tempChi;
             mostDistinctCSR = *it;
         }
     }
-
+/*}}}*/
     return mostDistinctCSR;
 }
 
 cv::Mat getCenterSurround(const cv::Mat img){
+/*{{{*/
+    // parameters
+    int nBinsPerDim = 3;
     // local variable storage for convenient invocation
     const int imageWidth = img.cols;
     const int imageHeight = img.rows;
 
     // center-surround histogram
     cv::Mat csv(imageHeight, imageWidth, CV_64F);
+    cv::Mat histImage(imageHeight, imageWidth, CV_16S);
+
+    //
+    int binWidth = 255 / nBinsPerDim;
+    int RED, GREEN, BLUE;
+    Vec3b intensity;
+    for (int y = 0; y < imageHeight; y ++) {
+        for (int x = 0; x < imageWidth; x ++) {
+            // get intensity of each pixel
+            intensity = img.at<Vec3b>(y, x);
+            RED = intensity.val[0];
+            GREEN = intensity.val[1];
+            BLUE = intensity.val[2];
+            // get index of bin
+            RED /= binWidth;
+            GREEN /= binWidth;
+            BLUE /= binWidth;
+            // handle exception
+            RED=(RED>=nBinsPerDim)?(nBinsPerDim-1):RED;
+            GREEN=(GREEN>=nBinsPerDim)?(nBinsPerDim-1):GREEN;
+            BLUE=(BLUE>=nBinsPerDim)?(nBinsPerDim-1):BLUE;
+            // store value in the histImage
+            histImage.at<short>(y,x) = RED + nBinsPerDim*GREEN+ nBinsPerDim*nBinsPerDim*BLUE;
+        }
+    }
     // 
     CSRectangle tempCSRect;
     double fallOff; // gaussian falloff coefficient
     for (int y = 0; y < imageHeight; y ++) {
         for (int x = 0; x < imageWidth; x ++) {
             // get the most distinct center surround pair centered at current pixel
-            tempCSRect = getMostDistinctCSRectangle(y, x, img);
+            tempCSRect = getMostDistinctCSRectangle(y, x, histImage, nBinsPerDim);
             //cout << "(" << x << "," << y << ") " << tempCSRect.chiDistance << endl;
             if (tempCSRect.chiDistance <= 0) {  continue;}
             // assign contribution of this center surround pair to pixels in its scope
             for (int tempy = tempCSRect.CTop ; tempy < tempCSRect.CTop + tempCSRect.CHeight ; tempy ++ ) {
                 for (int tempx = tempCSRect.CLeft ; tempx <= tempCSRect.CLeft + tempCSRect.CWidth ; tempx ++ ) {
                     fallOff = exp(-0.5 * pow( tempCSRect.CWidth  / 3.0, -2) * 
-                            (( tempx - x) *( tempx - x) + (tempy - y)*(tempy - y) ) ) ;
+                            ( (tempx - x)*( tempx - x) + (tempy - y)*(tempy - y) ) ) ;
                     csv.at<double>(tempy, tempx) += fallOff * tempCSRect.chiDistance;
-                    //cout << fallOff << endl;
+                    //cout << fallOff << "  ,   " << tempCSRect.chiDistance << endl;
                 }
             }
         }
     }
-    // normalisation
+    // find min and max
     double minValue = 1e6, maxValue = -1;
     double tempCSHValue;
     for (int y = 0; y < imageHeight; y ++) {
@@ -316,13 +321,14 @@ cv::Mat getCenterSurround(const cv::Mat img){
                 maxValue = tempCSHValue;
         }
     }
+    // normalisation
     double range = maxValue - minValue;
     for (int y = 0; y < imageHeight; y ++) {
         for (int x = 0; x < imageWidth; x ++) {
-
             csv.at<double>(y, x) = (csv.at<double>(y,x) - minValue) / range;
         }
     }
+/*}}}*/
     return csv;
 }
 
@@ -332,11 +338,12 @@ cv::Mat getCenterSurround(const cv::Mat img){
 cv::Mat getSpatialDistribution(cv::Mat img){
     /*{{{*/
     // constant declaration
-    const int nComponents = 3;
+    const int nComponents = 5;
     const int nDimensions = 3;
     const int imageWidth = img.cols;
     const int imageHeight = img.rows;
     const int nPixels = imageHeight * imageWidth;
+    const bool isPydown = false;
     // initialise objective matrix.
     cv::Mat cdi = cv::Mat(imageHeight, imageWidth, CV_64F);
     // temporary variable used in the loop
@@ -345,7 +352,11 @@ cv::Mat getSpatialDistribution(cv::Mat img){
     // use scale down to construct a small size of data set for 
     // training mixture of gaussians
     cv::Mat smallImg;
-    cv::pyrDown( img, smallImg, Size( imageWidth/2 , imageHeight/2 ) );
+    if (isPydown) {
+        cv::pyrDown( img, smallImg, Size( imageWidth/2 , imageHeight/2 ) );
+    } else {
+        smallImg = cv::Mat(img);
+    }
     // loop to read data from an scaled image
     vector<vector<double> > features(nPixels, vector<double>(3, 0.0));
     for(int y = 0; y < smallImg.rows; y++){
