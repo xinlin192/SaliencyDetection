@@ -21,9 +21,16 @@
 ##  const char *outputDir = DRWN_CMDLINE_ARGV[5]; // directory for resulting images
 
 ## 
-for x in $*
-do
-    mkdir ./results/BComposed
-    mkdir ./results/BComposed/$x
-    ../../bin/trainModel -verbose -x ./dataset/images/B/$x/ ./results/BMultiscaleContrast/$x/ ./results/BCenterSurround/$x/ ./results/BColorSpatialDistribution/$x/ ./dataset/labels/B/"$x"_data.txt ./results/BComposed/$x/
-done
+
+cp=$(pwd)
+
+resultDir="../results"
+mscDir="$resultDir/BMultiscaleContrast"
+cshDir="$resultDir/BCenterSurround"
+csdDir="$resultDir/BColorSpatialDistribution"
+outdir="../results/BComposed"
+index=$1 ## index of image package
+
+cd $outdir && mkdir $index
+cd $cp
+../../../bin/trainModel ../dataset/images/B/$index/ $mscDir/$index/ $cshDir/$index/ $csdDir/$index/ ../dataset/labels/B/"$index"_data.txt $outdir/$index/

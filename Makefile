@@ -18,7 +18,7 @@ PROJ_PATH := $(shell pwd)
 # add project source files here
 #######################################################################
 
-APP_SRC = trainModel.cpp testColorSpatialDistribution.cpp testMultiscaleContrast.cpp getLabelledImages.cpp
+APP_SRC = trainModel.cpp  getFeatureMaps.cpp  getLabelledImages.cpp
 
 #######################################################################
 

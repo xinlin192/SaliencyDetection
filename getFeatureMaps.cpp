@@ -1,5 +1,5 @@
 /*******************************************************
-** @file testColorSpatialDistribution.cpp
+** @file getFeatureMap.cpp
 ** @version 1.0
 ** @since 2013-05-16
 ** @author Jimmy Lin (u5223173) - u5223173@uds.anu.edu.au
@@ -38,7 +38,7 @@ using namespace Eigen;
 // copied from Stephen Gould's trainCOMP3130Model.cpp 2013 version
 void usage() {
     cerr << DRWN_USAGE_HEADER << endl;
-    cerr << "USAGE: ./testColorSpatialDistribution [OPTIONS] <imgDir> <lblFile> <outputDir>\n";
+    cerr << "USAGE: ./getFeatureMap <mode> <imgDir> <outputDir>\n";
     cerr << "OPTIONS:\n"
          << "  -x                :: visualize\n"
          << DRWN_STANDARD_OPTIONS_USAGE
@@ -58,7 +58,7 @@ int main (int argc, char * argv[]) {
     DRWN_END_CMDLINE_PROCESSING(usage());
 
     // Check for the correct number of required arguments
-    if (DRWN_CMDLINE_ARGC != 4) {
+    if (DRWN_CMDLINE_ARGC != 3) {
         usage();
         return -1;
     }
@@ -71,8 +71,7 @@ int main (int argc, char * argv[]) {
      */
     const char *modeSwitch = DRWN_CMDLINE_ARGV[0]; // msc, csh, csd
     const char *imgDir = DRWN_CMDLINE_ARGV[1];
-    const char *lblFile = DRWN_CMDLINE_ARGV[2];
-    const char *outputDir = DRWN_CMDLINE_ARGV[3];
+    const char *outputDir = DRWN_CMDLINE_ARGV[2];
 
     // intepret which feature to extract
     string mode;
