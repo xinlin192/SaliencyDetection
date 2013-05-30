@@ -204,7 +204,7 @@ CSRectangle getMostDistinctCSRectangle(const int ordinate, const int abscissa, c
     const int nSizeChoice = 12;
     const int minOfSide = (imageWidth>imageHeight)?imageHeight:imageWidth;
     double aspectRatio [] = {0.5, 0.75, 1.0, 1.5, 2.0};
-    double sizeRange [] = {0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75};
+    double sizeRange [] = {0.18, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75};
     std::list<CSRectangle> CSRs;
 
     int tempSWidth, tempSHeight, tempSLeft, tempSTop;
@@ -257,7 +257,7 @@ CSRectangle getMostDistinctCSRectangle(const int ordinate, const int abscissa, c
 cv::Mat getCenterSurround(const cv::Mat img){
 /*{{{*/
     // parameters
-    int nBinsPerDim = 3;
+    int nBinsPerDim = 4;
     // local variable storage for convenient invocation
     const int imageWidth = img.cols;
     const int imageHeight = img.rows;
