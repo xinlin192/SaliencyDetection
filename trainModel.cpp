@@ -31,6 +31,7 @@
 #include "drwnML.h"
 #include "drwnVision.h"
 #include "features.h"
+#include "mexImageCRF.h"
 using namespace std;
 using namespace Eigen;
 
@@ -183,18 +184,33 @@ int main (int argc, char * argv[]) {
             drwnShowDebuggingImage(canvas, "image", false);
             cvReleaseImage(&canvas);
         }
-        // get processed by feature.h
-        cv::Mat pres (img.rows, img.cols, CV_8UC3);
+        // get unary potential and combine them by pre-computed parameters 
+        vector< cv::Mat > unary(2);
+        unary[0] = cv::Mat(img.rows, img.cols, CV_64F);
+        unary[1] = cv::Mat(img.rows, img.cols, CV_64F);
         double grayscale;
-        for (int y = 0 ; y < img.rows; y ++) {
+        for (int y = 0; y < img.rows; y ++) {
             for (int x = 0 ; x < img.cols; x ++) {
-                grayscale = (msc.at<Vec3b>(y,x).val[0] + csh.at<Vec3b>(y,x).val[0] + csd.at<Vec3b>(y,x).val[0]) / 3;
-                pres.at<Vec3b>(y,x) = Vec3b(grayscale, grayscale, grayscale);
+                grayscale = 0.22*msc.at<Vec3b>(y,x).val[0] + 0.54*csh.at<Vec3b>(y,x).val[0] + 0.24*csd.at<Vec3b>(y,x).val[0];
+                unary[0].at<double>(y,x) = grayscale / 255.0;
+                unary[1].at<double>(y,x) = 1 - unary[0].at<double>(y,x);
             }
         }
+        // compute binary mask of each pixel
+        const double lambda = 2;
+        cv::Mat binaryMask = mexFunction(img, unary, lambda);
+
+        // interpret the binary mask to two-color image
+        cv::Mat pres(img.rows, img.cols, CV_8UC3);
+        for (int y = 0 ; y < img.rows; y ++) {
+            for (int x = 0 ; x < img.cols; x ++) {
+                int tempSaliency = binaryMask.at<short>(y,x)*255>125?255:0;
+                pres.at<cv::Vec3b>(y,x) = cv::Vec3b(tempSaliency, tempSaliency, tempSaliency);
+            }
+        }
+        // present the derived binary mask by white-black image
         IplImage pcvimg = (IplImage) pres;
         IplImage *present = cvCloneImage(&pcvimg);
-        cvSaveImage((string(outputDir) + baseNames[i] + ".jpg").c_str(), present);
         cv::imwrite(string(outputDir) + baseNames[i] + ".jpg", pres);
         if (bVisualize) { // draw the processed feature map and display it on the screen
             drwnShowDebuggingImage(present, "Composed Graph", false);

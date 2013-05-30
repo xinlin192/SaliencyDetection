@@ -51,75 +51,88 @@ void usage()
 
 // main ----------------------------------------------------------------------
 
-int main(int argc, char *argv[])
-{
+int main (int argc, char * argv[]) {
+    // what way are we building up a default classifier?
     // Set default value for optional command line arguments.
-    const char *lblDirOut = NULL;
+    const char *modelFile = NULL;
     bool bVisualize = false;
 
-    // Process command line arguments using Darwin.
     DRWN_BEGIN_CMDLINE_PROCESSING(argc, argv)
-        DRWN_CMDLINE_STR_OPTION("-o", lblDirOut)
+        DRWN_CMDLINE_STR_OPTION("-o", modelFile)
         DRWN_CMDLINE_BOOL_OPTION("-x", bVisualize)
     DRWN_END_CMDLINE_PROCESSING(usage());
 
-    // Check for the correct number of required arguments, otherwise
-    // print usage statement and exit.
-    if (DRWN_CMDLINE_ARGC != 2) {
+    // Check for the correct number of required arguments
+    if (DRWN_CMDLINE_ARGC != 5) {
         usage();
         return -1;
     }
 
-    const char *modelFile = DRWN_CMDLINE_ARGV[0];
-    const char *imgDir = DRWN_CMDLINE_ARGV[1];
-
-    // Load the classifier.
-    drwnDecisionTree classifier;
-    classifier.read(modelFile);
-
-    // Create output directory if it does not already exist.
-    if ((lblDirOut != NULL) && !drwnDirExists(lblDirOut)) {
-        drwnCreateDirectory(lblDirOut);
-    }
+    /* Check that the image directory and labels directory exist. All
+     * images with a ".jpg" extension will be used for training the
+     * model. It is assumed that the labels directory contains files
+     * with the same base as the image directory, but with extension
+     * ".txt". 
+     */
+    const char *imgDir = DRWN_CMDLINE_ARGV[0]; // directory restores original images
+    const char *mscDir = DRWN_CMDLINE_ARGV[1]; // directory restores multiscale contrast feature map
+    const char *cshDir = DRWN_CMDLINE_ARGV[2]; // directory restores center surround histogram feature map
+    const char *csdDir = DRWN_CMDLINE_ARGV[3]; // directory restores color spatial distribution feature map
+    const char *outputDir = DRWN_CMDLINE_ARGV[4]; // directory for resulting images
+    const double lambda = atof(DRWN_CMDLINE_ARGV[5]); 
+    // Check for existence of the directory containing orginal images
+    DRWN_ASSERT_MSG(drwnDirExists(imgDir), "image directory " << imgDir << " does not exist");
 
     // Get a list of images from the image directory.
     vector<string> baseNames = drwnDirectoryListing(imgDir, ".jpg", false, false);
     DRWN_LOG_MESSAGE("Loading " << baseNames.size() << " images and labels...");
 
-    // Configure system for CRF stuff here
-
-    // Iterate over images.
     for (unsigned i = 0; i < baseNames.size(); i++) {
+        String processedImage = baseNames[i] + ".jpg";
         DRWN_LOG_STATUS("...processing image " << baseNames[i]);
-
-        // Read the image and compute saliency.
-
-        // Show the image and saliency.
-        if (bVisualize) {
-            // drwnDrawRegionBoundaries and drwnShowDebuggingImage use OpenCV 1.0 C API
+        // read the image and draw the rectangle of labels of training data
+        cv::Mat img = cv::imread(string(imgDir) + DRWN_DIRSEP + processedImage);
+        cv::Mat msc = cv::imread(string(mscDir) + DRWN_DIRSEP + processedImage);
+        cv::Mat csh = cv::imread(string(cshDir) + DRWN_DIRSEP + processedImage);
+        cv::Mat csd = cv::imread(string(csdDir) + DRWN_DIRSEP + processedImage);
+        // show the image and feature maps 
+        if (bVisualize) { // draw the current image comparison
+            //drwnDrawRegionBoundaries and drwnShowDebuggingImage use OpenCV 1.0 C API
             IplImage cvimg = (IplImage)img;
-            CvMat cvseg = (CvMat)seg;
             IplImage *canvas = cvCloneImage(&cvimg);
-            //drwnDrawRegionBoundaries(canvas, &cvseg, CV_RGB(255, 255, 255), 3);
-            //drwnDrawRegionBoundaries(canvas, &cvseg, CV_RGB(255, 0, 0), 1);
             drwnShowDebuggingImage(canvas, "image", false);
             cvReleaseImage(&canvas);
         }
-
-        // Extract saliency features and classify the pixels
-       
-
-        // put a "mask"/rectangle around salient areas.
-    
-        // Write out the image.
-        if (lblDirOut != NULL) {
-            cv::imwrite(string(lblDirOut) + DRWN_DIRSEP + baseNames[i] + string(".png"), lbls);
+        // get unary potential and combine them by pre-computed parameters 
+        vector< cv::Mat > unary(2);
+        unary[0] = cv::Mat(img.rows, img.cols, CV_64F);
+        unary[1] = cv::Mat(img.rows, img.cols, CV_64F);
+        double grayscale;
+        for (int y = 0; y < img.rows; y ++) {
+            for (int x = 0 ; x < img.cols; x ++) {
+                grayscale = 0.22*msc.at<Vec3b>(y,x).val[0] + 0.54*csh.at<Vec3b>(y,x).val[0] + 0.24*csd.at<Vec3b>(y,x).val[0];
+                unary[0].at<double>(y,x) = grayscale / 255.0;
+                unary[1].at<double>(y,x) = 1 - unary[0].at<double>(y,x);
+            }
         }
+        // compute binary mask of each pixel
+        cv::Mat binaryMask = mexFunction(img, unary, lambda);
 
-        // Show results.
-        if (bVisualize) {
-            IplImage cvimg = (IplImage)lbls;
-            drwnShowDebuggingImage(&cvimg, "results", false);
+        // interpret the binary mask to two-color image
+        cv::Mat pres(img.rows, img.cols, CV_8UC3);
+        for (int y = 0 ; y < img.rows; y ++) {
+            for (int x = 0 ; x < img.cols; x ++) {
+                int tempSaliency = binaryMask.at<short>(y,x)*255>125?255:0;
+                pres.at<cv::Vec3b>(y,x) = cv::Vec3b(tempSaliency, tempSaliency, tempSaliency);
+            }
+        }
+        // present the derived binary mask by white-black image
+        IplImage pcvimg = (IplImage) pres;
+        IplImage *present = cvCloneImage(&pcvimg);
+        cv::imwrite(string(outputDir) + baseNames[i] + ".jpg", pres);
+        if (bVisualize) { // draw the processed feature map and display it on the screen
+            drwnShowDebuggingImage(present, "Composed Graph", false);
+            cvReleaseImage(&present);
         }
     }
 
