@@ -58,7 +58,7 @@ int main (int argc, char * argv[]) {
     DRWN_END_CMDLINE_PROCESSING(usage());
 
     // Check for the correct number of required arguments
-    if (DRWN_CMDLINE_ARGC != 3) {
+    if (DRWN_CMDLINE_ARGC != 4) {
         usage();
         return -1;
     }
@@ -69,13 +69,24 @@ int main (int argc, char * argv[]) {
      * with the same base as the image directory, but with extension
      * ".txt". 
      */
-    const char *imgDir = DRWN_CMDLINE_ARGV[0];
-    const char *lblFile = DRWN_CMDLINE_ARGV[1];
-    const char *outputDir = DRWN_CMDLINE_ARGV[2];
+    const char *modeSwitch = DRWN_CMDLINE_ARGV[0]; // msc, csh, csd
+    const char *imgDir = DRWN_CMDLINE_ARGV[1];
+    const char *lblFile = DRWN_CMDLINE_ARGV[2];
+    const char *outputDir = DRWN_CMDLINE_ARGV[3];
+
+    // intepret which feature to extract
+    string mode;
+    if (string(modeSwitch).compare("msc") == 0 ) {
+        mode = "Multiscale Contrast";
+    } else if (string(modeSwitch).compare("csh") == 0 ) {
+        mode = "Center Surround Histogram";
+    } else if (string(modeSwitch).compare("csd") == 0 ) {
+        mode = "Color Spatial Distribution";
+    }
+
+    // Check the existence of the given directory
     DRWN_ASSERT_MSG(drwnDirExists(imgDir), "image directory " << imgDir << " does not exist");
     DRWN_ASSERT_MSG(drwnDirExists(outputDir), "output directory " << outputDir << " does not exist");
-    // second argument is not directory any more, 
-    // it's a single text file with multiple rectangle
 
     // Get a list of images from the image directory.
     vector<string> baseNames = drwnDirectoryListing(imgDir, ".jpg", false, false);
@@ -83,23 +94,16 @@ int main (int argc, char * argv[]) {
 
     /* Build a dataset by loading images and labels. For each image,
      find the salient area using the labels and then compute the set of features
-     that determine this saliency.  Compute the values for the rest of the image
-     as well (maybe as superpixels??? unsure.
+     that determine this saliency.  
     */
     drwnClassifierDataset dataset;
     //  MAP FROM FILENAME TO RECTANGLE
-    int left, top, right, bottom;
-    vector<int> tempRectangle;
 
     for (unsigned i = 0; i < baseNames.size(); i++) {
         String processedImage = baseNames[i] + ".jpg";
         DRWN_LOG_STATUS("...processing image " << baseNames[i]);
         // read the image and draw the rectangle of labels of training data
         cv::Mat img = cv::imread(string(imgDir) + DRWN_DIRSEP + processedImage);
-        left =  tempRectangle [0];
-        top = tempRectangle [1];
-        right = tempRectangle [2];
-        bottom = tempRectangle[3];
 
         // show the image and feature maps 
         if (bVisualize) { // draw the current image comparison
@@ -110,7 +114,14 @@ int main (int argc, char * argv[]) {
             cvReleaseImage(&canvas);
         }
         // get processed by feature.h
-        cv::Mat cdi = getMultiScaleContrast(img, 3, 3); // windowSize:3 , pyramid level:4 
+        cv::Mat cdi;   
+        if (string(modeSwitch).compare("msc") == 0 ) {
+            cdi = getMultiScaleContrast(img, 3, 3);  // windowSize:3 , pyramid level:4
+        } else if (string(modeSwitch).compare("csh") == 0 ) {
+            cdi = getCenterSurround(img); 
+        } else if (string(modeSwitch).compare("csd") == 0 ) {
+            cdi = getSpatialDistribution(img);
+        }
         cv::Mat pres (img.rows, img.cols, CV_8UC3);
         double grayscale;
         for (int y = 0 ; y < cdi.rows; y ++) {
@@ -121,10 +132,9 @@ int main (int argc, char * argv[]) {
         }
         IplImage pcvimg = (IplImage) pres;
         IplImage *present = cvCloneImage(&pcvimg);
-        cvSaveImage((string(outputDir) + baseNames[i] + ".jpg").c_str(), present);
         cv::imwrite(string(outputDir) + baseNames[i] + ".jpg", pres);
         if (bVisualize) { // draw the processed feature map and display it on the screen
-            drwnShowDebuggingImage(present, "Multiscale Contrast", false);
+            drwnShowDebuggingImage(present, mode.c_str(), false);
             cvReleaseImage(&present);
         }
     }
