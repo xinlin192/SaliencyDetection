@@ -4,13 +4,16 @@ This will focus on salient object detection - further details TBA
 
 Achieved Tasks:
 
-1. Multiscale Contrast (with bugs)
-2. Color Spatial Distribution
+1. Multiscale Contrast
+2. Center-Surround Histogram (not quite satisfying)
+3. Color Spatial Distribution
+4. Presentation
+
 
 TODO Tasks:
 
-1. Center-Surround Histogram feature
-2. CRF learning
-3. CRF inference
-4. Result Evaluation
+1. CRF learning
+2. CRF inference
+3. Result Evaluation
+4. report
 
