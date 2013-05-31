@@ -132,6 +132,7 @@ the human visual receptive fields. Specifically, it captures the point that sali
 tends to have tremendous contrast to the surroundings in its boundary (not vice versa).
 Since we may have no preknowledge about the size of salient object, it is usual
 to compute the contrast at multiple scale. 
+% TODO ADD detailed analysis about why we should have multiple scales.
 
     \begin{center}    
         \includegraphics[width=0.65in,height=0.9in]{./Figures/pyramid/5_145_145839raw.jpg} \hspace{2mm}
@@ -155,9 +156,16 @@ gaussian image pyramid, using the pixels $x$ in the image $I$:
     $$
 where W(x) is a window that delineates which area to consider for neighbouring pixels to compare contrast values.
 
-% TODO add explanation for why we need to choose such window size and pyramid level.
+% TODO ADD explanation for why we need to choose such window size and pyramid level.
 In our implementation, we choose the total number of pyramid level $N$ to be $6$ and 
 the size of the window to be $9 \times 9$. 
+
+It is evident that the Multiscale Contrast give high distinction between the boundary and non-boundary region. 
+This provides us a precise description of where the boundary of salient object exist in the output binary mask.
+For those salient object has relatively large contrast within its body, this feature works perfectly, such as 
+the bird in the second image and the house in the third image. 
+As to the pixels within the salient objects, they are usually given low marks, this weakness can be complemented
+by the regional feature - Center Surround Histogram, which will be introduced latter.
 
     \begin{center}
     \includegraphics[width=0.7in,height=0.54in]{./Figures/contrast/1orig.jpg}
@@ -168,22 +176,31 @@ the size of the window to be $9 \times 9$.
     \includegraphics[width=0.7in,height=0.54in]{./Figures/contrast/2cont.jpg}
     \includegraphics[width=0.7in,height=0.54in]{./Figures/contrast/3cont.jpg}
     \includegraphics[width=0.7in,height=0.54in]{./Figures/contrast/4cont.jpg}\\
-    \footnotesize Fig. Local Feature: Multiscale Contrast under various scenes
+    \footnotesize Fig. Feature Maps of Multiscale Contrast under various scenes
     \end{center}
 
-It is evident that the Multiscale Contrast give high distinction between the boundary and non-boundary region. 
-This provides us a precise description of where the boundary of salient object exist in the output binary mask.
+But there are some drawbacks that are tough to avoid. 
+First and foremost, boundary of all objects are highlighted, which is obviously not desired.
+We only wish to give high mark to pixels that are relavant to salient object, rather than all boundaries in one image. 
+This would possibly lead to some "saliency leak" in the ultimate result and deteriorate detection precision
+ since some pixels outside the true salient object are likely to be considered as a part of that object.
 
-But there are also some drawbacks. First and foremost, boundary of objects are highlighted, which are not desired.
-We only wish to label, at most, the boundary of salient object, rather thatn all boundaries in one image. 
-This may possibly lead to some "saliency leak" in the ultimate result and deteriorate detection precision.
-Furthermore, the pixels within the salient objects are usually ignored in the sense that 
-usually the salient object has low contrast within its body.
+Bad vulnerability to the outlier pixels within the body of salient object is another problem of multiscale contrast. 
+Look at the chimpanzee in the fourth image, the tooth is tremendously contrasted to its surroundings,
+far beyond the contrast of the body of chimpanzee to the grass. Since each entry of output feature map 
+is quantitatively normalised, the contrast of the body of chimpanzee to the grass is comparatively trivial.
+However, the tooth may be too narrow to be observed by the human receptive field and thus not 
+labelled as the salient object. That is, this flaw may result in the low recall comparing to the ground truth data.
+
 \subsection{Center Surround Histogram}
 
 \subsection{Color Spatial Distribution}
-    Create a Gaussian Mixture Model to compute the spatial variance and continuity of colour in an image.
-
+    The goal of using Color Spatial Distribution feature is to take the global saliency information into account. 
+    By creating Gaussian Mixture Components and fitting them to pixels of the whole image, the
+    variance of each color component can be captured and we give penality to the pixels with high-variance 
+    color according to the supposition that the colour of salient object in one image tends to have 
+    intensive spatial distribution.
+    
     The component model is created from only a subset of the pixels in the image, and the maximum number of iterations is limited in order to reduce the time taken to compute this feature without sacrificing too much accuracy.
 
     \begin{center}
@@ -193,10 +210,10 @@ usually the salient object has low contrast within its body.
     \includegraphics[width=0.72in,height=0.52in]{./CSD_image/1_CSD.jpg}
     \includegraphics[width=0.72in,height=0.52in]{./CSD_image/2_CSD.jpg}
     \includegraphics[width=0.72in,height=0.52in]{./CSD_image/3_CSD.jpg} \\
-    \footnotesize Fig. 
+    \footnotesize Fig. Feature Maps of Color Spatial Distribution
     \end{center}
 
-    Each pixel is associated to a colour component with the probability
+    According to the theory of Machine Learning, each pixel is associated to a colour component with the probability
     $$
     P(c|I_x) = \frac{\omega_c\mathcal{N}(I_x|\mu_c,\sigma_c)}{\SUM_c \omega_c \mathcal{N}(I_x|\mu_c,\Sigma_c)}
     $$
@@ -207,8 +224,22 @@ usually the salient object has low contrast within its body.
     f_s(x,I)\propto\SUM_c p(c|I_x)\cdot(1-V(c))
     $$
     where $V(c)$ is the normalised covariance (horizontal and vertical variances) of the $c^{th}$ component, contained between 0 and 1.
+
+    trade-off between precision and time performance. Tricks to improve the performance.
+
+    Goodness of this feature
+
+    Weaknesses of this feature
 %% Learning (0.5 page)
 \section{Learning}
+Those three features aforementioned have their own strengthes and weaknesses in different areas. For example, the .
+It goes without saying that incorporating all three features into the unary potential of the CRF model 
+to complement each other. It would be oversimplistic and unpersuasive to treat three features in equal weight 
+since one feature perhaps may be stronger than other two features and ought to be assigned with higher importance.
+Hence, one effective and reasonable approach is to adjustably determine the optimal weight to combine three features
+with the help of certain machine learning algorithm. 
+
+In this project, we implement logistic regression to decide the optimal weight under the help of training data.
 
 %% CRF Inference (0.5 page)
 \section{CRF Inference}
