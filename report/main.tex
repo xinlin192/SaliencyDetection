@@ -7,6 +7,9 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\newcommand{\SUM}{\sum\limits}
 % Include other packages here, before hyperref.
 
 % If you comment hyperref and then uncomment it, you should delete
@@ -38,7 +41,7 @@ Canberra, Australia\\
 Chris-Chau-Long\\
 Australian National University\\
 Canberra, Australia\\
-{\small\url{}}
+{\small\url{chris.claoue.long@gmail.com}}
 }
 
 \maketitle
@@ -59,13 +62,151 @@ Canberra, Australia\\
 
 %% Introduction & Related Works (1 page)
 \section{Introduction}
+%{{{
+what? Saliency is the prominence of an object in an image.
+
+why? Salient object detection is useful in numerous areas, for instance, in siimulating human vision by robots, augmented Reality, 3D surface reconstruction and more.
+
+Related works?
+
+how? Often detected by its \textbf{high contrast boundary} to its near neighbours, \textbf{distinction from its surrounds}, \textbf{intensive colour distribution} compared to all other color component in candidate image and \textbf{space continuity of saliency}. \\
+%}}}
 
 %% Formulation (1 page)
 \section{Formulation}
+%{{{
+Given an image $I$, we want to compute the location of a salient object.
+
+Binary labelling task -- for each pixel $x$, indicate whether it belongs to the salient object (1) or not (0). 
+Thus, our objective is to have corresponding map $A$, indicating binary saliency of one pixel.
+
+    \begin{center}
+        \includegraphics[width=1.8in,height=1in]{./Figures/mrf.jpg} \\
+        \footnotesize Fig.2 graph for Conditional Random Field
+        \end{center}
+
+    Build up a probabilistic model $P(A|I)=\frac{1}{Z}e^{-E(A|I)}$, where $\frac{1}{Z}$ is the normalising factor, and $E(A|I)$ is the energy function incorporating both unary and pairwise potentials between pixels.
+
+    Formally, the energy function can be represented as
+    $$
+    E(A|I) = \SUM_x S_{unary}(a_x,I) + \lambda_0 \SUM_{x,x'}S_{pair}(a_x,a_{x'},I)
+    $$
+    where $\lambda$ is the relative weight between the summary of multiple unary features and pairwise features. \\[10pt]
+    The pairwise feature $S(a_x,a_{x'},I)$ exploits the spatial relationship between two adjacent pixels.  It can be viewed as a ``penalty'' for labelling adjacent pixels the same or differently.
+    $$
+    S(a_x,a_{x'},I) = |a_x-a_{x'}| \cdot e^{-\beta d_{x,x'}}
+    $$
+    where $x,x'$ represent two adjacent pixels, $d_{x,x'}$ is the L2-norm (standard norm) representing the colour difference between the two pixels, and $\beta=(2\langle||I_x-I_{x'}||^2\rangle)^{-1}$ is a robust parameter to weight the colour contrast.
+    
+    The unary potential for combination of three features is specified as 
+    $$
+    S_{unary}(a_x,I) = \SUM_{k=1}^K \lambda_k \cdot F_k(a_x,I)
+    $$
+    where $\lambda_k$ is the weight of the $k^{th}$ feature conforming to $\sum_{k=1}^{K} \lambda_k = 1$.
+    \begin{center} %% image 5_156_156422
+    \includegraphics[width=0.6in,height=0.8in]{./Figures/previews/raw.jpg}
+    \includegraphics[width=0.6in,height=0.8in]{./Figures/previews/MC.jpg}
+    \includegraphics[width=0.6in,height=0.8in]{./Figures/previews/CSH.jpg} 
+    \includegraphics[width=0.6in,height=0.8in]{./Figures/previews/CSD.jpg} 
+    \includegraphics[width=0.6in,height=0.8in]{./Figures/previews/Composed.jpg} \\
+    {\footnotesize Fig.3 Original Image and Preview of feature maps \\ 
+       Left to Right: (b) multiscale contrast  (c) center surround histogram \\[-1mm] 
+    (d) color spatial distribution (e) composed unary potential}
+    \end{center}
+    The value of each feature $F_k(a_x,I)$ comes from a normalised feature map $f_k(x,I)\in[0,1]$, and for each pixel:
+    $$
+    F_k(a_x,I) = \left\{\begin{matrix}f_k(x,I), & a_x=0\\1-f_k(x,I), & a_x=1\end{matrix}\right. 
+    $$
+%}}}
 
 %% Feature Extraction (2 pages)
 \section{Feature Extraction}
+Feature Extraction, widely acknowledged as the most significant component of computer vision task,
+represents how we want the computer to interpret the raw iamges. In this project, we just focus
+on three critical features, each of which is capable of capturing the saliency individually but
+in various level of scope. They are respectively Multiscale Contrast, Center Surround Histogram 
+and Color Spatial Distribution. 
+\subsection{Multiscale Contrast}
+Constrast is commonly utilised as local feature because the contrast operator simulates
+the human visual receptive fields. Specifically, it captures the point that salient object
+tends to have tremendous contrast to the surroundings in its boundary (not vice versa).
+Since we may have no preknowledge about the size of salient object, it is usual
+to compute the contrast at multiple scale. 
 
+    \begin{center}    
+        \includegraphics[width=0.65in,height=0.9in]{./Figures/pyramid/5_145_145839raw.jpg} \hspace{2mm}
+    \includegraphics[width=0.65in,height=0.9in]{./Figures/pyramid/5_145_145839_p0.jpg} 
+    \includegraphics[width=0.325in,height=0.45in]{./Figures/pyramid/5_145_145839_p1.jpg} 
+    \includegraphics[width=0.1625in,height=0.225in]{./Figures/pyramid/5_145_145839_p2.jpg} 
+    \includegraphics[width=0.08125in,height=0.1125in]{./Figures/pyramid/5_145_145839_p3.jpg} 
+    \includegraphics[width=0.040625in,height=0.0575in]{./Figures/pyramid/5_145_145839_p4.jpg} 
+    \includegraphics[width=0.0203125in,height=0.02825in]{./Figures/pyramid/5_145_145839_p5.jpg} \hspace{1mm}
+    \includegraphics[width=0.65in,height=0.9in]{./Figures/pyramid/5_145_145839.jpg} \\
+    \footnotesize Fig. Pyramid of Multiscale Contrast.  \\
+    (a) leftmost: Original Image. (b) rightmost: Multiscale Feature Map. \\
+    (c) immediate images: multiscale pyramids from level $1$ to $6$.
+    \end{center}
+
+Hence, define the multiscale constrast to be 
+a contrast map from the linear combination of image contrast at all levels of an N-level
+gaussian image pyramid, using the pixels $x$ in the image $I$:
+    $$
+    f_c(x,I) = \SUM_{n = 1}^{N}\SUM_{x'\in W(x)}||I^n(x)-I^n(x')||^2
+    $$
+where W(x) is a window that delineates which area to consider for neighbouring pixels to compare contrast values.
+
+% TODO add explanation for why we need to choose such window size and pyramid level.
+In our implementation, we choose the total number of pyramid level $N$ to be $6$ and 
+the size of the window to be $9 \times 9$. 
+
+    \begin{center}
+    \includegraphics[width=0.7in,height=0.54in]{./Figures/contrast/1orig.jpg}
+    \includegraphics[width=0.7in,height=0.54in]{./Figures/contrast/2orig.jpg}
+    \includegraphics[width=0.7in,height=0.54in]{./Figures/contrast/3orig.jpg}
+    \includegraphics[width=0.7in,height=0.54in]{./Figures/contrast/4orig.jpg}\\
+    \includegraphics[width=0.7in,height=0.54in]{./Figures/contrast/1cont.jpg}
+    \includegraphics[width=0.7in,height=0.54in]{./Figures/contrast/2cont.jpg}
+    \includegraphics[width=0.7in,height=0.54in]{./Figures/contrast/3cont.jpg}
+    \includegraphics[width=0.7in,height=0.54in]{./Figures/contrast/4cont.jpg}\\
+    \footnotesize Fig. Local Feature: Multiscale Contrast under various scenes
+    \end{center}
+
+It is evident that the Multiscale Contrast give high distinction between the boundary and non-boundary region. 
+This provides us a precise description of where the boundary of salient object exist in the output binary mask.
+
+But there are also some drawbacks. First and foremost, boundary of objects are highlighted, which are not desired.
+We only wish to label, at most, the boundary of salient object, rather thatn all boundaries in one image. 
+This may possibly lead to some "saliency leak" in the ultimate result and deteriorate detection precision.
+Furthermore, the pixels within the salient objects are usually ignored in the sense that 
+usually the salient object has low contrast within its body.
+\subsection{Center Surround Histogram}
+
+\subsection{Color Spatial Distribution}
+    Create a Gaussian Mixture Model to compute the spatial variance and continuity of colour in an image.
+
+    The component model is created from only a subset of the pixels in the image, and the maximum number of iterations is limited in order to reduce the time taken to compute this feature without sacrificing too much accuracy.
+
+    \begin{center}
+    \includegraphics[width=0.72in,height=0.52in]{./CSD_image/1.jpg}
+    \includegraphics[width=0.72in,height=0.52in]{./CSD_image/2.jpg}
+    \includegraphics[width=0.72in,height=0.52in]{./CSD_image/3.jpg}\\
+    \includegraphics[width=0.72in,height=0.52in]{./CSD_image/1_CSD.jpg}
+    \includegraphics[width=0.72in,height=0.52in]{./CSD_image/2_CSD.jpg}
+    \includegraphics[width=0.72in,height=0.52in]{./CSD_image/3_CSD.jpg} \\
+    \footnotesize Fig. 
+    \end{center}
+
+    Each pixel is associated to a colour component with the probability
+    $$
+    P(c|I_x) = \frac{\omega_c\mathcal{N}(I_x|\mu_c,\sigma_c)}{\SUM_c \omega_c \mathcal{N}(I_x|\mu_c,\Sigma_c)}
+    $$
+    where $\omega_c$ is the weight, $\mu_c$ is the mean colour, $\sigma_c$ is the covariance, and $\mathcal N(I_x|\mu_c,\sigma_c)$ is the multivariate normal distribution of the $c^{th}$ component.
+
+    The final colour spatial distribution feature is defined as a weighted sum:
+    $$
+    f_s(x,I)\propto\SUM_c p(c|I_x)\cdot(1-V(c))
+    $$
+    where $V(c)$ is the normalised covariance (horizontal and vertical variances) of the $c^{th}$ component, contained between 0 and 1.
 %% Learning (0.5 page)
 \section{Learning}
 
@@ -80,7 +221,7 @@ Canberra, Australia\\
 
 %% Discussion (existing flaws and possible improvements) (0.5 page)
 \section{Discussion}
-\subsection{Current Drawbacks}
+\subsection{Current Weaknesses}
 \subsection{Possible Improvement}
 
 %% acknowlegement and reference (0.5 page)
