@@ -14,7 +14,6 @@
 % run, let it finish, and you should be clear).
 \usepackage[pagebackref=true,breaklinks=true,letterpaper=true,colorlinks,bookmarks=false]{hyperref}
 
-
 \iccvfinalcopy % *** Uncomment this line for the final submission
 \def\iccvPaperID{****} % *** Enter the ICCV Paper ID here
 \def\httilde{\mbox{\tt\raisebox{-.5ex}{\symbol{126}}}}
@@ -24,7 +23,7 @@
 \begin{document}
 
 %%%%%%%%% TITLE
-\title{Application of Conditional Random Field in Salient Object Detection\\ with Local, Regional and Global Feature Extraction}
+\title{Application of Conditional Random Field in Image Salient Object Detection\\ with Local, Regional and Global Feature Extraction}
 
 \author{Jimmy Lin\\
 Australian National University\\
@@ -47,26 +46,62 @@ Canberra, Australia\\
 
 %%%%%%%%% ABSTRACT
 \begin{abstract}
-   The ABSTRACT is to be in fully-justified italicized text, at the top
-   of the left-hand column, below the author and affiliation
-   information. Use the word ``Abstract'' as the title, in 12-point
-   Times, boldface type, centered relative to the column, initially
-   capitalized. The abstract is to be in 10-point, single-spaced type.
-   Leave two blank lines after the Abstract, then begin the main text.
-   Look at previous ICCV abstracts to get a feel for style and length.
+    Making use of OpenCV, DARWIN and MSRA datasets, we detect the saliency of by extracting local, 
+    regional and global saliency feature, 
+    then combine those features with pre-fitted weights derived by logistic regression.
+    On top of that, the conditional random field framework is constructed to capture the spatial continuity of the saliency.
+    The importance ratio between the combined unary and pairwise term is determined by cross validation.
+    Based on the binary mask inferred in Conditional Random Field, we ultimately apply winner-take-all algorithm to 
+    output one boxing rectangle to label the detected salient object, by which the performance of our 
+    approach is evaluated. 
+    %%- respectively multiscale contrast, center surround histogram, and color spatial distribution. 
 \end{abstract}
 
-%%%%%%%%% BODY TEXT
+%% Introduction & Related Works (1 page)
 \section{Introduction}
 
+%% Formulation (1 page)
+\section{Formulation}
 
+%% Feature Extraction (2 pages)
+\section{Feature Extraction}
 
+%% Learning (0.5 page)
+\section{Learning}
+
+%% CRF Inference (0.5 page)
+\section{CRF Inference}
+
+%% Pixel Level result presentation (1 page)
+\section{Result Presentation}
+
+%% Result evaluation in rectangle level (1 page)
+\section{Evaluation}
+
+%% Discussion (existing flaws and possible improvements) (0.5 page)
+\section{Discussion}
+\subsection{Current Drawbacks}
+\subsection{Possible Improvement}
+
+%% acknowlegement and reference (0.5 page)
+\begin{thebibliography}{99} \fontsize{9pt}{50} \setlength{\itemsep}{-0.5pt} 
+    \bibitem 1 Liu, Tie, et al. "Learning to detect a salient object." 
+        \textit{Computer Vision and Pattern Recognition, 2007. CVPR07. IEEE Conference on. IEEE, 2007}.
+
+    \bibitem 2 Liu, Tie, et al. "Learning to detect a salient object." 
+        \textit{Pattern Analysis and Machine Intelligence, IEEE Transactions on 33.2 (2011): 353-367}. 
+
+    \bibitem 3 Itti, Laurent, Christof Koch, and Ernst Niebur. "A model of saliency-based visual attention for rapid scene analysis."
+        \textit{Pattern Analysis and Machine Intelligence, IEEE Transactions on 20.11 (1998): 1254-1259}.
+
+    \bibitem 4 Ma, Yu-Fei, and Hong-Jiang Zhang. "Contrast-based image attention analysis by using fuzzy growing."
+        \textit{ Proceedings of the eleventh ACM international conference on Multimedia. ACM, 2003}. 
+
+    \bibitem 5 Gould, Stephen. "DARWIN: A Framework for Machine Learning and Computer Vision Research and Development." 
+        \textit{Journal of Machine Learning Research 13 (2012): 3533-3537}
+
+\end{thebibliography}
 %-------------------------------------------------------------------------
 
-{\small
-\bibliographystyle{ieee}
-\bibliography{egbib}
-}
-
-
 \end{document}
+
