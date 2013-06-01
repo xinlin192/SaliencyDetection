@@ -1,3 +1,18 @@
+%**8-page Report Framework**
+%
+%1. Abstract (emphasize our variants)
+%2. Introduction & Related Works (1 page)
+%3. Formulation (1 page)
+%4. Feature Extraction (2 pages)
+%5. Learning (0.5 page)
+%6. CRF Inference (0.5 page)
+%7. Pixel Level result presentation (1 page)
+%8. Result evaluation in rectangle level (1 page)
+%9. Discussion (existing flaws and possible improvements) (0.5 page)
+%10. acknowlegement and reference (0.5 page)
+%
+
+
 \documentclass[10pt,twocolumn,letterpaper]{article}
 
 \usepackage{iccv}
@@ -50,15 +65,18 @@ Canberra, Australia\\
 
 %%%%%%%%% ABSTRACT
 \begin{abstract}
-    Making use of OpenCV, DARWIN and MSRA datasets, we detect the saliency of by extracting local, 
+%{{{
+    MSRA datasets, we detect the saliency of by extracting local, 
     regional and global saliency feature, 
     then combine those features with pre-fitted weights derived by logistic regression.
     On top of that, the conditional random field framework is constructed to capture the spatial continuity of the saliency.
     The importance ratio between the combined unary and pairwise term is determined by cross validation.
     Based on the binary mask inferred in Conditional Random Field, we ultimately apply winner-take-all algorithm to 
     output one boxing rectangle to label the detected salient object, by which the performance of our 
-    approach is evaluated. 
+    approach is evaluated. Our implementation will employ the  OpenCV library, 
+    leveraging on the ANU's open source DARWIN framework to achieve a CRF-based saliency detection algorithm. 
     %%- respectively multiscale contrast, center surround histogram, and color spatial distribution. 
+%}}}
 \end{abstract}
 
 %% Introduction & Related Works (1 page)
@@ -127,7 +145,9 @@ represents how we want the computer to interpret the raw iamges. In this project
 on three critical features, each of which is capable of capturing the saliency individually but
 in various level of scope. They are respectively Multiscale Contrast, Center Surround Histogram 
 and Color Spatial Distribution. 
+%% local feature
 \subsection{Multiscale Contrast}
+%{{{
 Constrast is commonly utilised as local feature because the contrast operator simulates
 the human visual receptive fields. Specifically, it captures the point that salient object
 tends to have tremendous contrast to the surroundings in its boundary (not vice versa).
@@ -191,11 +211,28 @@ Look at the chimpanzee in the fourth image, the tooth is tremendously contrasted
 far beyond the contrast of the body of chimpanzee to the grass. Since each entry of output feature map 
 is quantitatively normalised, the contrast of the body of chimpanzee to the grass is comparatively trivial.
 However, the tooth may be too narrow to be observed by the human receptive field and thus not 
-labelled as the salient object. That is, this flaw may result in the low recall comparing to the ground truth data.
+labelled as the salient object. That is, this flaw may result in the low recall comparing to the ground truth data.%}}}
 
 \subsection{Center Surround Histogram}
+%% regional feature
+%{{{
+Create a colour RGB histogram for both the rectangle and the surrounding frame with a certain resolution (number of ``bins'' for each colour)
+%, and calculate how many pixels fall into each colour's bins in the frame and the rectangle.\\[10pt]
+%    Finally, c
 
+    Calculate the $\chi^2$ value between the two histograms to obtain the differences between the rectangle and the surrounding frame.  Do this for multiple aspect ratios, and keep the largest $\chi^2$ value: %and the frame that formed it:
+    $$
+    R(x) = \argmax\limits_{R(x)}\chi^2(R(x), R_s(x)) =\argmax\limits_{R(x)}\frac{1}{2}\cdot\SUM_{i\in bins}\frac{(hist_{R(x)_i}-hist_{R_s(x)_i})^2}{hist_{R(x)_i}+hist_{R_s(x)_i}}
+    $$
+    The center-surround histogram feature is finally calculated as:
+    $$
+    f_h(x,I)\propto\SUM_{x'|x\in R(x')}w_{xx'}\chi^2(R(x'),R_s(x'))
+    $$
+%}}}
+
+%% global feature
 \subsection{Color Spatial Distribution}
+%{{{
     The goal of using Color Spatial Distribution feature is to take into account the global saliency information, 
     that is, the information about how widely the colors occurring in one image are distributed over the global scope.
     By creating Gaussian Mixture Components and fitting them to pixels of the whole image, the
@@ -306,6 +343,7 @@ labelled as the salient object. That is, this flaw may result in the low recall 
 
     The number of gaussian components is another trade-off between the quality of feature extraction
     and computational cost. Our implementation uses five gaussians to softly capture color components in one image. 
+%}}}
 
 %% Learning (0.5 page)
 \section{Learning}
