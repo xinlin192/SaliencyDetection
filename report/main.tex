@@ -10,6 +10,7 @@
 \DeclareMathOperator*{\argmin}{arg\,min}
 \DeclareMathOperator*{\argmax}{arg\,max}
 \newcommand{\SUM}{\sum\limits}
+\newcommand{\hs}{\hspace{0.58in}}
 % Include other packages here, before hyperref.
 
 % If you comment hyperref and then uncomment it, you should delete
@@ -61,7 +62,7 @@ Canberra, Australia\\
 \end{abstract}
 
 %% Introduction & Related Works (1 page)
-\section{Introduction}
+\section{Introduction and Motivation}
 %{{{
 what? Saliency is the prominence of an object in an image.
 
@@ -73,7 +74,7 @@ how? Often detected by its \textbf{high contrast boundary} to its near neighbour
 %}}}
 
 %% Formulation (1 page)
-\section{Formulation}
+\section{Problem Formulation}
 %{{{
 Given an image $I$, we want to compute the location of a salient object.
 
@@ -195,41 +196,117 @@ labelled as the salient object. That is, this flaw may result in the low recall 
 \subsection{Center Surround Histogram}
 
 \subsection{Color Spatial Distribution}
-    The goal of using Color Spatial Distribution feature is to take the global saliency information into account. 
+    The goal of using Color Spatial Distribution feature is to take into account the global saliency information, 
+    that is, the information about how widely the colors occurring in one image are distributed over the global scope.
     By creating Gaussian Mixture Components and fitting them to pixels of the whole image, the
     variance of each color component can be captured and we give penality to the pixels with high-variance 
     color according to the supposition that the colour of salient object in one image tends to have 
     intensive spatial distribution.
     
-    The component model is created from only a subset of the pixels in the image, and the maximum number of iterations is limited in order to reduce the time taken to compute this feature without sacrificing too much accuracy.
+    According to the theory of Machine Learning, each pixel is associated to a colour component with the probability
+    $$
+    P(c|I_x) = \frac{\omega_c\mathcal{N}(I_x|\mu_c,\Sigma_c)}{\SUM_c \omega_c \mathcal{N}(I_x|\mu_c,\Sigma_c)}
+    $$
+    where $\omega_c$ is the weight, $\mu_c$ is the mean colour, $\Sigma_c$ is the covariance, and $\mathcal N(I_x|\mu_c,\Sigma_c)$ is the multivariate normal distribution of the $c^{th}$ component.
+
+    For each fitted gaussian color component $c$, we compute its horizontal variance $V_{h}(c)$ as follows,
+    $$
+    V_{h}(c) = \frac{1}{|X|_{c}} \sum_{x} p (c|I_{x}) \cdot | x_{h} - M_{h}(c) |^{2}
+    $$
+    where $x_h$ is horizontal coordinate of pixel $x$, $|X|_c$ is normalising factor 
+    and $M_h (c)$ is the mean of the gaussin component:
+    $$
+    |X|_c = \sum_x p(c|I_x)
+    $$
+    $$
+    M_h (c) = \frac{1}{|X|_c} \sum_{x} p(c|I_x) \cdot x_h
+    $$
+
+    Vertical variance $V_{v}(c)$ is defined similiarly, and we equally combine the horizental and vertical variance to derive the unnormalised composite variance $V_h (c)$: 
+    $$
+    V' (c) = V_h (c) + V_v (c) 
+    $$
+
+    Then employ the min-max approach to normalise the composite covariance:
+    $$
+    V (c) = \frac{V'(c) - min \big(V'(c)\big) }{max \big(V'(c)\big) - min \big(V'(c)\big)}  
+    $$
+    where $V(c)$ is the normalised composite covariance of the $c^{th}$ component, contained between 0 and 1.
+
+    The final colour spatial distribution feature for pixel $x$ is defined as a weighted sum of its color intensiveness:
+    $$
+    f_s(x,I)\propto\SUM_c p(c|I_x)\cdot(1-V(c))
+    $$
+
+    The feature map $f_s (\cdot,I)$ is also normalized to the range $[0, 1]$. The following figure
+    shows color spatial-distribution feature maps of several example images. 
+    The salient objects are well covered by this global feature. 
 
     \begin{center}
     \includegraphics[width=0.72in,height=0.52in]{./CSD_image/1.jpg}
     \includegraphics[width=0.72in,height=0.52in]{./CSD_image/2.jpg}
-    \includegraphics[width=0.72in,height=0.52in]{./CSD_image/3.jpg}\\
+    \includegraphics[width=0.72in,height=0.52in]{./CSD_image/3.jpg}
+    \includegraphics[width=0.72in,height=0.52in]{./CSD_image/4.jpg}\\
     \includegraphics[width=0.72in,height=0.52in]{./CSD_image/1_CSD.jpg}
     \includegraphics[width=0.72in,height=0.52in]{./CSD_image/2_CSD.jpg}
-    \includegraphics[width=0.72in,height=0.52in]{./CSD_image/3_CSD.jpg} \\
-    \footnotesize Fig. Feature Maps of Color Spatial Distribution
+    \includegraphics[width=0.72in,height=0.52in]{./CSD_image/3_CSD.jpg} 
+    \includegraphics[width=0.72in,height=0.52in]{./CSD_image/4_CSD.jpg} \\
+    \footnotesize \hspace{0.1cm} (a) \hs (b) \hs  (c) \hs (d) \\
+     Fig. Feature Maps of Color Spatial Distribution under various scenes
     \end{center}
 
-    According to the theory of Machine Learning, each pixel is associated to a colour component with the probability
-    $$
-    P(c|I_x) = \frac{\omega_c\mathcal{N}(I_x|\mu_c,\sigma_c)}{\SUM_c \omega_c \mathcal{N}(I_x|\mu_c,\Sigma_c)}
-    $$
-    where $\omega_c$ is the weight, $\mu_c$ is the mean colour, $\sigma_c$ is the covariance, and $\mathcal N(I_x|\mu_c,\sigma_c)$ is the multivariate normal distribution of the $c^{th}$ component.
+    % why it is a successful feature in detecting the saliency
+    It is evident that the global feature gains a huge success in mark up the saliency when the background
+    is monotonous. As illustrated by the first three images in the above figure, the flying stuff
+    is distinguished from the bichrome background - blue ocean and white tide, the sign card under the 
+    background of ocean and tree leaves and in the third image the girl body before the fully white wall.
+    % Weaknesses of this feature
+    However, in the case of colorful background, color spatial distribution, with a high probability,
+    fails to distinguish the salient object in the image. The Fig.. (d) demonstrates us
+    this undesired property of the global feature. 
 
-    The final colour spatial distribution feature is defined as a weighted sum:
-    $$
-    f_s(x,I)\propto\SUM_c p(c|I_x)\cdot(1-V(c))
-    $$
-    where $V(c)$ is the normalised covariance (horizontal and vertical variances) of the $c^{th}$ component, contained between 0 and 1.
+    % our variation
+    One variation in our implementation is to create the component model from only a subset of the pixels in the image.
+    The pixels in the subset is picked up with equal spatial distance. Specifically, we apply the "pydown" module 
+    in Opencv to dilute the pixels participating this unsupervised learning task.
+    Such manipulation will not sacrifice too much accuracy, but greatly reduce 
+    the running time of fitting the Mixture of Gaussians since the number of pixels provided for the fitting halves. 
 
-    trade-off between precision and time performance. Tricks to improve the performance.
+    \begin{center}
+    \includegraphics[width=0.72in,height=0.52in]{./Figures/pydownCompare/1.jpg}
+    \includegraphics[width=0.72in,height=0.52in]{./Figures/pydownCompare/1NOPYDOWN.jpg}
+    \includegraphics[width=0.72in,height=0.52in]{./Figures/pydownCompare/1PYDOWN.jpg} 
+    \includegraphics[width=0.72in,height=0.52in]{./Figures/pydownCompare/1DOUBLEPYDOWN.jpg} \\
+    \includegraphics[width=0.72in,height=0.52in]{./Figures/pydownCompare/2.jpg}
+    \includegraphics[width=0.72in,height=0.52in]{./Figures/pydownCompare/2NOPYDOWN.jpg}
+    \includegraphics[width=0.72in,height=0.52in]{./Figures/pydownCompare/2PYDOWN.jpg} 
+    \includegraphics[width=0.72in,height=0.52in]{./Figures/pydownCompare/2DOUBLEPYDOWN.jpg} \\
+    \includegraphics[width=0.72in,height=0.52in]{./Figures/pydownCompare/3.jpg}
+    \includegraphics[width=0.72in,height=0.52in]{./Figures/pydownCompare/3NOPYDOWN.jpg}
+    \includegraphics[width=0.72in,height=0.52in]{./Figures/pydownCompare/3PYDOWN.jpg} 
+    \includegraphics[width=0.72in,height=0.52in]{./Figures/pydownCompare/3DOUBLEPYDOWN.jpg} \\
+    \footnotesize (a) original (b) no pydown (c) one-level pydown (d) two-level pydown
+    Fig. Examples for global feature using diluted images \\
+    \end{center}
 
-    Goodness of this feature
+    We test three levels of pixel dilution, no pydown, one-level pydown and two-level pydown. One-level
+    pydown means reducing both of the width and height of one image to half of the original size, 
+    such that only a quarter of pixels are available for fitting the mixture of gaussians.
+    From the above figure, it is evident that one-level pydown, to some extent, increases the quality of 
+    this global feature by marking the salient block softly or obscurely rather than in a strict way. 
+    Extraction for two-level pydown 
+    indicated in Fig. (d) is even faster, but generally it lost the effectiveness of this global feature.
+    Hence, in our implementation of color spatial distribution, we employ the one-level pydown as a trick
+    to both enhance quality of global feature and improve extraction time performance.
 
-    Weaknesses of this feature
+    Besides, the maximum number of iterations is limited $(100)$ and the convergence criterion is lowered $(10^{-1})$
+    in order to reduce the time taken to compute this feature.  This outcome of this global feature, after such
+    simplification, will not get deteriorated since we only care about capturing 
+    approximate component location, rather than precisely maximum likelihood of the coloured pixels.
+
+    The number of gaussian components is another trade-off between the quality of feature extraction
+    and computational cost. Our implementation uses five gaussians to softly capture color components in one image. 
+
 %% Learning (0.5 page)
 \section{Learning}
 Those three features aforementioned have their own strengthes and weaknesses in different areas. For example, the .
@@ -241,17 +318,20 @@ with the help of certain machine learning algorithm.
 
 In this project, we implement logistic regression to decide the optimal weight under the help of training data.
 
-%% CRF Inference (0.5 page)
+%% CRF Inference (0.5 - 1 page)
+%% images for inferred binary mask
 \section{CRF Inference}
-
-%% Pixel Level result presentation (1 page)
-\section{Result Presentation}
+To infer the maximum likelihood assignment for pixelwise variables under the CRF framework,
+the usual message passing algorithm would be intractable. Therefore, we turn to the alpha expansion algorithm 
+based on the mexfunction, such that inferring maximum likelihood assignment would be affordable. 
 
 %% Result evaluation in rectangle level (1 page)
-\section{Evaluation}
+%% images for the output rectangle
+\section{Result Evaluation}
 
 %% Discussion (existing flaws and possible improvements) (0.5 page)
-\section{Discussion}
+\section{Conclusion and Discussion}
+\subsection{Conclusion}
 \subsection{Current Weaknesses}
 \subsection{Possible Improvement}
 
