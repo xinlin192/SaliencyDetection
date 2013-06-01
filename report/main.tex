@@ -11,8 +11,6 @@
 %9. Discussion (existing flaws and possible improvements) (0.5 page)
 %10. acknowlegement and reference (0.5 page)
 %
-
-
 \documentclass[10pt,twocolumn,letterpaper]{article}
 
 \usepackage{iccv}
@@ -42,7 +40,8 @@
 \begin{document}
 
 %%%%%%%%% TITLE
-\title{Application of Conditional Random Field in Image Salient Object Detection\\ with Local, Regional and Global Feature Extraction}
+\title{Application of Conditional Random Fields to Pixel-Level Salient Object Detection Through Local, Regional and Global Features}
+%\title{Application of Conditional Random Field in Image Salient Object Detection\\ with Local, Regional and Global Feature Extraction}
 
 \author{Jimmy Lin\\
 Australian National University\\
@@ -54,10 +53,10 @@ Canberra, Australia\\
 % just like the second author.
 % To save space, use either the email address or home page, not both
 \and
-Chris-Chau-Long\\
+Christopher Claou\'e-Long\\
 Australian National University\\
 Canberra, Australia\\
-{\small\url{chris.claoue.long@gmail.com}}
+{\small\url{u5183532@anu.edu.au}}
 }
 
 \maketitle
@@ -65,26 +64,13 @@ Canberra, Australia\\
 
 %%%%%%%%% ABSTRACT
 \begin{abstract}
-%{{{
-    MSRA datasets, we detect the saliency of by extracting local, 
-    regional and global saliency feature, 
-    then combine those features with pre-fitted weights derived by logistic regression.
-    On top of that, the conditional random field framework is constructed to capture the spatial continuity of the saliency.
-    The importance ratio between the combined unary and pairwise term is determined by cross validation.
-    Based on the binary mask inferred in Conditional Random Field, we ultimately apply winner-take-all algorithm to 
-    output one boxing rectangle to label the detected salient object, by which the performance of our 
-    approach is evaluated. Our implementation will employ the  OpenCV library, 
-    leveraging on the ANU's open source DARWIN framework to achieve a CRF-based saliency detection algorithm. 
-    %%- respectively multiscale contrast, center surround histogram, and color spatial distribution. 
-%}}}
+    Making use of OpenCV, DARWIN and the MSRA dataset, we detect the saliency of by extracting local, regional and global saliency features at the pixel level, then combine those features with pre-fitted weights derived by logistic regression. The Conditional Random Field is then constructed to capture the spatial continuity of the saliency. The importance ratio of the combined unary and pairwise terms is determined by cross-validation. Based on the binary mask inferred by the Conditional Random Field, we ultimately apply a winner-takes-all algorithm to output a single bounding rectangle to label the detected salient object, by which the performance of our approach is evaluated through boundary-displacement error. 
 \end{abstract}
 
 %% Introduction & Related Works (1 page)
 \section{Introduction and Motivation}
 %{{{
-what? Saliency is the prominence of an object in an image.
-
-why? Salient object detection is useful in numerous areas, for instance, in siimulating human vision by robots, augmented Reality, 3D surface reconstruction and more.
+A long-standing problem in the field of computer vision is how to calculate the saliency of objects in an image -- that is, their prominence in the image when compared to their background and surrounds.  This property is important for image recognition since it leads to the ability to single out individual areas of an image, for example in automatic image cropping and adaptive vision in robotics, and 3D surface reconstruction in augmented reality displays.
 
 Related works?
 

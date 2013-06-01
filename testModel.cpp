@@ -6,7 +6,7 @@
 **
 ******************************************************************************
 ** FILENAME:    testCOMP3130Model.cpp
-** AUTHOR(S):   Stephen Gould <stephen.gould@anu.edu.au>
+** AUTHOR(S):   Chris Claoue-Long (u5183532) - u5183532@anu.edu.au
 **
 *****************************************************************************/
 
@@ -41,7 +41,7 @@ using namespace Eigen;
 void usage()
 {
     cerr << DRWN_USAGE_HEADER << endl;
-    cerr << "USAGE: ./testModel [OPTIONS] <model> <imgDir>\n";
+    cerr << "USAGE: ./testModel [OPTIONS] <imgDir> <mscDir> <cshDir> <csdDir> <outputDir> <lambda>\n";
     cerr << "OPTIONS:\n"
          << "  -o <lblDir>       :: output directory for predicted labels\n"
          << "  -x                :: visualize\n"
@@ -63,7 +63,7 @@ int main (int argc, char * argv[]) {
     DRWN_END_CMDLINE_PROCESSING(usage());
 
     // Check for the correct number of required arguments
-    if (DRWN_CMDLINE_ARGC != 5) {
+    if (DRWN_CMDLINE_ARGC != 6) {
         usage();
         return -1;
     }
@@ -79,10 +79,14 @@ int main (int argc, char * argv[]) {
     const char *cshDir = DRWN_CMDLINE_ARGV[2]; // directory restores center surround histogram feature map
     const char *csdDir = DRWN_CMDLINE_ARGV[3]; // directory restores color spatial distribution feature map
     const char *outputDir = DRWN_CMDLINE_ARGV[4]; // directory for resulting images
-    const double lambda = atof(DRWN_CMDLINE_ARGV[5]); 
+    const double lambda = atof(DRWN_CMDLINE_ARGV[5]); // lambda calculation
     
     // Check for existence of the directory containing orginal images
     DRWN_ASSERT_MSG(drwnDirExists(imgDir), "image directory " << imgDir << " does not exist");
+    DRWN_ASSERT_MSG(drwnDirExists(mscDir), "Multiscale Contrast directory " << mscDir << " does not exist");
+    DRWN_ASSERT_MSG(drwnDirExists(cshDir), "Centre-Surround Histogram directory " << cshDir << " does not exist");
+    DRWN_ASSERT_MSG(drwnDirExists(csdDir), "Colour Spatial Distribution directory " << csdDir << " does not exist");
+    DRWN_ASSERT_MSG(drwnDirExists(outputDir), "Output directory " << outputDir << " does not exist");
 
     // Get a list of images from the image directory.
     vector<string> baseNames = drwnDirectoryListing(imgDir, ".jpg", false, false);
@@ -117,11 +121,11 @@ int main (int argc, char * argv[]) {
                 unary[1].at<double>(y,x) = 1 - unary[0].at<double>(y,x);
             }
         }
-        
+
         // compute binary mask of each pixel
         cv::Mat binaryMask = mexFunction(img, unary, lambda);
 
-        // interpret the binary mask to two-color image
+        // interpret the binary mask as a two-color image
         cv::Mat pres(img.rows, img.cols, CV_8UC3);
         for (int y = 0 ; y < img.rows; y ++) {
             for (int x = 0 ; x < img.cols; x ++) {
@@ -130,7 +134,7 @@ int main (int argc, char * argv[]) {
             }
         }
         
-        // present the derived binary mask by white-black image
+        // present the derived binary mask
         IplImage pcvimg = (IplImage) pres;
         IplImage *present = cvCloneImage(&pcvimg);
         cv::imwrite(string(outputDir) + baseNames[i] + ".jpg", pres);
@@ -139,6 +143,8 @@ int main (int argc, char * argv[]) {
             cvReleaseImage(&present);
         }
     }
+    
+    // TODO bounding box rectangle output.
 
     // Clean up by freeing memory and printing profile information.
     cvDestroyAllWindows();

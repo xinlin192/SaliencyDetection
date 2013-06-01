@@ -6,13 +6,13 @@
 **
 ******************************************************************************
 ** FILENAME:    2550Common.h
-** AUTHOR(S):   Stephen Gould <stephen.gould@anu.edu.au>
-**              Jimmy Lin <u5223173@uds.anu.edu.anu>
+** AUTHOR(S):   Jimmy Lin <u5223173@uds.anu.edu.anu>
 **              Chris Claoue-Long <u5183532@anu.edu.au>
 *****************************************************************************/
 #include <cmath>
 #include <set>
 #include <math.h> 
+
 using namespace std;
 using namespace Eigen;
 
