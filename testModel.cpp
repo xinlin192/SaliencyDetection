@@ -31,8 +31,6 @@
 #include "drwnML.h"
 #include "drwnVision.h"
 
-#include "crfCommon.h"
-
 using namespace std;
 using namespace Eigen;
 
@@ -52,7 +50,7 @@ void usage()
 // main ----------------------------------------------------------------------
 
 int main (int argc, char * argv[]) {
-    // what way are we building up a default classifier?
+
     // Set default value for optional command line arguments.
     const char *modelFile = NULL;
     bool bVisualize = false;
@@ -68,18 +66,19 @@ int main (int argc, char * argv[]) {
         return -1;
     }
 
-    /* Check that the image directory and labels directory exist. All
-     * images with a ".jpg" extension will be used for training the
-     * model. It is assumed that the labels directory contains files
-     * with the same base as the image directory, but with extension
-     * ".txt". 
-     */
+    // Check that the image directory and labels directory exist. All
+    // images with a ".jpg" extension will be used for training the
+    // model. It is assumed that the labels directory contains files
+    // with the same base as the image directory, but with extension
+    // ".txt". 
+     
     const char *imgDir = DRWN_CMDLINE_ARGV[0]; // directory restores original images
     const char *mscDir = DRWN_CMDLINE_ARGV[1]; // directory restores multiscale contrast feature map
     const char *cshDir = DRWN_CMDLINE_ARGV[2]; // directory restores center surround histogram feature map
     const char *csdDir = DRWN_CMDLINE_ARGV[3]; // directory restores color spatial distribution feature map
     const char *outputDir = DRWN_CMDLINE_ARGV[4]; // directory for resulting images
     const double lambda = atof(DRWN_CMDLINE_ARGV[5]); 
+    
     // Check for existence of the directory containing orginal images
     DRWN_ASSERT_MSG(drwnDirExists(imgDir), "image directory " << imgDir << " does not exist");
 
@@ -95,14 +94,15 @@ int main (int argc, char * argv[]) {
         cv::Mat msc = cv::imread(string(mscDir) + DRWN_DIRSEP + processedImage);
         cv::Mat csh = cv::imread(string(cshDir) + DRWN_DIRSEP + processedImage);
         cv::Mat csd = cv::imread(string(csdDir) + DRWN_DIRSEP + processedImage);
-        // show the image and feature maps 
-        if (bVisualize) { // draw the current image comparison
+        
+        if (bVisualize) {
             //drwnDrawRegionBoundaries and drwnShowDebuggingImage use OpenCV 1.0 C API
             IplImage cvimg = (IplImage)img;
             IplImage *canvas = cvCloneImage(&cvimg);
             drwnShowDebuggingImage(canvas, "image", false);
             cvReleaseImage(&canvas);
         }
+        
         // get unary potential and combine them by pre-computed parameters 
         vector< cv::Mat > unary(2);
         unary[0] = cv::Mat(img.rows, img.cols, CV_64F);
@@ -115,6 +115,7 @@ int main (int argc, char * argv[]) {
                 unary[1].at<double>(y,x) = 1 - unary[0].at<double>(y,x);
             }
         }
+        
         // compute binary mask of each pixel
         cv::Mat binaryMask = mexFunction(img, unary, lambda);
 
@@ -126,6 +127,7 @@ int main (int argc, char * argv[]) {
                 pres.at<cv::Vec3b>(y,x) = cv::Vec3b(tempSaliency, tempSaliency, tempSaliency);
             }
         }
+        
         // present the derived binary mask by white-black image
         IplImage pcvimg = (IplImage) pres;
         IplImage *present = cvCloneImage(&pcvimg);
