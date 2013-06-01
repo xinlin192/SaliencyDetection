@@ -31,7 +31,7 @@
 #include "drwnML.h"
 #include "drwnVision.h"
 
-#include "crfCommon.h"
+#include "mexImageCRF.h"
 
 using namespace std;
 using namespace Eigen;
