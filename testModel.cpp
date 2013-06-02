@@ -41,7 +41,7 @@ using namespace Eigen;
 void usage()
 {
     cerr << DRWN_USAGE_HEADER << endl;
-    cerr << "USAGE: ./testModel [OPTIONS] <imgDir> <mscDir> <cshDir> <csdDir> <outputDir> <lambda>\n";
+    cerr << "USAGE: ./testModel [OPTIONS] <imgDir> <mscDir> <cshDir> <csdDir> <outputDir> <outputLbls> <lambda>\n";
     cerr << "OPTIONS:\n"
          << "  -o <lblDir>       :: output directory for predicted labels\n"
          << "  -x                :: visualize\n"
@@ -63,7 +63,7 @@ int main (int argc, char * argv[]) {
     DRWN_END_CMDLINE_PROCESSING(usage());
 
     // Check for the correct number of required arguments
-    if (DRWN_CMDLINE_ARGC != 6) {
+    if (DRWN_CMDLINE_ARGC != 7) {
         usage();
         return -1;
     }
@@ -79,7 +79,8 @@ int main (int argc, char * argv[]) {
     const char *cshDir = DRWN_CMDLINE_ARGV[2]; // directory restores center surround histogram feature map
     const char *csdDir = DRWN_CMDLINE_ARGV[3]; // directory restores color spatial distribution feature map
     const char *outputDir = DRWN_CMDLINE_ARGV[4]; // directory for resulting images
-    const double lambda = atof(DRWN_CMDLINE_ARGV[5]); // lambda calculation
+    const char *outLbls = DRWN_CMDLINE_ARGV[5]; // output labels file
+    const double lambda = atof(DRWN_CMDLINE_ARGV[6]); // lambda calculation
     
     // Check for existence of the directory containing orginal images
     DRWN_ASSERT_MSG(drwnDirExists(imgDir), "image directory " << imgDir << " does not exist");
@@ -91,16 +92,24 @@ int main (int argc, char * argv[]) {
     // Get a list of images from the image directory.
     vector<string> baseNames = drwnDirectoryListing(imgDir, ".jpg", false, false);
     DRWN_LOG_MESSAGE("Loading " << baseNames.size() << " images and labels...");
+    string dir = string(imgDir);
+    int dirIndex = dir.find_last_of(DRWN_DIRSEP)-1; // get the last occurrence
+    ofstream outputLbls;
+    outputLbls.open(outLbls, ios::out | ios::trunc);
+    if (!outputLbls.is_open()){
+        cerr << "ERROR CREATING OUTPUT LABEL FILE";
+        return -1;
+    }
+    outputLbls << baseNames.size() << "\n\n"; // number of labels there will be in this file
 
-
-    //declare all often-used variables of the loop here to save on memory!
+    //often-used variables of the loop are here to save on memory!
     cv::Mat img;
     cv::Mat msc;
     cv::Mat csh;
     cv::Mat csd;
     cv::Mat binaryMask;
     cv::Mat bounding;
-    vector<vector<cv::Point> > v;
+    vector<vector<cv::Point> > contours;
     unsigned int area;
     int idx;
     cv::Rect box;
@@ -155,7 +164,8 @@ int main (int argc, char * argv[]) {
         IplImage pcvimg = (IplImage) pres;
         IplImage *present = cvCloneImage(&pcvimg);
         cv::imwrite(string(outputDir) + baseNames[i] + ".jpg", pres);
-        if (bVisualize) { // draw the processed feature map and display it on the screen
+        if (bVisualize) { 
+            // draw the processed feature map and display it on the screen
             drwnShowDebuggingImage(present, "Composed Graph", false);
             cvReleaseImage(&present);
         }
@@ -163,31 +173,41 @@ int main (int argc, char * argv[]) {
         // convert pres to a suitable image for working on finding the bounding box using OpenCV functions
         cvtColor(pres, bounding, CV_BGR2GRAY);
         
-        // find the contours, returnign only extreme external bounds
-        findContours(bounding,v,CV_RETR_EXTERNAL,CV_CHAIN_APPROX_NONE);
+        // find the contours, returning only extreme external bounds, find the largest contour area.
+        // TODO change to getting a bounding box around all white pixels
+        findContours(bounding,contours,CV_RETR_EXTERNAL,CV_CHAIN_APPROX_NONE);
+        
+        // find the largest contour area
         area = 0;
-        for(unsigned int it=0; it<v.size();it++) {
-            if(area < v[it].size())
+        for(unsigned int it=0; it<contours.size();it++) {
+            if(area < contours[it].size())
                 idx = it; 
         }
-        box = boundingRect(v[idx]);
+        box = boundingRect(contours[idx]);
         pt1.x = box.x;
         pt1.y = box.y;
         pt2.x = box.x + box.width;
         pt2.y = box.y + box.height;
-        // Draws the bounding box in the original image and show it
         cv::rectangle(bounding, pt1, pt2, Scalar(255,0,0));
-        // show the bounding box!
-        IplImage bound = (IplImage)bounding;
-        IplImage *boundCanvas = cvCloneImage(&bound);
-        drwnShowDebuggingImage(boundCanvas, "Rectangle", false);
-        cvReleaseImage(&boundCanvas);
+
+        if(bVisualize){
+            // Draw the bounding box in the original image and show it
+            IplImage bound = (IplImage)bounding;
+            IplImage *boundCanvas = cvCloneImage(&bound);
+            drwnShowDebuggingImage(boundCanvas, "Rectangle", false);
+            cvReleaseImage(&boundCanvas);
+        }
+        
         cv::imwrite(string(outputDir) + baseNames[i] + "RECT.jpg", bounding);
 
+        // add the rectangle to the list of output labels
+        //outputLbls << last substring of "/";
+        outputLbls  << dir.substr(dirIndex, dirIndex+1) << "\\" << baseNames[i] << ".jpg\n";
+        outputLbls << img.rows << " " << img.cols << "\n";
+        outputLbls << pt1.x << " " << pt1.y << " " << pt2.x << " " << pt2.y << ";\n\n";
     }
     
-    
-    
+    outputLbls.close();
     // Clean up by freeing memory and printing profile information.
     cvDestroyAllWindows();
     drwnCodeProfiler::print();
