@@ -92,14 +92,33 @@ int main (int argc, char * argv[]) {
     vector<string> baseNames = drwnDirectoryListing(imgDir, ".jpg", false, false);
     DRWN_LOG_MESSAGE("Loading " << baseNames.size() << " images and labels...");
 
+
+    //declare all often-used variables of the loop here to save on memory!
+    cv::Mat img;
+    cv::Mat msc;
+    cv::Mat csh;
+    cv::Mat csd;
+    cv::Mat binaryMask;
+    cv::Mat bounding;
+    vector<vector<cv::Point> > v;
+    unsigned int area;
+    int idx;
+    cv::Rect box;
+    cv::Point pt1, pt2;
+    int tempSaliency;
+    vector< cv::Mat > unary(2);
+    double grayscale;
+    
+
+
     for (unsigned i = 0; i < baseNames.size(); i++) {
         String processedImage = baseNames[i] + ".jpg";
         DRWN_LOG_STATUS("...processing image " << baseNames[i]);
         // read the image and draw the rectangle of labels of training data
-        cv::Mat img = cv::imread(string(imgDir) + DRWN_DIRSEP + processedImage);
-        cv::Mat msc = cv::imread(string(mscDir) + DRWN_DIRSEP + processedImage);
-        cv::Mat csh = cv::imread(string(cshDir) + DRWN_DIRSEP + processedImage);
-        cv::Mat csd = cv::imread(string(csdDir) + DRWN_DIRSEP + processedImage);
+        img = cv::imread(string(imgDir) + DRWN_DIRSEP + processedImage);
+        msc = cv::imread(string(mscDir) + DRWN_DIRSEP + processedImage);
+        csh = cv::imread(string(cshDir) + DRWN_DIRSEP + processedImage);
+        csd = cv::imread(string(csdDir) + DRWN_DIRSEP + processedImage);
         
         if (bVisualize) {
             //drwnDrawRegionBoundaries and drwnShowDebuggingImage use OpenCV 1.0 C API
@@ -110,10 +129,8 @@ int main (int argc, char * argv[]) {
         }
         
         // get unary potential and combine them by pre-computed parameters 
-        vector< cv::Mat > unary(2);
         unary[0] = cv::Mat(img.rows, img.cols, CV_64F);
         unary[1] = cv::Mat(img.rows, img.cols, CV_64F);
-        double grayscale;
         for (int y = 0; y < img.rows; y ++) {
             for (int x = 0 ; x < img.cols; x ++) {
                 grayscale = 0.22*msc.at<Vec3b>(y,x).val[0] + 0.54*csh.at<Vec3b>(y,x).val[0] + 0.24*csd.at<Vec3b>(y,x).val[0];
@@ -123,13 +140,13 @@ int main (int argc, char * argv[]) {
         }
 
         // compute binary mask of each pixel
-        cv::Mat binaryMask = mexFunction(img, unary, lambda);
+        binaryMask = mexFunction(img, unary, lambda);
 
         // interpret the binary mask as a two-color image
         cv::Mat pres(img.rows, img.cols, CV_8UC3);
         for (int y = 0 ; y < img.rows; y ++) {
             for (int x = 0 ; x < img.cols; x ++) {
-                int tempSaliency = binaryMask.at<short>(y,x)*255>125?255:0;
+                tempSaliency = binaryMask.at<short>(y,x)*255>125?255:0;
                 pres.at<cv::Vec3b>(y,x) = cv::Vec3b(tempSaliency, tempSaliency, tempSaliency);
             }
         }
@@ -143,17 +160,28 @@ int main (int argc, char * argv[]) {
             cvReleaseImage(&present);
         }
         
-        // TODO may need to erode before use
-        cv::RotatedRect box = cv::minAreaRect(pres);
-        int x = box.center.x - (box.size.width/2);
-        int y = box.center.y - (box.size.height/2);
-    
-        cv::rectangle(pres, cv::Point(x,y), cv::Point(x+box.size.width, y+box.size.height), Scalar(0,0,255));
-        IplImage cvTESTimg = (IplImage)pres;
-        IplImage *cvTESTpres = cvCloneImage(&cvTESTimg);
-        drwnShowDebuggingImage(cvTESTpres, "resulting rectangle", false);
-        cvReleaseImage(&cvTESTpres);
-        //cv.imwrite(string(outputDir) + basenames[i] + ".jpg", pres);    
+        // convert pres to a suitable image for working on finding the bounding box using OpenCV functions
+        cvtColor(pres, bounding, CV_BGR2GRAY);
+        findContours(bounding,v,CV_RETR_LIST,CV_CHAIN_APPROX_NONE);
+        area = 0;
+        for(unsigned int it=0; it<v.size();it++) {
+            if(area < v[it].size())
+                idx = it; 
+        }
+        box = boundingRect(v[idx]);
+        pt1.x = box.x;
+        pt1.y = box.y;
+        pt2.x = box.x + box.width;
+        pt2.y = box.y + box.height;
+        // Draws the rect in the original image and show it
+        cv::rectangle(bounding, pt1, pt2, Scalar(255,0,0));
+        // show the bounding box!
+        IplImage bound = (IplImage)bounding;
+        IplImage *boundCanvas = cvCloneImage(&bound);
+        drwnShowDebuggingImage(boundCanvas, "Rectangle", false);
+        cvReleaseImage(&boundCanvas);
+        cv::imwrite(string(outputDir) + baseNames[i] + "RECT.jpg", bounding);
+
     }
     
     
