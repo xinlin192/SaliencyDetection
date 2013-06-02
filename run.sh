@@ -18,8 +18,8 @@ elif [ $# -eq "2" ]; then
     # create csh/csd/msc images
     echo "Computing $1 renderings for images in $2"
     mkdir results/$1
-    ../../bin/getFeatureMaps -x -v $1 $2 results/$1
-    echo "Results saved to results/$1"
+    ../../bin/getFeatureMaps -x -v $1 $2 results/$1/
+    echo "Results saved to results/$1/"
 elif [ $# -eq "3" ]; then
     # train/test/mark the saliency detector
     echo "WARNING:" 

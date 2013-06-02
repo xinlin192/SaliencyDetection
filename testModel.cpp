@@ -142,10 +142,22 @@ int main (int argc, char * argv[]) {
             drwnShowDebuggingImage(present, "Composed Graph", false);
             cvReleaseImage(&present);
         }
+        
+        // TODO may need to erode before use
+        cv::RotatedRect box = cv::minAreaRect(pres);
+        int x = box.center.x - (box.size.width/2);
+        int y = box.center.y - (box.size.height/2);
+    
+        cv::rectangle(pres, cv::Point(x,y), cv::Point(x+box.size.width, y+box.size.height), Scalar(0,0,255));
+        IplImage cvTESTimg = (IplImage)pres;
+        IplImage *cvTESTpres = cvCloneImage(&cvTESTimg);
+        drwnShowDebuggingImage(cvTESTpres, "resulting rectangle", false);
+        cvReleaseImage(&cvTESTpres);
+        //cv.imwrite(string(outputDir) + basenames[i] + ".jpg", pres);    
     }
     
-    // TODO bounding box rectangle output.
-
+    
+    
     // Clean up by freeing memory and printing profile information.
     cvDestroyAllWindows();
     drwnCodeProfiler::print();
