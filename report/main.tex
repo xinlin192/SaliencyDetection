@@ -64,33 +64,70 @@ Canberra, Australia\\
 
 %%%%%%%%% ABSTRACT
 \begin{abstract}
-    Making use of OpenCV, DARWIN and the MSRA dataset, we detect the saliency of by extracting local, regional and global saliency features at the pixel level, then combine those features with pre-fitted weights derived by logistic regression. The Conditional Random Field is then constructed to capture the spatial continuity of the saliency. The importance ratio of the combined unary and pairwise terms is determined by cross-validation. Based on the binary mask inferred by the Conditional Random Field, we ultimately apply a winner-takes-all algorithm to output a single bounding rectangle to label the detected salient object, by which the performance of our approach is evaluated through boundary-displacement error. 
+    Making use of OpenCV, DARWIN and the MSRA dataset, we detect the saliency of by extracting local
+    , regional and global saliency features at the pixel level, then combine those features with pre-fitted
+    weights derived by logistic regression. The Conditional Random Field is then constructed to capture
+    the spatial continuity of the saliency. The importance ratio of the combined unary and pairwise terms
+    is determined by cross-validation. Based on the binary mask inferred by the Conditional Random Field,
+    we ultimately apply a winner-takes-all algorithm to output a single bounding rectangle to label the
+    detected salient object, by which the performance of our approach is evaluated through
+    boundary-displacement error. 
 \end{abstract}
 
 %% Introduction & Related Works (1 page)
 \section{Introduction and Motivation}
 %{{{
-A long-standing problem in the field of computer vision is how to calculate the saliency of objects in an image -- that is, their prominence in the image when compared to their background and surrounds.  This property is important for image recognition since it leads to the ability to single out individual areas of an image, for example in automatic image cropping and adaptive vision in robotics, and 3D surface reconstruction in augmented reality displays.
+A long-standing problem in the field of computer vision is how to calculate the saliency
+of objects in an image -- that is, their prominence in the image when compared to their
+background and surrounds.  This property is important for image recognition since it leads
+to the ability to single out individual areas of an image, for example in automatic image
+cropping and visual attention simulation in robotics, and 3D surface reconstruction in 
+augmented reality displays.
+%}}}
 
-Related works?
-
-how? Often detected by its \textbf{high contrast boundary} to its near neighbours, \textbf{distinction from its surrounds}, \textbf{intensive colour distribution} compared to all other color component in candidate image and \textbf{space continuity of saliency}. \\
+%% Related Works (0.5 page)
+\section{Related Works}
+%{{{
+Most existing visual attention approaches are based on the bottom-up computational framework,
+where visual attention is supposed to be driven by low-level stimulus in the scene,
+such as color intensity and contrast. These approaches consist of the following three steps:
+The first step is feature extraction in which multiple low-level visual features, such as
+intensity, color, orientation, texture, and motion, are extracted from the image at multiple
+scales. The second step is saliency computation. The saliency is computed by a center-surround
+operation, self-information, or graph-based random walk using multiple features. After
+normalization and linear/nonlinear combination, a master map or a saliency map is computed
+to represent the saliency of each image pixel. Last, a few key locations on the saliency map
+are identified by winner-take-all, or inhibition-of- return, or other nonlinear operations.
 %}}}
 
 %% Formulation (1 page)
-\section{Problem Formulation}
+\section{Our Approach}
+
+We base the essence of our salient object detection on several suppositions: 
+it is likely for stuff with high contrast boundary to its near neighbours to be salient object, 
+large "block" distinction relative to located surrounds, 
+intensive colour distribution compared to all other color component
+in candidate image and space continuity of saliency. \\
+
+\subsection{Formulation}
 %{{{
-Given an image $I$, we want to compute the location of a salient object.
+    To formulate the salient object detection problem, we incorporate the high-level concept
+    of the salient object into the process of saliency map computation.
+    As can be observed in Fig, people naturally pay more attention to salient objects in images, such as a person,
+    a face, a car, an animal, or a road sign. Therefore, salient object detection can be formulated as a binary
+    labeling problem that separates a salient object from the background. 
 
-Binary labelling task -- for each pixel $x$, indicate whether it belongs to the salient object (1) or not (0). 
-Thus, our objective is to have corresponding map $A$, indicating binary saliency of one pixel.
+    For each pixel $x$ of given an image $I$, the binary mask $A_x$ indicate whether this pixel
+    $x$ belongs to the salient object (1) or not (0). Thus, our objective can be transformaed to 
+    derive the corresponding saliency map $A$, indicating binary salient property of one pixel.
 
+    Build up a probabilistic model $P(A|I)=\frac{1}{Z}e^{-E(A|I)}$, where $\frac{1}{Z}$ is the normalising factor, and $E(A|I)$ is the energy function incorporating both unary and pairwise potentials between pixels.
     \begin{center}
         \includegraphics[width=1.8in,height=1in]{./Figures/mrf.jpg} \\
         \footnotesize Fig.2 graph for Conditional Random Field
         \end{center}
 
-    Build up a probabilistic model $P(A|I)=\frac{1}{Z}e^{-E(A|I)}$, where $\frac{1}{Z}$ is the normalising factor, and $E(A|I)$ is the energy function incorporating both unary and pairwise potentials between pixels.
+
 
     Formally, the energy function can be represented as
     $$
@@ -125,14 +162,14 @@ Thus, our objective is to have corresponding map $A$, indicating binary saliency
 %}}}
 
 %% Feature Extraction (2 pages)
-\section{Feature Extraction}
+\subsection{Feature Extraction}
 Feature Extraction, widely acknowledged as the most significant component of computer vision task,
 represents how we want the computer to interpret the raw iamges. In this project, we just focus
 on three critical features, each of which is capable of capturing the saliency individually but
 in various level of scope. They are respectively Multiscale Contrast, Center Surround Histogram 
 and Color Spatial Distribution. 
 %% local feature
-\subsection{Multiscale Contrast}
+\subsubsection{Multiscale Contrast}
 %{{{
 Constrast is commonly utilised as local feature because the contrast operator simulates
 the human visual receptive fields. Specifically, it captures the point that salient object
@@ -199,7 +236,7 @@ is quantitatively normalised, the contrast of the body of chimpanzee to the gras
 However, the tooth may be too narrow to be observed by the human receptive field and thus not 
 labelled as the salient object. That is, this flaw may result in the low recall comparing to the ground truth data.%}}}
 
-\subsection{Center Surround Histogram}
+\subsubsection{Center Surround Histogram}
 %% regional feature
 %{{{
 Create a colour RGB histogram for both the rectangle and the surrounding frame with a certain resolution (number of ``bins'' for each colour)
@@ -217,7 +254,7 @@ Create a colour RGB histogram for both the rectangle and the surrounding frame w
 %}}}
 
 %% global feature
-\subsection{Color Spatial Distribution}
+\subsubsection{Color Spatial Distribution}
 %{{{
     The goal of using Color Spatial Distribution feature is to take into account the global saliency information, 
     that is, the information about how widely the colors occurring in one image are distributed over the global scope.
@@ -312,7 +349,7 @@ Create a colour RGB histogram for both the rectangle and the surrounding frame w
     Fig. Examples for global feature using diluted images \\
     \end{center}
 
-    We test three levels of pixel dilution, no pydown, one-level pydown and two-level pydown. One-level
+    We test three levels of pixel dilution: no pydown, one-level pydown and two-level pydown. One-level
     pydown means reducing both of the width and height of one image to half of the original size, 
     such that only a quarter of pixels are available for fitting the mixture of gaussians.
     From the above figure, it is evident that one-level pydown, to some extent, increases the quality of 
@@ -332,7 +369,7 @@ Create a colour RGB histogram for both the rectangle and the surrounding frame w
 %}}}
 
 %% Learning (0.5 page)
-\section{Learning}
+\subsection{Learning}
 Those three features aforementioned have their own strengthes and weaknesses in different areas. For example, the .
 It goes without saying that incorporating all three features into the unary potential of the CRF model 
 to complement each other. It would be oversimplistic and unpersuasive to treat three features in equal weight 
@@ -344,7 +381,7 @@ In this project, we implement logistic regression to decide the optimal weight u
 
 %% CRF Inference (0.5 - 1 page)
 %% images for inferred binary mask
-\section{CRF Inference}
+\subsection{CRF Inference}
 To infer the maximum likelihood assignment for pixelwise variables under the CRF framework,
 the usual message passing algorithm would be intractable. Therefore, we turn to the alpha expansion algorithm 
 based on the mexfunction, such that inferring maximum likelihood assignment would be affordable. 
@@ -355,9 +392,9 @@ based on the mexfunction, such that inferring maximum likelihood assignment woul
 
 %% Discussion (existing flaws and possible improvements) (0.5 page)
 \section{Conclusion and Discussion}
-\subsection{Conclusion}
-\subsection{Current Weaknesses}
-\subsection{Possible Improvement}
+%\subsection{Conclusion}
+%\subsection{Current Weaknesses}
+%\subsection{Possible Improvement}
 
 %% acknowlegement and reference (0.5 page)
 \begin{thebibliography}{99} \fontsize{9pt}{50} \setlength{\itemsep}{-0.5pt} 
