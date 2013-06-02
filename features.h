@@ -5,9 +5,9 @@
 ** All rights reserved.
 **
 ******************************************************************************
-** FILENAME:    2550Common.h
-** AUTHOR(S):   Stephen Gould <stephen.gould@anu.edu.au>
-**              Jimmy Lin <u5223173@uds.anu.edu.anu>
+** FILENAME:    features.h
+** AUTHOR(S):   
+**              Jimmy Lin <u5223173@anu.edu.anu>
 **              Chris Claoue-Long <u5183532@anu.edu.au>
 *****************************************************************************/
 #include <cmath>
@@ -71,8 +71,15 @@ cv::Mat getContrast(cv::Mat img, int windowSize){
     return contrastMap;
 }
 
+typedef struct {
+    int nPyLevel;
+    int windowSize;
+    cv::Mat featureMap;
+    vector< cv::Mat > PyContrastMaps;
+} MultiScaleContrast;
+
 // Get the multiscale contrast map of the image (to 6 scales) 
-cv::Mat getMultiScaleContrast(cv::Mat img, const int windowSize, const int nPyLevel){
+MultiScaleContrast getMultiScaleContrast(cv::Mat img, const int windowSize, const int nPyLevel){
 /*{{{*/
     // constant declaration
     const int imageWidth = img.cols;
@@ -138,8 +145,9 @@ cv::Mat getMultiScaleContrast(cv::Mat img, const int windowSize, const int nPyLe
             msc.at<double>(y,x) = (msc.at<double>(y,x) - minContrast) / range ;
         }
     }
+    MultiScaleContrast obj = {nPyLevel, windowSize, msc, contrastMaps};
 /*}}}*/
-    return msc;
+    return obj;
 }
 
 // ----------------------- Center Surround Histogram-----------------------------------------------
@@ -343,7 +351,7 @@ cv::Mat getSpatialDistribution(cv::Mat img){
     const int imageWidth = img.cols;
     const int imageHeight = img.rows;
     const int nPixels = imageHeight * imageWidth;
-    const bool isPydown = false;
+    const bool isPydown = true;
     // initialise objective matrix.
     cv::Mat cdi = cv::Mat(imageHeight, imageWidth, CV_64F);
     // temporary variable used in the loop

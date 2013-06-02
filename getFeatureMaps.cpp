@@ -51,10 +51,12 @@ int main (int argc, char * argv[]) {
     // Set default value for optional command line arguments.
     const char *modelFile = NULL;
     bool bVisualize = false;
+    bool pyramidDisplay = false;
 
     DRWN_BEGIN_CMDLINE_PROCESSING(argc, argv)
         DRWN_CMDLINE_STR_OPTION("-o", modelFile)
         DRWN_CMDLINE_BOOL_OPTION("-x", bVisualize)
+        DRWN_CMDLINE_BOOL_OPTION("-p", pyramidDisplay)
     DRWN_END_CMDLINE_PROCESSING(usage());
 
     // Check for the correct number of required arguments
@@ -115,7 +117,15 @@ int main (int argc, char * argv[]) {
         // get processed by feature.h
         cv::Mat cdi;   
         if (string(modeSwitch).compare("msc") == 0 ) {
-            cdi = getMultiScaleContrast(img, 3, 3);  // windowSize:3 , pyramid level:4
+            // halfwindowSize:5 , pyramid level: 6
+            MultiScaleContrast mscObj = getMultiScaleContrast(img, 5, 6);
+            cdi = mscObj.featureMap;  
+            // output the pyramid
+            if (pyramidDisplay) {
+                for (int p = 0; p < mscObj.nPyLevel; p ++) {
+                    cv::imwrite(string(outputDir) + baseNames[i] + "_p" + toString(p) + ".jpg", mscObj.PyContrastMaps[p]);
+                }
+            }
         } else if (string(modeSwitch).compare("csh") == 0 ) {
             cdi = getCenterSurround(img); 
         } else if (string(modeSwitch).compare("csd") == 0 ) {
