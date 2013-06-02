@@ -207,9 +207,9 @@ Create a colour RGB histogram for both the rectangle and the surrounding frame w
 %    Finally, c
 
     Calculate the $\chi^2$ value between the two histograms to obtain the differences between the rectangle and the surrounding frame.  Do this for multiple aspect ratios, and keep the largest $\chi^2$ value: %and the frame that formed it:
-    $$
-    R(x) = \argmax\limits_{R(x)}\chi^2(R(x), R_s(x)) =\argmax\limits_{R(x)}\frac{1}{2}\cdot\SUM_{i\in bins}\frac{(hist_{R(x)_i}-hist_{R_s(x)_i})^2}{hist_{R(x)_i}+hist_{R_s(x)_i}}
-    $$
+    \begin{align*}
+    R(x) &= \argmax\limits_{R(x)}\chi^2(R(x), R_s(x)) \\ &=\argmax\limits_{R(x)}\frac{1}{2}\cdot\SUM_{i\in bins}\frac{(hist_{R(x)_i}-hist_{R_s(x)_i})^2}{hist_{R(x)_i}+hist_{R_s(x)_i}}
+    \end{align*}
     The center-surround histogram feature is finally calculated as:
     $$
     f_h(x,I)\propto\SUM_{x'|x\in R(x')}w_{xx'}\chi^2(R(x'),R_s(x'))
