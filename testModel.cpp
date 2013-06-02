@@ -162,7 +162,9 @@ int main (int argc, char * argv[]) {
         
         // convert pres to a suitable image for working on finding the bounding box using OpenCV functions
         cvtColor(pres, bounding, CV_BGR2GRAY);
-        findContours(bounding,v,CV_RETR_LIST,CV_CHAIN_APPROX_NONE);
+        
+        // find the contours, returnign only extreme external bounds
+        findContours(bounding,v,CV_RETR_EXTERNAL,CV_CHAIN_APPROX_NONE);
         area = 0;
         for(unsigned int it=0; it<v.size();it++) {
             if(area < v[it].size())
@@ -173,7 +175,7 @@ int main (int argc, char * argv[]) {
         pt1.y = box.y;
         pt2.x = box.x + box.width;
         pt2.y = box.y + box.height;
-        // Draws the rect in the original image and show it
+        // Draws the bounding box in the original image and show it
         cv::rectangle(bounding, pt1, pt2, Scalar(255,0,0));
         // show the bounding box!
         IplImage bound = (IplImage)bounding;
