@@ -93,7 +93,7 @@ int main (int argc, char * argv[]) {
     vector<string> baseNames = drwnDirectoryListing(imgDir, ".jpg", false, false);
     DRWN_LOG_MESSAGE("Loading " << baseNames.size() << " images and labels...");
     string dir = string(imgDir);
-    int dirIndex = dir.find_last_of(DRWN_DIRSEP)-1; // get the last occurrence
+    //int dirIndex = dir.find_last_of(DRWN_DIRSEP)-1; // get the last occurrence
     ofstream outputLbls;
     outputLbls.open(outLbls, ios::out | ios::trunc);
     if (!outputLbls.is_open()){
@@ -209,7 +209,8 @@ int main (int argc, char * argv[]) {
 
         // add the rectangle to the list of output labels
         //outputLbls << last substring of "/";
-        outputLbls  << dir.substr(dirIndex, dirIndex+1) << "\\" << baseNames[i] << ".jpg\n";
+        //outputLbls  << dir.substr(dirIndex, dirIndex) << "\\" << baseNames[i] << ".jpg\n";
+        outputLbls << baseNames[i].substr(0,1) << "\\" << baseNames[i] << ".jpg\n";
         outputLbls << img.rows << " " << img.cols << "\n";
         outputLbls << pt1.x << " " << pt1.y << " " << pt2.x << " " << pt2.y << ";\n\n";
     }
