@@ -35,7 +35,7 @@
 #include "drwnML.h"
 #include "drwnVision.h"
 
-#include "getLabelledImages.cpp"
+#include "parseLabel.h"
 #include "mexImageCRF.h"
 
 using namespace std;

@@ -31,6 +31,8 @@
 #include "drwnML.h"
 #include "drwnVision.h"
 
+#include "parseLabel.h"
+
 
 using namespace std;
 using namespace Eigen;
@@ -65,13 +67,38 @@ int main(int argc, char *argv[]){
         return -1;
     }
     
+    const char *resultLbls = DRWN_CMDLINE_ARGV[0];
+    const char *truthLbls = DRWN_CMDLINE_ARGV[1];
+    
+    DRWN_ASSERT_MSG(drwnFileExists(resultLbls), "Results file " << resultLbls << " does not exist");
+    DRWN_ASSERT_MSG(drwnFileExists(truthLbls), "Ground truth file " << truthLbls << " does not exist");
+    
+//     ifstream results, truth;
+//     results.open(resultLbls);
+//     truth.open(truthLbls);
+//     
+//     if (!results.is_open()){
+//         cerr << "ERROR OPENING RESULTS FILE";
+//         return -1;
+//     }
+//     if (!truth.is_open()){
+//         cerr << "ERROR OPENING GROUND TRUTH FILE";
+//         return -1;
+//     }
+    
     // Process labels and calculate distance between them
     DRWN_LOG_MESSAGE("Comparing resultant labels to ground truth...");
-    const char *resultsLbl = DRWN_CMDLINE_ARGV[0];
-    const char *truthLbl = DRWN_CMDLINE_ARGV[1];
-    map< string, vector<int> > resultPairs = parseLabel(resultsLbl);
-    map< string, vector<int> > truthPairs = parseLabel(truthLbl);
+
+    map< string, vector<int> > resultPairs = parseLabel(resultLbls);
+    map< string, vector<int> > truthPairs = parseLabel(truthLbls);
     
+    vector<int> resultRect, truthRect;    
+    for (std::map<string, vector<int> >::iterator it = resultPairs.begin(); it != resultPairs.end(); ++it){
+        cout << it->first;
+        cout << it->second[0];
+    
+    }
+        
     // for each label in the resultPairs, find its corresponding element in the truthPairs
     // calculate the distance between the two to get a score out of 100 (100 is best, 0 is nowhere near close)
     // TODO work out exactly how to do this.
