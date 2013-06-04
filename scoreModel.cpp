@@ -73,30 +73,28 @@ int main(int argc, char *argv[]){
     DRWN_ASSERT_MSG(drwnFileExists(resultLbls), "Results file " << resultLbls << " does not exist");
     DRWN_ASSERT_MSG(drwnFileExists(truthLbls), "Ground truth file " << truthLbls << " does not exist");
     
-//     ifstream results, truth;
-//     results.open(resultLbls);
-//     truth.open(truthLbls);
-//     
-//     if (!results.is_open()){
-//         cerr << "ERROR OPENING RESULTS FILE";
-//         return -1;
-//     }
-//     if (!truth.is_open()){
-//         cerr << "ERROR OPENING GROUND TRUTH FILE";
-//         return -1;
-//     }
-    
     // Process labels and calculate distance between them
     DRWN_LOG_MESSAGE("Comparing resultant labels to ground truth...");
 
     map< string, vector<int> > resultPairs = parseLabel(resultLbls);
     map< string, vector<int> > truthPairs = parseLabel(truthLbls);
-    
-    vector<int> resultRect, truthRect;    
+    string currFile; // for getting the rectangle from the truth pairs map
+    vector<int> resultRect, truthRect;
+    int topDisp, leftDisp, rightDisp, bottomDisp;
+
     for (std::map<string, vector<int> >::iterator it = resultPairs.begin(); it != resultPairs.end(); ++it){
-        cout << it->first;
-        cout << it->second[0];
-    
+        cout << "Getting truth rectangle...\n";
+        currFile = it->first;
+        cout << currFile << "\n";
+        truthRect = truthPairs.find(currFile)->second;
+        cout << "Found the truth rectangle!\n";
+        resultRect = it->second;
+        leftDisp = abs(truthRect.at(0)-resultRect.at(0));
+        topDisp = abs(truthRect.at(1)-resultRect.at(1));
+        rightDisp = abs(truthRect.at(2)-resultRect.at(2));
+        bottomDisp = abs(truthRect.at(3)-resultRect.at(3));
+        cout << it->first << "\n";
+        cout << leftDisp << " " << topDisp << " " << rightDisp << " " << bottomDisp << "\n\n";
     }
         
     // for each label in the resultPairs, find its corresponding element in the truthPairs
