@@ -163,12 +163,14 @@ int main (int argc, char * argv[]) {
         // present the derived binary mask
         IplImage pcvimg = (IplImage) pres;
         IplImage *present = cvCloneImage(&pcvimg);
-        cv::imwrite(string(outputDir) + baseNames[i] + ".jpg", pres);
+        //cv::imwrite(string(outputDir) + baseNames[i] + ".jpg", pres);
+        /*
         if (bVisualize) { 
             // draw the processed feature map and display it on the screen
             drwnShowDebuggingImage(present, "Composed Graph", false);
             cvReleaseImage(&present);
         }
+        */
         
         // convert pres to a suitable image for working on finding the bounding box using OpenCV functions
         cvtColor(pres, bounding, CV_BGR2GRAY);
@@ -188,7 +190,12 @@ int main (int argc, char * argv[]) {
         pt1.y = box.y;
         pt2.x = box.x + box.width;
         pt2.y = box.y + box.height;
-        cv::rectangle(bounding, pt1, pt2, Scalar(255,0,0));
+        bounding = cv::Mat(img);
+        for (int k = 0; k < 5 ; k +=3) {
+            cv::rectangle(bounding, cv::Point(pt1.x-k, pt1.y-k), cv::Point(pt2.x+k, pt2.y+k), Scalar(255, 0, 0));
+            cv::rectangle(bounding, cv::Point(pt1.x-k-1, pt1.y-k-1), cv::Point(pt2.x+k+1, pt2.y+k+1), Scalar(0, 255, 0));
+            cv::rectangle(bounding, cv::Point(pt1.x-k-2, pt1.y-k-2), cv::Point(pt2.x+k+2, pt2.y+k+2), Scalar(0, 0, 255));
+        }
 
         if(bVisualize){
             // Draw the bounding box in the original image and show it

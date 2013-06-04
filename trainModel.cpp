@@ -35,8 +35,8 @@
 #include "drwnML.h"
 #include "drwnVision.h"
 
-#include "getLabelledImages.cpp"
 #include "mexImageCRF.h"
+#include "parseLabel.h"
 
 using namespace std;
 using namespace Eigen;
@@ -134,28 +134,34 @@ int main (int argc, char * argv[]) {
         }
         
         // get unary potential and combine them by pre-computed parameters 
-        vector< cv::Mat > unary(2);
-        unary[0] = cv::Mat(img.rows, img.cols, CV_64F);
-        unary[1] = cv::Mat(img.rows, img.cols, CV_64F);
-        double grayscale;
+        //vector< cv::Mat > unary(2);
+        //unary[0] = cv::Mat(img.rows, img.cols, CV_64F);
+        //unary[1] = cv::Mat(img.rows, img.cols, CV_64F);
+        double unaryCombo;
+        double maxValue = -1, minValue = 1e6;
+        cv::Mat unaryComboMap(img.rows, img.cols, CV_64F);
         for (int y = 0; y < img.rows; y ++) {
             for (int x = 0 ; x < img.cols; x ++) {
-                grayscale = 0.22*msc.at<Vec3b>(y,x).val[0] + 0.54*csh.at<Vec3b>(y,x).val[0] + 0.24*csd.at<Vec3b>(y,x).val[0];
-                unary[0].at<double>(y,x) = grayscale / 255.0;
-                unary[1].at<double>(y,x) = 1 - unary[0].at<double>(y,x);
+                unaryCombo = 0.22*msc.at<Vec3b>(y,x).val[0] + 0.54*csh.at<Vec3b>(y,x).val[0] + 0.24*csd.at<Vec3b>(y,x).val[0];
+                unaryComboMap.at<double>(y, x) = unaryCombo;
+                maxValue = (maxValue < unaryCombo)? unaryCombo: maxValue;
+                minValue = (minValue > unaryCombo)? unaryCombo: minValue;
+                //unary[0].at<double>(y,x) = grayscale / 255.0;
+                //unary[1].at<double>(y,x) = 1 - unary[0].at<double>(y,x);
             }
         }
         
         // compute binary mask over the image
-        const double lambda = 2;
-        cv::Mat binaryMask = mexFunction(img, unary, lambda);
+        //const double lambda = 2;
+        //cv::Mat binaryMask = mexFunction(img, unary, lambda);
 
         // interpret the binary mask to two-color image
         cv::Mat pres(img.rows, img.cols, CV_8UC3);
+        int grayscale;
         for (int y = 0 ; y < img.rows; y ++) {
             for (int x = 0 ; x < img.cols; x ++) {
-                int tempSaliency = binaryMask.at<short>(y,x)*255>125?255:0;
-                pres.at<cv::Vec3b>(y,x) = cv::Vec3b(tempSaliency, tempSaliency, tempSaliency);
+                grayscale = (int) (255 * ( unaryComboMap.at<double>(y,x) - minValue ) / (maxValue - minValue) );
+                pres.at<cv::Vec3b>(y,x) = cv::Vec3b(grayscale, grayscale, grayscale);
             }
         }
         
