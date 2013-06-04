@@ -28,6 +28,8 @@
 #include "drwnML.h"
 #include "drwnVision.h"
 #include "features.h"
+#include "parseLabel.h"
+
 using namespace std;
 using namespace Eigen;
 
@@ -44,70 +46,6 @@ void usage() {
 	 << endl;
 }
 
-// parseLabel ----------------------------------------------------------------
-
-/* Form a hash map between the filenames and integer vectors representing the 
- * salient rectangle boundaries in the corresponding images. 
- */
-map< string, vector<int> > parseLabel (const char * labelFileName) {
-    map< string, vector<int> > fileLabelPairs; // MAP FROM FILENAME TO RECTANGLE
-    string line;
-    ifstream labelFile ;
-    labelFile.open(labelFileName);
-    while ( !labelFile.eof() ){
-        unsigned int pos;
-        string imagePackage;
-        string imageFilename;
-        int widthOfImage, heightOfImage;
-        vector<int> posRectangle;
-        posRectangle.resize(4);
-        // restore every line of the file
-        getline(labelFile, line); 
-        if (line.find( ".jpg") != std::string::npos) {
-            // PARSE for the first line 
-            // - which stores the image name and package
-            pos = line.find("\\");
-            imageFilename = line.substr(pos+1); // get filename
-            imagePackage = line.substr(0, pos); // get package number
-            imageFilename = imageFilename.substr(0, imageFilename.size() - 1); // truncate string
-            // test for printing
-            //cout << "imageFilename:" << imageFilename  << endl;
-            //cout << imageFilename.size() << endl;
-
-            // PARSE for the SECOND line
-            //  width and height of that training image
-            //  use c lib's string 2 integer
-            getline(labelFile, line);
-            pos = line.find(" ");
-            widthOfImage = atoi(line.substr(0,pos).c_str()); 
-            heightOfImage = atoi(line.substr(pos+1).c_str()); 
-            // print for test
-            //cout << "Width:" << widthOfImage << "\t" << "Height:" << heightOfImage << endl;
-
-            // PARSE for the third line
-            // three saliency rectangles, each with four parameter
-            getline(labelFile, line);
-            string temp;
-            for (int i = 0 ; i < 3; i ++) {
-                pos = line.find(";");
-                temp = line.substr(0, pos);
-                sscanf(temp.c_str(), "%d %d %d %d", &posRectangle[0],
-                        &posRectangle[1], &posRectangle[2], &posRectangle[3]);
-                line = line.substr(pos+1);
-                // printing for test
-                //printf("Left: %3d \t Top: %4d \t Right: %4d \t Bottom: %4d \n",
-                        //posRectangle[0], posRectangle[1], posRectangle[2], posRectangle[3]);
-                if (i == 1) { // we choose second data here.
-                    fileLabelPairs[imageFilename] = posRectangle;
-                }
-            }
-            //cout << endl;
-        }
-    }
-    labelFile.close();
-    
-    return fileLabelPairs;
-}
 // main ----------------------------------------------------------------------
 
 int main (int argc, char * argv[]) {

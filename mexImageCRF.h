@@ -41,10 +41,8 @@ void addUnaryTerms(drwnMaxFlow *g, const vector< cv::Mat > unary,
 void addPairwiseTerms(drwnMaxFlow *g, const drwnPixelNeighbourContrasts contrast,
     double lambda, const cv::Mat labels, int alpha);
 
-/*
-MatrixXi alphaExpansionTest(const vector<MatrixXd> &unary,
+cv::Mat alphaExpansionTest( vector< cv::Mat > unary,
     const drwnPixelNeighbourContrasts &contrast, double lambda);
-*/
 
 // main -----------------------------------------------------------------------
 
@@ -145,11 +143,7 @@ cv::Mat mexFunction(cv::Mat img, vector< cv::Mat > unary, const double lambda)
     delete g;
 
     // testing code
-    /*
-    if (atoi(options[string("test")].c_str()) != 0) {
-        labels = alphaExpansionTest(unary, contrast, lambda);
-    }
-    */
+    labels = alphaExpansionTest(unary, contrast, lambda);
 
     // release memory
     cvReleaseImage(&image);
@@ -289,8 +283,7 @@ void addPairwiseTerms(drwnMaxFlow *g, const drwnPixelNeighbourContrasts contrast
     }
 }
 
-/*
-MatrixXi alphaExpansionTest(const vector<MatrixXd> &unary,
+cv::Mat alphaExpansionTest(vector< cv::Mat > unary,
     const drwnPixelNeighbourContrasts &contrast, double lambda)
 {
     DRWN_FCN_TIC;
@@ -308,7 +301,7 @@ MatrixXi alphaExpansionTest(const vector<MatrixXd> &unary,
         drwnTableFactor *phi = new drwnTableFactor(universe);
         phi->addVariable(i);
         for (int xi = 0; xi < L; xi++) {
-            (*phi)[xi] = unary[xi](i % H, i / H);
+            (*phi)[xi] = unary[xi].at<double>(i % H, i / H);
         }
         graph.addFactor(phi);
     }
@@ -405,12 +398,11 @@ MatrixXi alphaExpansionTest(const vector<MatrixXd> &unary,
     drwnFullAssignment assignment;
     double e = inf.inference(assignment);
 
-    MatrixXi labels(H, W);
+    cv::Mat labels(H, W, CV_16S);
     for (int i = 0; i < H * W; i++) {
-        labels(i % H, i / H) = assignment[i];
+        labels.at<short>(i % H, i / H) = assignment[i];
     }
 
     DRWN_FCN_TOC;
     return labels;
 }
-*/
