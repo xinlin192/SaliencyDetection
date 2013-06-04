@@ -162,7 +162,8 @@ in candidate image and space continuity of saliency. \\
     $$
     E(A|I) = \SUM_x S_{unary}(a_x,I) + \lambda_0 \SUM_{x,x'}S_{pair}(a_x,a_{x'},I)
     $$
-    where $\lambda$ is the relative weight between the summary of multiple unary features and pairwise features. \\[10pt]
+    where $\lambda$ is the relative weight between the summary of multiple unary features and pairwise features. 
+
     The pairwise feature $S(a_x,a_{x'},I)$ exploits the spatial relationship between two adjacent pixels.  It can be viewed as a ``penalty'' for labelling adjacent pixels the same or differently.
     $$
     S(a_x,a_{x'},I) = |a_x-a_{x'}| \cdot e^{-\beta d_{x,x'}}
@@ -249,7 +250,8 @@ by the regional feature - Center Surround Histogram, which will be introduced la
     \includegraphics[width=0.7in,height=0.54in]{./Figures/contrast/2cont.jpg}
     \includegraphics[width=0.7in,height=0.54in]{./Figures/contrast/3cont.jpg}
     \includegraphics[width=0.7in,height=0.54in]{./Figures/contrast/4cont.jpg}\\
-    \footnotesize Fig. Feature Maps of Multiscale Contrast under various scenes
+    \footnotesize \hspace{0.1cm} (a) \hs (b) \hs  (c) \hs (d) \\
+     Fig. Feature Maps of Multiscale Contrast under various scenes
     \end{center}
 
 But there are some drawbacks that are tough to avoid. 
@@ -311,7 +313,8 @@ and keep the largest $\chi^2$ value:
     \includegraphics[width=0.7in,height=0.54in]{./Figures/CSH_image/2cont.jpg}
     \includegraphics[width=0.7in,height=0.54in]{./Figures/CSH_image/3cont.jpg}
     \includegraphics[width=0.7in,height=0.54in]{./Figures/CSH_image/4cont.jpg}\\
-    \footnotesize Fig. Feature Maps of Center-Surrond Histograms under various scenes
+    \footnotesize \hspace{0.1cm} (a) \hs (b) \hs  (c) \hs (d) \\
+    Fig. Feature Maps of Center-Surrond Histograms under various scenes
     \end{center}
 
     %% TODO advantage and drabacks of this feature.
@@ -451,14 +454,83 @@ In this project, we implement logistic regression to decide the optimal weight u
 %% images for inferred binary mask
 \subsection{CRF Inference}
 To infer the maximum likelihood assignment for pixelwise variables under the CRF framework,
-the usual message passing algorithm would be intractable. Therefore, we turn to the alpha expansion algorithm 
-based on the mexfunction, such that inferring maximum likelihood assignment would be affordable. 
+the usual message passing algorithm would be intractable. Therefore, we turn to the $\alpha$-expansion inference,
+which successively segments all and non-$\alpha$ pixels with graph cuts and the algorithm will 
+change the value of $\alpha$ at each iteration with graph-cut algorithm. 
+By this means, inferring maximum likelihood assignment for binary saliency variable, or equivalently, 
+ minimal energy function would be much faster. 
+
+But how to determine the parameter $\lambda_0$, which indicates to what extent, relative to the 
+unary term (combined feature map), we ought to consider the pairwise potential in 
+deciding the binary saliency of one pixel? And this parameter would influence the smoothness of
+resulting binary mask since pairwise term can be regarded as the penality to adjacent pixels 
+with different labels. Our solution is to determine the optimal $\lambda_0$
+by applying the cross validation on $\lambda_0$ at various magnitudes. 
+
+%% TODO add diagram and graph to illustrate our cross validation on various lambda
+TODO:add diagram and graph to illustrate our cross validation on various lambda \\
+
+By cross validation above, the optimal parameter $\lambda_0$ we use for evaluating the binary mask is 8.
+\begin{center}
+    \includegraphics[width=0.8in,height=0.6in]{./Figures/CRFinference/5_159_159364.jpg}
+    \includegraphics[width=0.8in,height=0.6in]{./Figures/CRFinference/5_159_159364_3.jpg}
+    \includegraphics[width=0.8in,height=0.6in]{./Figures/CRFinference/5_159_159364_2.jpg} \\
+    \includegraphics[width=0.8in,height=0.6in]{./Figures/CRFinference/5_159_159649.jpg}
+    \includegraphics[width=0.8in,height=0.6in]{./Figures/CRFinference/5_159_159649_3.jpg}
+    \includegraphics[width=0.8in,height=0.6in]{./Figures/CRFinference/5_159_159649_2.jpg} \\
+    \includegraphics[width=0.8in,height=0.6in]{./Figures/CRFinference/5_162_162349.jpg}
+    \includegraphics[width=0.8in,height=0.6in]{./Figures/CRFinference/5_162_162349_3.jpg}
+    \includegraphics[width=0.8in,height=0.6in]{./Figures/CRFinference/5_162_162349_2.jpg} \\
+    \footnotesize  (a) Raw Image (b) Combined Unary Map  (c) Binary Mask ($\lambda=8$)\\
+     Fig. Examples for CRF inference by $\alpha$-algorithm
+\end{center}
 
 %% Result evaluation in rectangle level (1 page)
 %% images for the output rectangle
 \section{Result Evaluation}
 We randomly pick up 500 images from MSRA dataset B to form the training set. And we choose another 500 images
 to form the testing set.
+\subsection{Bounding Box}
+The binary mask, derived from the CRF inference, can be directly used for various applications. 
+However, in order to evaluate the effectiveness of our approach, we make use of ... algorithm to output a bounding 
+rectangle to box the salient object, based on the derived pixelwise binary mask. 
+
+%% TODO Specific algorithm for output bounding box
+
+\begin{center}
+    \includegraphics[width=0.6in,height=0.4in]{./Figures/boundingbox/5_145_145114RECT.jpg}
+    \includegraphics[width=0.6in,height=0.4in]{./Figures/boundingbox/5_145_145275RECT.jpg}
+    \includegraphics[width=0.6in,height=0.4in]{./Figures/boundingbox/5_145_145349RECT.jpg}
+    \includegraphics[width=0.6in,height=0.4in]{./Figures/boundingbox/5_145_145398RECT.jpg}
+    \includegraphics[width=0.6in,height=0.4in]{./Figures/boundingbox/5_146_146319RECT.jpg} \\
+    \includegraphics[width=0.6in,height=0.4in]{./Figures/boundingbox/5_146_146330RECT.jpg}
+    \includegraphics[width=0.6in,height=0.4in]{./Figures/boundingbox/5_146_146332RECT.jpg}
+    \includegraphics[width=0.6in,height=0.4in]{./Figures/boundingbox/5_146_146431RECT.jpg}
+    \includegraphics[width=0.6in,height=0.4in]{./Figures/boundingbox/5_146_146552RECT.jpg}
+    \includegraphics[width=0.6in,height=0.4in]{./Figures/boundingbox/5_147_147367RECT.jpg} \\
+    \includegraphics[width=0.6in,height=0.4in]{./Figures/boundingbox/5_148_148067RECT.jpg}
+    \includegraphics[width=0.6in,height=0.4in]{./Figures/boundingbox/5_148_148271RECT.jpg}
+    \includegraphics[width=0.6in,height=0.4in]{./Figures/boundingbox/5_148_148710RECT.jpg}
+    \includegraphics[width=0.6in,height=0.4in]{./Figures/boundingbox/5_148_148763RECT.jpg}
+    \includegraphics[width=0.6in,height=0.4in]{./Figures/boundingbox/5_148_148788RECT.jpg} \\
+    \includegraphics[width=0.6in,height=0.4in]{./Figures/boundingbox/5_150_150590RECT.jpg}
+    \includegraphics[width=0.6in,height=0.4in]{./Figures/boundingbox/5_151_151334RECT.jpg}
+    \includegraphics[width=0.6in,height=0.4in]{./Figures/boundingbox/5_153_153455RECT.jpg}
+    \includegraphics[width=0.6in,height=0.4in]{./Figures/boundingbox/5_153_153651RECT.jpg}
+    \includegraphics[width=0.6in,height=0.4in]{./Figures/boundingbox/5_154_154297RECT.jpg} \\
+    \includegraphics[width=0.6in,height=0.4in]{./Figures/boundingbox/5_155_155096RECT.jpg}
+    \includegraphics[width=0.6in,height=0.4in]{./Figures/boundingbox/5_155_155145RECT.jpg}
+    \includegraphics[width=0.6in,height=0.4in]{./Figures/boundingbox/5_155_155333RECT.jpg}
+    \includegraphics[width=0.6in,height=0.4in]{./Figures/boundingbox/5_155_155196RECT.jpg}
+    \includegraphics[width=0.6in,height=0.4in]{./Figures/boundingbox/5_155_155459RECT.jpg} \\
+    \footnotesize Fig. Examples images for bounding box output
+\end{center}
+
+% TODO add some analysis here.
+
+\subsection{Evaluation Criteria}
+\subsubsection{Precision \& Recall}
+\subsubsection{Boudary Displacement Error}
 
 %% Discussion (existing flaws and possible improvements) (0.5 page)
 \section{Conclusion and Discussion}
@@ -483,8 +555,11 @@ to form the testing set.
     \bibitem 5 L. Itti. Models of Bottom-Up and Top-Down Visual Attention. PhD thesis, 
         \textit{California Institute of Technology Pasadena, 2000}.
 
-    \bibitem 6 Gould, Stephen. "DARWIN: A Framework for Machine Learning and Computer Vision Research and Development." 
-        \textit{Journal of Machine Learning Research 13 (2012): 3533-3537}
+    \bibitem 6 Boykov, Yuri, Olga Veksler, and Ramin Zabih. "Fast approximate energy minimization via graph cuts." 
+        \textit{Pattern Analysis and Machine Intelligence, IEEE Transactions on 23.11 (2001): 1222-1239}.
+
+    \bibitem 7 Gould, Stephen. "DARWIN: A Framework for Machine Learning and Computer Vision Research and Development." 
+        \textit{Journal of Machine Learning Research 13 (2012): 3533-3537}.
 
 \end{thebibliography}
 %-------------------------------------------------------------------------
