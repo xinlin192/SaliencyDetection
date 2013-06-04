@@ -42,7 +42,7 @@ using namespace Eigen;
 void usage()
 {
     cerr << DRWN_USAGE_HEADER << endl;
-    cerr << "USAGE: ./score [OPTIONS] <resultFile> <lblFile>\n";
+    cerr << "USAGE: ./score [OPTIONS] <resultLblFile> <truthLblFile>\n";
     cerr << "OPTIONS:\n"
          << "  -x                :: visualize\n"
          << DRWN_STANDARD_OPTIONS_USAGE
@@ -78,16 +78,15 @@ int main(int argc, char *argv[]){
 
     map< string, vector<int> > resultPairs = parseLabel(resultLbls);
     map< string, vector<int> > truthPairs = parseLabel(truthLbls);
-    string currFile; // for getting the rectangle from the truth pairs map
     vector<int> resultRect, truthRect;
     int topDisp, leftDisp, rightDisp, bottomDisp;
+    float avgBDE;
+    string currFile;
 
+    // get the result and the truth labels for each file, calculate their Boundary-Displacement Error
     for (std::map<string, vector<int> >::iterator it = resultPairs.begin(); it != resultPairs.end(); ++it){
-        cout << "Getting truth rectangle...\n";
         currFile = it->first;
-        cout << currFile << "\n";
         truthRect = truthPairs.find(currFile)->second;
-        cout << "Found the truth rectangle!\n";
         resultRect = it->second;
         leftDisp = abs(truthRect.at(0)-resultRect.at(0));
         topDisp = abs(truthRect.at(1)-resultRect.at(1));
@@ -96,10 +95,11 @@ int main(int argc, char *argv[]){
         cout << it->first << "\n";
         cout << leftDisp << " " << topDisp << " " << rightDisp << " " << bottomDisp << "\n\n";
     }
-        
-    // for each label in the resultPairs, find its corresponding element in the truthPairs
-    // calculate the distance between the two to get a score out of 100 (100 is best, 0 is nowhere near close)
-    // TODO work out exactly how to do this.
+    
+    float avgAcc = 1000.0; // TODO return actual accuracy!
+    cout << "Average accuracy: " << avgAcc << "\%\n";
+    
+
 
     // Clean up by freeing memory and printing profile information.
     cvDestroyAllWindows();
