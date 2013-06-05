@@ -147,8 +147,8 @@ int main(int argc, char *argv[]){
                             if(currDistance < minDistance) minDistance = currDistance;
                         }
                     }
-                } else minDistance = 0;
-                avgDistance += minDistance;
+                    avgDistance += minDistance;
+                }
                 minDistance = 10000.0; // reset to a ridiculously large number to get the smaller value once more
             }
             
