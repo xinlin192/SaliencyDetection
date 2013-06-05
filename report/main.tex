@@ -73,6 +73,7 @@ Making use of OpenCV, DARWIN and the MSRA dataset, we detect the saliency of by 
 
 A long-standing problem in the field of computer vision is how to calculate the saliency of objects in an image, that is, their prominence in the image when compared to their background and surrounds.  Human vision can accomplish this quite easily, since the human brain itself has mechanisms to direct attention to the main objects in the perceived image.  This ability of visual attention has been studied by researchers in multiple fields, from physiology and psychology to computer vision.  The property of detecting a salient object is important for the latter because it leads to the ability to single out individual areas of an image, for example in automatic image cropping and vision simulation in robotics, as well as 3D surface reconstruction in augmented reality displays.
 
+\begin{figure}
 \begin{center}
     \includegraphics[width=0.6in,height=0.4in]{./Figures/example_image/4_140_140907.jpg}
     \includegraphics[width=0.6in,height=0.4in]{./Figures/example_image/4_141_141474.jpg}
@@ -99,8 +100,9 @@ A long-standing problem in the field of computer vision is how to calculate the 
     \includegraphics[width=0.6in,height=0.4in]{./Figures/example_image/4_144_144604.jpg}
     \includegraphics[width=0.6in,height=0.4in]{./Figures/example_image/4_134_134777.jpg}
     \includegraphics[width=0.6in,height=0.4in]{./Figures/example_image/4_134_134664.jpg}\\
-    \footnotesize Fig. Example images from MSRA dataset B
+    \caption{Example images from MSRA dataset B}
     \end{center}
+\end{figure}
 
 %% Related Works (0.5 page)
 \section{Related Works}
@@ -115,9 +117,9 @@ Lastly, a few key locations on the saliency map are identified by winner-take-al
 %% Formulation (1 page)
 \section{Our Approach}
 
-For our approach, we have based our salient object detection on several suppositions, that mimic how human vision differentiates salient objects from the rest of the visual field.
+In our approach, we base our salient object detection on several suppositions that mimic how human vision differentiates salient objects from the rest of the visual field.
 
-It is likely for pixels with a high contrast difference to their near neighbours to be part of a salient object, since they could represent a contour or boundary around an object.  This is similar to how the human brain discovers boundaries between objects in its visual field \BOLD{CITATION PSYCHBOOK}
+It is likely that pixels with a high contrast difference to their near neighbours to be part of a salient object, since they could represent a contour or boundary around an object.  This is similar to how the human brain discovers boundaries between objects in its visual field by detecting differences in light intensity\BOLD{CITATION PSYCHBOOK}
 
 Salient objects are more often than not quite distinct from their local surrounding region.  \BOLD{MORE HERE}
 
@@ -131,12 +133,12 @@ For each pixel $x$ of given an image $I$, the binary mask $A_x$ indicates whethe
 
 To do this, we build up a probabilistic model $$P(A|I)=\frac{1}{Z}e^{-E(A|I)}$$ where $\frac{1}{Z}$ is the normalising factor, and $E(A|I)$ is the energy function incorporating both unary and pairwise potentials between pixels.
 
+\begin{figure}
     \begin{center}
-    	\BOLD{REDO FIGS}
         \includegraphics[width=1.8in,height=1in]{./Figures/mrf.jpg} \\
-        \footnotesize Fig.2 graph for Conditional Random Field
+        \caption{A Conditional Random Field }\small White nodes are the objects, grey nodes are their potentials
         \end{center}
-
+\end{figure}
 
 Formally, the energy function can be represented as $$E(A|I) = \SUM_x S_{unary}(a_x,I) + \lambda_0 \SUM_{x,x'}S_{pair}(a_x,a_{x'},I)$$ where $\lambda$ is the relative weight between the sum of multiple unary  and pairwise features. 
 
@@ -144,17 +146,17 @@ The pairwise feature $S(a_x,a_{x'},I)$ exploits the spatial relationship between
 
 The unary potential for combination of three features is specified as $$S_{unary}(a_x,I) = \SUM_{k=1}^K \lambda_k \cdot F_k(a_x,I)$$ where $\lambda_k$ is the weight of the $k^{th}$ feature conforming to $\sum_{k=1}^{K} \lambda_k = 1$.
 
+\begin{figure}
     \begin{center} %% image 5_156_156422
     \includegraphics[width=0.6in,height=0.8in]{./Figures/previews/raw.jpg}
     \includegraphics[width=0.6in,height=0.8in]{./Figures/previews/MC.jpg}
     \includegraphics[width=0.6in,height=0.8in]{./Figures/previews/CSH.jpg} 
     \includegraphics[width=0.6in,height=0.8in]{./Figures/previews/CSD.jpg} 
     \includegraphics[width=0.6in,height=0.8in]{./Figures/previews/Composed.jpg} \\
-    {\footnotesize Fig.3 Original Image and Preview of feature maps \\ 
-       Left to Right: (b) multiscale contrast  (c) center surround histogram \\[-1mm] 
-    (d) color spatial distribution (e) composed unary potential}
-    \end{center}
-
+    \caption{Original Image and Preview of feature maps}\vspace{1mm}
+       \small Left to Right: Original Image, Multiscale Contrast Map, Centre-Surround Histogram, Colour Spatial Distribution, Composed Unary Potentials
+\end{center}
+\end{figure}
 
 The value of each feature $F_k(a_x,I)$ comes from a normalised feature map $f_k(x,I)\in[0,1]$, where for each pixel: $$F_k(a_x,I) = \left\{\begin{matrix}f_k(x,I), & a_x=0\\1-f_k(x,I), & a_x=1\end{matrix}\right.$$
 
@@ -168,19 +170,24 @@ Feature Extraction, widely acknowledged as the most significant component of com
 Constrast is commonly used as local feature because the contrast operator simulates the human visual receptive fields. Specifically, it captures the point that salient object tends to have tremendous contrast to the surroundings in its boundary (not vice versa). Since we may have no prior knowledge about the size of salient object, it is usual to compute the contrast at multiple scale. 
 \BOLD{TODO ADD detailed analysis about why we should have multiple scales.}
 
-    \begin{center}    
-        \includegraphics[width=0.65in,height=0.9in]{./Figures/pyramid/5_145_145839raw.jpg} \hspace{2mm}
-    \includegraphics[width=0.65in,height=0.9in]{./Figures/pyramid/5_145_145839_p0.jpg} 
-    \includegraphics[width=0.325in,height=0.45in]{./Figures/pyramid/5_145_145839_p1.jpg} 
-    \includegraphics[width=0.1625in,height=0.225in]{./Figures/pyramid/5_145_145839_p2.jpg} 
-    \includegraphics[width=0.08125in,height=0.1125in]{./Figures/pyramid/5_145_145839_p3.jpg} 
-    \includegraphics[width=0.040625in,height=0.0575in]{./Figures/pyramid/5_145_145839_p4.jpg} 
-    \includegraphics[width=0.0203125in,height=0.02825in]{./Figures/pyramid/5_145_145839_p5.jpg} \hspace{1mm}
-    \includegraphics[width=0.65in,height=0.9in]{./Figures/pyramid/5_145_145839.jpg} \\
-    \footnotesize Fig. Pyramid of Multiscale Contrast.  \\
-    (a) leftmost: Original Image. (b) rightmost: Multiscale Feature Map. \\
-    (c) immediate images: multiscale pyramids from level $1$ to $6$.
-    \end{center}
+\begin{figure}[h]
+\begin{center}    
+\includegraphics[width=0.65in,height=0.9in]{./Figures/pyramid/5_145_145839raw.jpg} %\hspace{2mm}
+\includegraphics[width=0.65in,height=0.9in]{./Figures/pyramid/5_145_145839.jpg} \\[0.5mm]
+\includegraphics[width=0.65in,height=0.9in]{./Figures/pyramid/5_145_145839_p0.jpg} `
+\includegraphics[width=0.65in,height=0.9in]{./Figures/pyramid/5_145_145839_p1.jpg} 
+    %width=0.325in,height=0.45in
+\includegraphics[width=0.65in,height=0.9in]{./Figures/pyramid/5_145_145839_p2.jpg}\\[0.5mm]
+    %width=0.1625in,height=0.225in    
+\includegraphics[width=0.65in,height=0.9in]{./Figures/pyramid/5_145_145839_p3.jpg} 
+    %width=0.08125in,height=0.1125in    
+\includegraphics[width=0.65in,height=0.9in]{./Figures/pyramid/5_145_145839_p4.jpg}
+    %width=0.0203125in,height=0.02825in
+\includegraphics[width=0.65in,height=0.9in]{./Figures/pyramid/5_145_145839_p5.jpg} \hspace{1mm}\\
+    %width=0.040625in,height=0.0575in    
+\caption{Multiscale Contrast example.}\small{Top-left: Original Image. Top-right: Multiscale Contrast Map.\\Bottom 6 Images: Contrast Image Pyramid, Levels $1$ to $6$.}
+\end{center}
+\end{figure}
 
 Hence, define the multiscale contrast to be a contrast map from the linear combination of image contrast at all levels of an N-level
 gaussian image pyramid, using the pixels $x$ in the image $I$: $$f_c(x,I) = \SUM_{n = 1}^{N}\SUM_{x'\in W(x)}||I^n(x)-I^n(x')||^2$$ where W(x) is a window that delineates which area to consider for neighbouring pixels to compare contrast values.
@@ -190,6 +197,7 @@ In our implementation, we choose the total number of pyramid level $N$ to be $6$
 
 It is evident that the multiscale contrast gives high distinction between the boundary and non-boundary region. This provides us a precise description of where the boundary of salient object exist in the output binary mask. For those salient object has relatively large contrast within its body, this feature works perfectly, such as the bird in the second image and the house in the third image. As to the pixels within the salient objects, they are usually given low marks, this weakness can be complemented by the regional feature - centre-surround histogram, which will be introduced later.
 
+\begin{figure}
     \begin{center}
     \includegraphics[width=0.7in,height=0.54in]{./Figures/contrast/1orig.jpg}
     \includegraphics[width=0.7in,height=0.54in]{./Figures/contrast/2orig.jpg}
@@ -200,8 +208,9 @@ It is evident that the multiscale contrast gives high distinction between the bo
     \includegraphics[width=0.7in,height=0.54in]{./Figures/contrast/3cont.jpg}
     \includegraphics[width=0.7in,height=0.54in]{./Figures/contrast/4cont.jpg}\\
     \footnotesize \hspace{0.1cm} (a) \hs (b) \hs  (c) \hs (d) \\
-     Fig. Feature Maps of Multiscale Contrast under various scenes
+\caption{Feature Maps of Multiscale Contrast under various scenes}
     \end{center}
+\end{figure}
 
 But there are some drawbacks that are tough to avoid. First and foremost, boundary of all objects are highlighted, which is obviously not desired. We only wish to give high mark to pixels that are relavant to salient object, rather than all boundaries in one image. This would possibly lead to some "saliency leak" in the ultimate result and deteriorate detection precision since some pixels outside the true salient object are likely to be considered as a part of that object.
 
@@ -218,11 +227,12 @@ Create a colour RGB histogram for both the rectangle and the surrounding frame, 
 R(x) &= \argmax\limits_{R(x)}\chi^2(R(x), R_s(x)) \\ &=\argmax\limits_{R(x)}\frac{1}{2}\cdot\SUM_{i\in bins}\frac{(hist_{R(x)_i}-hist_{R_s(x)_i})^2}{hist_{R(x)_i}+hist_{R_s(x)_i}}
 \end{align*}
 
-Here, we traverse through five template of rectangle with different aspect ratio $\{ 0.5, 0.75, 1.0, 1.25, 1.5\}$ for determining the most distinct pair of centre and surround rectangle centred at each pixel $x$. Besides, to reduce the demands on computational resources, the size range of the rectangle is reduced to 12 discrete ratios $\{ {0.18, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75}\}$ with regards to  $min(w,h)$, which is the minimal value of width and height of the processed image.
+Here, we traverse through five template of rectangle with different aspect ratio $\{ 0.5, 0.75, 1.0, 1.25, 1.5\}$ for determining the most distinct pair of centre and surround rectangle centred at each pixel $x$. Besides, to reduce the demands on computational resources, the size range of the rectangle is reduced to 12 discrete ratios $\{$0.18, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75$\}$ with regards to  $min(w,h)$, which is the minimal value of width and height of the processed image.
 
 The centre-surround histogram feature at each pixel $x$ is finally calculated by $$f_h(x,I)\propto\SUM_{x'|x\in R(x')}w_{xx'}\chi^2(R(x'),R_s(x'))$$
 Note that the centre-surround histogram feature reflects the distinguishability of each pixel, which is assigned from the distinguishability of the most outstanding area centred at each pixel of one image, with the weight of spatial closeness to the centre of that area. 
 
+\begin{figure}
     \begin{center}
     \includegraphics[width=0.7in,height=0.54in]{./Figures/CSH_image/1orig.jpg}
     \includegraphics[width=0.7in,height=0.54in]{./Figures/CSH_image/2orig.jpg}
@@ -233,8 +243,9 @@ Note that the centre-surround histogram feature reflects the distinguishability 
     \includegraphics[width=0.7in,height=0.54in]{./Figures/CSH_image/3cont.jpg}
     \includegraphics[width=0.7in,height=0.54in]{./Figures/CSH_image/4cont.jpg}\\
     \footnotesize \hspace{0.1cm} (a) \hs (b) \hs  (c) \hs (d) \\
-    Fig. Feature Maps of Center-Surrond Histograms under various scenes
+    \caption{Feature Maps of Centre-Surrond Histograms under various scenes}
     \end{center}
+\end{figure}
 
 \BOLD{TODO advantage and drabacks of this feature.}
 As we can see from above Fig, the whole salient block within one image is given distinguishable emphasis comparing to its surrounds in the output feature map. 
@@ -258,6 +269,7 @@ The final colour spatial distribution feature for pixel $x$ is defined as a weig
 
 The feature map $f_s (\cdot,I)$ is also normalized to the range $[0, 1]$. The following figure shows colour spatial distribution feature maps of several example images. The salient objects are well covered by this global feature. 
 
+\begin{figure}
     \begin{center}
     \includegraphics[width=0.72in,height=0.52in]{./CSD_image/1.jpg}
     \includegraphics[width=0.72in,height=0.52in]{./CSD_image/2.jpg}
@@ -268,8 +280,9 @@ The feature map $f_s (\cdot,I)$ is also normalized to the range $[0, 1]$. The fo
     \includegraphics[width=0.72in,height=0.52in]{./CSD_image/3_CSD.jpg} 
     \includegraphics[width=0.72in,height=0.52in]{./CSD_image/4_CSD.jpg} \\
     \footnotesize \hspace{0.1cm} (a) \hs (b) \hs  (c) \hs (d) \\
-     Fig. Feature Maps of Color Spatial Distribution under various scenes
+     \caption{Feature Maps of Color Spatial Distribution under various scenes}
     \end{center}
+\end{figure}
 
 \BOLD{why it is a successful feature in detecting the saliency}
 It is evident that the global feature gains a huge success in mark up the saliency when the background is monotonous. As illustrated by the first three images in the above figure, the flying stuff is distinguished from the bichrome background - blue ocean and white tide, the sign card under the  background of ocean and tree leaves and in the third image the girl body before the fully white wall.
@@ -278,6 +291,7 @@ However, in the case of colorful background, color spatial distribution, with a 
 
 One variation in our implementation is to create the component model from only a subset of the pixels in the image. The pixels in the subset is picked up with equal spatial distance. Specifically, we apply the "pydown" module in Opencv to dilute the pixels participating this unsupervised learning task. Such manipulation will not sacrifice too much accuracy, but greatly reduce  the running time of fitting the Mixture of Gaussians since the number of pixels provided for the fitting halves. 
 
+\begin{figure}
     \begin{center}
     \includegraphics[width=0.72in,height=0.52in]{./Figures/pydownCompare/1.jpg}
     \includegraphics[width=0.72in,height=0.52in]{./Figures/pydownCompare/1NOPYDOWN.jpg}
@@ -292,8 +306,9 @@ One variation in our implementation is to create the component model from only a
     \includegraphics[width=0.72in,height=0.52in]{./Figures/pydownCompare/3PYDOWN.jpg} 
     \includegraphics[width=0.72in,height=0.52in]{./Figures/pydownCompare/3DOUBLEPYDOWN.jpg} \\
     \footnotesize (a) original (b) no pydown (c) one-level pydown (d) two-level pydown
-    Fig. Examples for global feature using diluted images \\
+    \caption{Examples for global feature using diluted images}
     \end{center}
+\end{figure}
 
 We test three levels of pixel dilution: no pydown, one-level pydown and two-level pydown. One-level pydown means reducing both of the width and height of one image to half of the original size,  such that only a quarter of pixels are available for fitting the mixture of gaussians. From the above figure, it is evident that one-level pydown, to some extent, increases the quality of  this global feature by marking the salient block softly or obscurely rather than in a strict way. 
 
@@ -327,6 +342,8 @@ But how to determine the parameter $\lambda_0$, which indicates to what extent, 
 TODO:add diagram and graph to illustrate our cross validation on various lambda}
 
 By cross validation above, the optimal parameter $\lambda_0$ we use for evaluating the binary mask is $\lambda_0 = 8$.
+
+\begin{figure}
 \begin{center}
     \includegraphics[width=0.8in,height=0.6in]{./Figures/CRFinference/5_159_159364.jpg}
     \includegraphics[width=0.8in,height=0.6in]{./Figures/CRFinference/5_159_159364_3.jpg}
@@ -338,8 +355,9 @@ By cross validation above, the optimal parameter $\lambda_0$ we use for evaluati
     \includegraphics[width=0.8in,height=0.6in]{./Figures/CRFinference/5_162_162349_3.jpg}
     \includegraphics[width=0.8in,height=0.6in]{./Figures/CRFinference/5_162_162349_2.jpg} \\
     \footnotesize  (a) Raw Image (b) Combined Unary Map  (c) Binary Mask ($\lambda=8$)\\
-     Fig. Examples for CRF inference by $\alpha$-algorithm
+     \caption{Examples for CRF inference by $\alpha$-algorithm}
 \end{center}
+\end{figure}
 
 %% Result evaluation in rectangle level (1 page)
 %% images for the output rectangle
@@ -347,10 +365,11 @@ By cross validation above, the optimal parameter $\lambda_0$ we use for evaluati
 We randomly pick up 500 images from MSRA dataset B to form the training set. And we choose another 500 images to form the testing set.
 
 \subsection{Bounding Box}
-The binary mask, derived from the CRF inference, can be directly used for various applications. However, in order to evaluate the effectiveness of our approach, we make use of ... algorithm to output a bounding rectangle to box the salient object, based on the derived pixelwise binary mask. 
+The binary mask derived from the CRF inference can be used directly in a multitude of applications. However, in order to evaluate the accuracy of our approach, we make use of OpenCV's findContours algorithm to output a bounding box around the salient object, based on the derived pixel-wise binary mask. The dimensions of this bounding box is output as a label for each image into a text file holding all resultant labels for that directory.
 
 %% TODO Specific algorithm for output bounding box
 
+\begin{figure}
 \begin{center}
     \includegraphics[width=0.6in,height=0.4in]{./Figures/boundingbox/5_145_145114RECT.jpg}
     \includegraphics[width=0.6in,height=0.4in]{./Figures/boundingbox/5_145_145275RECT.jpg}
@@ -377,12 +396,14 @@ The binary mask, derived from the CRF inference, can be directly used for variou
     \includegraphics[width=0.6in,height=0.4in]{./Figures/boundingbox/5_155_155333RECT.jpg}
     \includegraphics[width=0.6in,height=0.4in]{./Figures/boundingbox/5_155_155196RECT.jpg}
     \includegraphics[width=0.6in,height=0.4in]{./Figures/boundingbox/5_155_155459RECT.jpg} \\
-    \footnotesize Fig. Examples images for bounding box output
+    \caption{Examples images for bounding box output}
 \end{center}
+\end{figure}
 
 % TODO add some analysis here.
 
 \subsection{Evaluation Criteria}
+
 \subsubsection{Precision \& Recall}
 \subsubsection{Boudary Displacement Error}
 
