@@ -33,7 +33,7 @@ map< string, vector<int> > parseLabel (const char * labelFileName) {
             pos = line.find("\\");
             imageFilename = line.substr(pos+1); // get filename
             imagePackage = line.substr(0, pos); // get package number
-            // imageFilename = imageFilename.substr(0, imageFilename.size() - 1); // truncate string
+            imageFilename = imageFilename.substr(0, imageFilename.size() - 1); // truncate string
             // test for printing
             // cout << "imageFilename:" << imageFilename  << " ";
             // cout << imageFilename.size() << endl;

@@ -164,20 +164,20 @@ int main (int argc, char * argv[]) {
         IplImage pcvimg = (IplImage) pres;
         IplImage *present = cvCloneImage(&pcvimg);
         //cv::imwrite(string(outputDir) + baseNames[i] + ".jpg", pres);
-        /*
+        
         if (bVisualize) { 
             // draw the processed feature map and display it on the screen
             drwnShowDebuggingImage(present, "Composed Graph", false);
             cvReleaseImage(&present);
         }
-        */
+        
         
         // convert pres to a suitable image for working on finding the bounding box using OpenCV functions
         cvtColor(pres, bounding, CV_BGR2GRAY);
         
         // find the contours, returning only extreme external bounds, find the largest contour area.
         // TODO change to getting a bounding box around all white pixels
-        findContours(bounding,contours,CV_RETR_EXTERNAL,CV_CHAIN_APPROX_NONE);
+        findContours(bounding,contours,CV_RETR_EXTERNAL,CV_CHAIN_APPROX_SIMPLE);
         
         // find the largest contour area
         area = 0;
@@ -208,11 +208,11 @@ int main (int argc, char * argv[]) {
         cv::imwrite(string(outputDir) + baseNames[i] + "RECT.jpg", bounding);
 
         // add the rectangle to the list of output labels
-        //outputLbls << last substring of "/";
-        //outputLbls  << dir.substr(dirIndex, dirIndex) << "\\" << baseNames[i] << ".jpg\n";
-        outputLbls << baseNames[i].substr(0,1) << "\\" << baseNames[i] << ".jpg\n";
-        outputLbls << img.rows << " " << img.cols << "\n";
-        outputLbls << pt1.x << " " << pt1.y << " " << pt2.x << " " << pt2.y << ";\n\n";
+        // the \r here is to mimic the windows-style carriage returns that are contained in the truth label files
+        outputLbls << baseNames[i].substr(0,1) << "\\" << baseNames[i] << ".jpg\r\n";
+        outputLbls << img.cols << " " << img.rows << "\n";
+        // we're getting the second labels so put bogus padding values as the first set
+        outputLbls << "0 0 0 0;" << pt1.x << " " << pt1.y << " " << pt2.x << " " << pt2.y << ";\n\n";
     }
     
     outputLbls.close();
