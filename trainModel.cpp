@@ -37,6 +37,7 @@
 
 #include "mexImageCRF.h"
 #include "parseLabel.h"
+#include "Classifier.h"
 
 using namespace std;
 using namespace Eigen;
@@ -45,7 +46,7 @@ using namespace Eigen;
 
 void usage() {
     cerr << DRWN_USAGE_HEADER << endl;
-    cerr << "USAGE: ./trainModel [OPTIONS] <imgDir> <mscDir> <cshDir> <csdDir> <lblFile> <outDir>\n";
+    cerr << "USAGE: ./trainModel [OPTIONS] <imgDir> <mscDir> <cshDir> <csdDir> <lblFile> \n";
     cerr << "OPTIONS:\n"
          << "  -o <model>        :: output model\n"
          << "  -x                :: visualize\n"
@@ -67,7 +68,7 @@ int main (int argc, char * argv[]) {
     DRWN_END_CMDLINE_PROCESSING(usage());
 
     // Check for the correct number of required arguments
-    if (DRWN_CMDLINE_ARGC != 6) {
+    if (DRWN_CMDLINE_ARGC != 5) {
         usage();
         return -1;
     }
@@ -83,7 +84,6 @@ int main (int argc, char * argv[]) {
     const char *cshDir = DRWN_CMDLINE_ARGV[2]; // directory restores center surround histogram feature map
     const char *csdDir = DRWN_CMDLINE_ARGV[3]; // directory restores color spatial distribution feature map
     const char *lblFile = DRWN_CMDLINE_ARGV[4]; // a single text file with ground truth rectangle
-    const char *outputDir = DRWN_CMDLINE_ARGV[5]; // directory for resulting images
 
     // check their existence
     DRWN_ASSERT_MSG(drwnDirExists(imgDir), "image directory " << imgDir << " does not exist");
@@ -91,21 +91,25 @@ int main (int argc, char * argv[]) {
     DRWN_ASSERT_MSG(drwnDirExists(imgDir), "Centre-Surround histogram directory " << cshDir << " does not exist");
     DRWN_ASSERT_MSG(drwnDirExists(imgDir), "Colour Spatial Distribution directory " << csdDir << " does not exist");
     DRWN_ASSERT_MSG(drwnFileExists(lblFile), "Labels file " << lblFile << " does not exist");
-    DRWN_ASSERT_MSG(drwnDirExists(outputDir), "image directory " << outputDir << " does not exist");
 
     // Get a list of images from the image directory.
     vector<string> baseNames = drwnDirectoryListing(imgDir, ".jpg", false, false);
     DRWN_LOG_MESSAGE("Loading " << baseNames.size() << " images and labels...");
+
+    map< string, vector<int> > fileLabelPairs = parseLabel(lblFile);
+    int left, top, right, bottom;
+    vector<int> tempRectangle;
+    String processedImage;
+    vector<double> lambda(3, 0.0);
 
     // Build a dataset by loading images and labels. For each image,
     // find the salient area using the labels and then compute the set of features
     // that determine this saliency
     drwnClassifierDataset dataset;
 
-    map< string, vector<int> > fileLabelPairs = parseLabel(lblFile);
-    int left, top, right, bottom;
-    vector<int> tempRectangle;
-    String processedImage;
+    // initialise one 2-class logistic model, data dimension = 3
+    Classifier classifier;
+    classifier.initialize(3, 2);
 
     for (unsigned i = 0; i < baseNames.size(); i++) {
         processedImage = baseNames[i] + ".jpg";
@@ -116,6 +120,21 @@ int main (int argc, char * argv[]) {
         cv::Mat msc = cv::imread(string(mscDir) + DRWN_DIRSEP + processedImage);
         cv::Mat csh = cv::imread(string(cshDir) + DRWN_DIRSEP + processedImage);
         cv::Mat csd = cv::imread(string(csdDir) + DRWN_DIRSEP + processedImage);
+
+        // basic info of currently processed image
+        const int H = img.rows;
+        const int W = img.cols;
+
+        // form feature vector for each pixel
+        vector< vector<double> > features;
+        features.resize(H * W, vector<double>(3, 0.0));
+        for (int y = 0 ; y < H ; y ++) {
+            for (int x = 0 ; x < W ; x ++) {
+                features[ y * W + x ][0] = msc.at<Vec3b>(y,x).val[0] / 255.0;
+                features[ y * W + x ][1] = csh.at<Vec3b>(y,x).val[0] / 255.0;
+                features[ y * W + x ][2] = csd.at<Vec3b>(y,x).val[0] / 255.0;
+            }
+        }
         
         // ground truth label
         tempRectangle = fileLabelPairs.find(processedImage)->second ;
@@ -123,6 +142,19 @@ int main (int argc, char * argv[]) {
         top = tempRectangle [1];
         right = tempRectangle [2];
         bottom = tempRectangle[3];
+
+        // form target vector for the current image
+        vector<int> targets( H * W, 0);
+        for (int y = 0 ; y < H ; y ++) {
+            for (int x = 0 ; x < W ; x ++) {
+                if ( y >= top && y <= bottom && x >= left && x <= right)
+                    targets[ y * W + x ] = 1;
+            }
+        }
+        classifier.train(features, targets);
+        
+        lambda = classifier.getWeights();
+        cout << lambda[0] << "," << lambda[1] << "," << lambda[2] << endl;
 
         // show the image and feature maps 
         if (bVisualize) {
@@ -168,7 +200,7 @@ int main (int argc, char * argv[]) {
         // present the derived binary mask by white-black image
         IplImage pcvimg = (IplImage) pres;
         IplImage *present = cvCloneImage(&pcvimg);
-        cv::imwrite(string(outputDir) + baseNames[i] + ".jpg", pres);
+        //cv::imwrite(string(outputDir) + baseNames[i] + ".jpg", pres);
         
         if (bVisualize) {
             drwnShowDebuggingImage(present, "Composed Graph", false);
