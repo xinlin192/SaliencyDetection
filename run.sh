@@ -20,12 +20,18 @@ elif [ $# -eq "2" ]; then
     mkdir results/$1
     ../../bin/getFeatureMaps -x -v $1 $2 results/$1/
     echo "Results saved to results/$1/"
-elif [ $# -eq "3" ]; then
-    # train/test/mark the saliency detector
+elif [ $# -eq "7" ]; then 
+    # imgDir mscDir cshDir csdDir outputDir outputLbls lambda
+    # test and mark the saliency detector
     echo "WARNING:" 
     echo "THIS ASSUMES YOU HAVE ALREADY COMPUTED ALL CSH, CSD AND MSC RENDERINGS FOR THE IMAGES IN $2"
     echo "Running the saliency detector..."
-    # STUFF HERE about training?, testing, scoring.
+    mkdir results/output
+    ../../bin/testModel $@
+    echo "Please input the ground truth label file's absolute path"
+    echo -n "> " # prompt for input
+    read groundTruth
+    ../../bin/scoreModel groundTruth $6
 else
     echo -e $USAGE
 fi

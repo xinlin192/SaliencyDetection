@@ -18,29 +18,27 @@ map< string, vector<int> > parseLabel (const char * labelFileName) {
     string line;
     ifstream labelFile ;
     labelFile.open(labelFileName);
+    unsigned int pos;
+    string imagePackage;
+    string imageFilename;
+    int widthOfImage, heightOfImage;
+    vector<int> posRectangle(4);
+        
     while ( !labelFile.eof() ){
-        unsigned int pos;
-        string imagePackage;
-        string imageFilename;
-        int widthOfImage, heightOfImage;
-        vector<int> posRectangle;
-        posRectangle.resize(4);
+
         // restore every line of the file
         getline(labelFile, line); 
         if (line.find( ".jpg") != std::string::npos) {
-            // PARSE for the first line 
-            // - which stores the image name and package
+            // Parse the first line, which stores the image name and package
             pos = line.find("\\");
             imageFilename = line.substr(pos+1); // get filename
             imagePackage = line.substr(0, pos); // get package number
-            //imageFilename = imageFilename.substr(0, imageFilename.size() - 1); // truncate string
+            // imageFilename = imageFilename.substr(0, imageFilename.size() - 1); // truncate string
             // test for printing
-            //cout << "imageFilename:" << imageFilename  << endl;
-            //cout << imageFilename.size() << endl;
+            // cout << "imageFilename:" << imageFilename  << " ";
+            // cout << imageFilename.size() << endl;
 
-            // PARSE for the SECOND line
-            //  width and height of that training image
-            //  use c lib's string 2 integer
+            // Parse the second line, the width and height of that training image
             getline(labelFile, line);
             pos = line.find(" ");
             widthOfImage = atoi(line.substr(0,pos).c_str()); 
@@ -48,8 +46,7 @@ map< string, vector<int> > parseLabel (const char * labelFileName) {
             // print for test
             //cout << "Width:" << widthOfImage << "\t" << "Height:" << heightOfImage << endl;
 
-            // PARSE for the third line
-            // three saliency rectangles, each with four parameter
+            // Parse the third line -- three saliency rectangles, each with four parameters
             getline(labelFile, line);
             string temp;
             for (int i = 0 ; i < 3; i ++) {
