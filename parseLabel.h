@@ -55,9 +55,11 @@ map< string, vector<int> > parseLabel (const char * labelFileName) {
                 sscanf(temp.c_str(), "%d %d %d %d", &posRectangle[0],
                         &posRectangle[1], &posRectangle[2], &posRectangle[3]);
                 line = line.substr(pos+1);
+
                 // printing for test
                 //printf("Left: %3d \t Top: %4d \t Right: %4d \t Bottom: %4d \n",
                         //posRectangle[0], posRectangle[1], posRectangle[2], posRectangle[3]);
+                       
                 if (i == 1) { // we choose second data here.
                     fileLabelPairs[imageFilename] = posRectangle;
                 }

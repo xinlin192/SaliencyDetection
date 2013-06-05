@@ -17,13 +17,17 @@ class Classifier: public drwnTMultiClassLogistic<drwnIdentityJointFeatureMap>
     public:
     vector< double > getWeights() {
         /*
+        cout << "invoked" << endl;
         int nParameters = (*_weights).size();
-        vector< double > tempWeights(nParameters);
-        for (int i = 0 ; i < nParameters; i ++ ) {
-            tempWeights[i] = (* _weights)[i];
-        }*/
-        return *_weights;
-
+        cout << "number of parameters: "<< nParameters << endl;
+        vector< double > tempWeights(nParameters, 0.0);
+        */
+        vector< double > tempWeights(3, 0.0);
+        for (int i = 0 ; i < 3; i ++ ) {
+            tempWeights[i] =  _theta[i];
+            //cout << _theta[i]  << endl;
+        }
+        return tempWeights;
     }
 
 };
