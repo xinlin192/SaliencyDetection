@@ -110,25 +110,51 @@ int main(int argc, char *argv[]){
         cout << it->first << "\n";
         cout << leftDisp << " " << topDisp << " " << rightDisp << " " << bottomDisp << "\n\n";
         
+        // get the largest rectangle, we'll use this to calculate the distance
+        int left, right, top, bottom, l, b, t, r;
+        if ((rright-rleft)*(rbottom-rtop)<(tright-tleft)*(tbottom-ttop)){
+            left = tleft;
+            right = tright;
+            top = ttop;
+            bottom = tbottom;
+            l = rleft;
+            b = rright;
+            t = rtop;
+            r = rbottom;
+        } else {
+            left = rleft;
+            right = rright;
+            top = rtop;
+            bottom = rbottom;
+            l = tleft;
+            b = tright;
+            t = ttop;
+            r = tbottom;
+        }
+        
         
         // calculate the minimum distance between each point x in the results and all the points in the truth label
         // add this result to the avgDistance for each point x
         avgDistance = 0.0;
         minDistance = 10000.0; // ridiculously large number, there will always be a smaller value to take!
-        for(int rcol = rleft; rcol < rright; rcol++){
-            for(int rrow = rtop; rrow < rbottom; rrow++){
-                for(int tcol = tleft; tcol < tright; tcol++){
-                    for (int trow = ttop; trow < tbottom; trow++){
-                        currDistance = sqrt(pow((float)rcol-tcol,2) + pow((float)rrow-trow,2) );
-                        if(currDistance < minDistance) minDistance = currDistance;
+        for(int largeCol = left; largeCol < right; largeCol++){
+            for(int largeRow = top; largeRow < bottom; largeRow++){
+                if(!(largeCol > l && largeCol < r && largeRow > t && largeRow < b)){
+                    // non-zero displacement
+                    for(int smallCol = l; smallCol < r; smallCol++){
+                        for (int smallRow = t; smallRow < b; smallRow++){
+                            currDistance = sqrt(pow((float)largeCol-smallCol,2) + pow((float)largeRow-smallRow,2) );
+                            if(currDistance < minDistance) minDistance = currDistance;
+                        }
                     }
-                }
-                
+                } else minDistance = 0;
                 avgDistance += minDistance;
+                minDistance = 10000.0; // reset to a ridiculously large number to get the smaller value once more
             }
             
         }
-        // add this to the overall BDE (it will be 0 if a perfect label, else slightly off)
+        // average over the number of pixels then add this to the overall BDE (it will be 0 if a perfect label, else slightly off)
+        avgDistance /= ((right-left)*(bottom-top));
         avgBDE += avgDistance;
 
     }
