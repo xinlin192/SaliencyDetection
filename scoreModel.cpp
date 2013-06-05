@@ -79,25 +79,63 @@ int main(int argc, char *argv[]){
     map< string, vector<int> > resultPairs = parseLabel(resultLbls);
     map< string, vector<int> > truthPairs = parseLabel(truthLbls);
     vector<int> resultRect, truthRect;
-    int topDisp, leftDisp, rightDisp, bottomDisp;
-    float avgBDE;
+    float topDisp, leftDisp, rightDisp, bottomDisp;
+    int rleft, rtop, rright, rbottom, tleft, ttop, tright, tbottom;
+    float avgBDE = 0;
+    float avgDistance, currDistance, minDistance;
     string currFile;
 
     // get the result and the truth labels for each file, calculate their Boundary-Displacement Error
     for (std::map<string, vector<int> >::iterator it = resultPairs.begin(); it != resultPairs.end(); ++it){
         currFile = it->first;
+        if(truthPairs.find(currFile) == truthPairs.end()){
+            cerr << "ERROR FINDING MAP FROM " << currFile << " TO BOUNDING RECTANGLE IN TRUTH LABELS\n";
+            return -1;
+        }
         truthRect = truthPairs.find(currFile)->second;
         resultRect = it->second;
-        leftDisp = abs(truthRect.at(0)-resultRect.at(0));
-        topDisp = abs(truthRect.at(1)-resultRect.at(1));
-        rightDisp = abs(truthRect.at(2)-resultRect.at(2));
-        bottomDisp = abs(truthRect.at(3)-resultRect.at(3));
+        rleft = resultRect.at(0);
+        tleft = truthRect.at(0);
+        rtop = resultRect.at(1);
+        ttop = truthRect.at(1);
+        rright = resultRect.at(2);
+        tright = truthRect.at(2);
+        rbottom = resultRect.at(3);
+        tbottom = truthRect.at(3);
+        leftDisp = (rleft-tleft);
+        topDisp = (rtop-ttop);
+        rightDisp = (rright-tright);
+        bottomDisp = (rbottom-tbottom);
+        // debugging
         cout << it->first << "\n";
         cout << leftDisp << " " << topDisp << " " << rightDisp << " " << bottomDisp << "\n\n";
+        
+        
+        // calculate the minimum distance between each point x in the results and all the points in the truth label
+        // add this result to the avgDistance for each point x
+        avgDistance = 0.0;
+        minDistance = 10000.0; // ridiculously large number, there will always be a smaller value to take!
+        for(int rcol = rleft; rcol < rright; rcol++){
+            for(int rrow = rtop; rrow < rbottom; rrow++){
+                for(int tcol = tleft; tcol < tright; tcol++){
+                    for (int trow = ttop; trow < tbottom; trow++){
+                        currDistance = sqrt(pow((float)rcol-tcol,2) + pow((float)rrow-trow,2) );
+                        if(currDistance < minDistance) minDistance = currDistance;
+                    }
+                }
+                
+                avgDistance += minDistance;
+            }
+            
+        }
+        // add this to the overall BDE (it will be 0 if a perfect label, else slightly off)
+        avgBDE += avgDistance;
+
     }
     
-    float avgAcc = 1000.0; // TODO return actual accuracy!
-    cout << "Average accuracy: " << avgAcc << "\%\n";
+    // get the average BDE overal;
+    avgBDE /= (float)resultPairs.size();
+    cout << "Average Boundary Displacement Error: " << avgBDE << "\n";
     
 
 
