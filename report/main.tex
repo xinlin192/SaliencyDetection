@@ -168,7 +168,7 @@ Feature Extraction, widely acknowledged as the most significant component of com
 \subsubsection{Multiscale Contrast}
 
 Constrast is commonly used as local feature because the contrast operator simulates the human visual receptive fields. Specifically, it captures the point that salient object tends to have tremendous contrast to the surroundings in its boundary (not vice versa). Since we may have no prior knowledge about the size of salient object, it is usual to compute the contrast at multiple scale. 
-\BOLD{TODO ADD detailed analysis about why we should have multiple scales.}
+\BOLD{TODO ADD technical analysis about why we should have multiple scales.}
 
 \begin{figure}[h]
 \begin{center}    
@@ -188,7 +188,6 @@ Immediate images: multiscale pyramids from level $1$ to $6$.}
 Hence, define the multiscale contrast to be a contrast map from the linear combination of image contrast at all levels of an N-level
 gaussian image pyramid, using the pixels $x$ in the image $I$: $$f_c(x,I) = \SUM_{n = 1}^{N}\SUM_{x'\in W(x)}||I^n(x)-I^n(x')||^2$$ where W(x) is a window that delineates which area to consider for neighbouring pixels to compare contrast values.
 
-\BOLD{TODO ADD explanation for why we need to choose such window size and pyramid level.}
 In our implementation, we choose the total number of pyramid level $N$ to be $6$ and the size of the window to be $9 \times 9$. 
 
 It is evident that the multiscale contrast gives high distinction between the boundary and non-boundary region. This provides us a precise description of where the boundary of salient object exist in the output binary mask. For those salient object has relatively large contrast within its body, this feature works perfectly, such as the bird in the second image and the house in the third image. As to the pixels within the salient objects, they are usually given low marks, this weakness can be complemented by the regional feature - centre-surround histogram, which will be introduced later.
@@ -204,7 +203,7 @@ It is evident that the multiscale contrast gives high distinction between the bo
     \includegraphics[width=0.7in,height=0.54in]{./Figures/contrast/3cont.jpg}
     \includegraphics[width=0.7in,height=0.54in]{./Figures/contrast/4cont.jpg}\\
     \footnotesize \hspace{0.1cm} (a) \hs (b) \hs  (c) \hs (d) \\
-\caption{Feature Maps of Multiscale Contrast under various scenes}
+\caption{Feature Maps of Multiscale Contrast under various scenes} \label{Fig:LocalFeatureMap}
     \end{center}
 \end{figure}
 
@@ -215,7 +214,7 @@ Bad vulnerability to the outlier pixels within the body of salient object is ano
 \subsubsection{Centre-Surround Histogram}
 %% regional feature
 
-As shown in the Fig. , the local feature - multiscale contrast only partially detects salient objects since it is only sensitive to the boundaries. Out of the purpose of detecting the whole block of objects, we make use of another static salient feature, which captures the regional information of saliency and can be computed using various low-level features via a center-surround operation. 
+As shown in the Fig.\ref{Fig:LocalFeatureMap} , the local feature - multiscale contrast only partially detects salient objects since it is only sensitive to the boundaries. Out of the purpose of detecting the whole block of objects, we make use of another static salient feature, which captures the regional information of saliency and can be computed using various low-level features via a center-surround operation. 
 
 Create a colour RGB histogram for both the rectangle and the surrounding frame, which has the same area with the center rectangle, with a certain resolution (number of ``bins'' for each colour). And then measure the distinguishability of the area centered at each pixel $x$ by calculating the $\chi^2$ value between the two histograms to obtain the differences between the rectangle and the surrounding frame.  Do this for multiple aspect ratios, and keep the largest $\chi^2$ value: 
 
@@ -239,29 +238,51 @@ Note that the centre-surround histogram feature reflects the distinguishability 
     \includegraphics[width=0.7in,height=0.54in]{./Figures/CSH_image/3cont.jpg}
     \includegraphics[width=0.7in,height=0.54in]{./Figures/CSH_image/4cont.jpg}\\
     \footnotesize \hspace{0.1cm} (a) \hs (b) \hs  (c) \hs (d) \\
-    \caption{Feature Maps of Centre-Surrond Histograms under various scenes}
+    \caption{Feature Maps of Centre-Surrond Histograms} \label{Fig:RegionalFeatureMap}
     \end{center}
 \end{figure}
 
-\BOLD{TODO advantage and drabacks of this feature.}
-As we can see from above Fig, the whole salient block within one image is given distinguishable emphasis comparing to its surrounds in the output feature map. 
 
+As we can see from Fig.\ref{Fig:RegionalFeatureMap}, the whole salient block within one image is
+given distinguishable emphasis comparing to its surrounds in the output feature map. 
+
+However, unlike multiscale contrast, the center surround histogram does not provide accurate description for the 
+boundary of one object, which is an inherent drawback of this regional feature. Fortunately, 
+as mentioned previously, the local feature, to some extent, would complement the regional feature 
+at the boundary description. 
 
 
 
 %% global feature
 \subsubsection{Colour Spatial Distribution}
 
-The goal of using colour spatial distribution feature is to take into account the global saliency information, that is, the information about how widely the colours occurring in one image are distributed over the global scope. By creating Gaussian Mixture Components and fitting them to pixels of the whole image, the variance of each colour component can be captured and we give penalty to the pixels with high-variance colour according to the supposition that the colour of salient object in one image tends to have a unique subset of colours from the distribution
+The goal of using colour spatial distribution feature is to take into account the global 
+saliency information, that is, the information about how widely the colours occurring in 
+one image are distributed over the global scope. 
 
-According to the theory of Machine Learning, each pixel is associated to a colour component with the probability $$
-    P(c|I_x) = \frac{\omega_c\mathcal{N}(I_x|\mu_c,\Sigma_c)}{\SUM_c \omega_c \mathcal{N}(I_x|\mu_c,\Sigma_c)}$$ \BOLD{CITATION FOR THIS?}\\
-where $\omega_c$ is the weight, $\mu_c$ is the mean colour, $\Sigma_c$ is the covariance, and $\mathcal N(I_x|\mu_c,\Sigma_c)$ is the multivariate normal distribution of the $c^{th}$ component.For each fitted gaussian colour component $c$, we compute its horizontal variance $V_{h}(c)$ as $$V_{h}(c) = \frac{1}{|X|_{c}} \sum_{x} p (c|I_{x}) \cdot | x_{h} - M_{h}(c) |^{2}$$ where $x_h$ is horizontal coordinate of pixel $x$, $|X|_c$ is normalising factor and $M_h (c)$ is the mean of the gaussian component $$|X|_c = \sum_x p(c|I_x)\\M_h (c) = \frac{1}{|X|_c} \sum_{x} p(c|I_x) \cdot x_h$$
+First of all, we create the Gaussian Mixture Components $\{c, \mu_c, \Sigma_c\}$ 
+with regard to the color component $c$ and fitting these components, making use of pixels of the whole image. 
+According to the Gaussian Mixtures Model, each pixel is associated to a colour component with the probability $$
+    P(c|I_x) = \frac{\omega_c\mathcal{N}(I_x|\mu_c,\Sigma_c)}{\SUM_c \omega_c \mathcal{N}(I_x|\mu_c,\Sigma_c)}$$ 
+where $\omega_c$ is the weight, $\mu_c$ is the mean colour, $\Sigma_c$ is the covariance, and $\mathcal N(I_x|\mu_c,\Sigma_c)$ is the multivariate normal distribution of the $c^{th}$ component. 
 
-Vertical variance $V_{v}(c)$ is defined similarly, and we equally combine the horizontal and vertical variance to derive the unnormalised composite variance $V_h (c)$ $$V' (c) = V_h (c) + V_v (c) $$
-Then employ the min-max approach to normalise the composite covariance$$V (c) = \frac{V'(c) - min \big(V'(c)\big) }{max \big(V'(c)\big) - min \big(V'(c)\big)}$$ where $V(c)$ is the normalised composite covariance of the $c^{th}$ component, contained between 0 and 1.
+For each fitted gaussian colour component $c$, we compute its horizontal variance $V_{h}(c)$ as 
+$$V_{h}(c) = \frac{1}{|X|_{c}} \sum_{x} p (c|I_{x}) \cdot | x_{h} - M_{h}(c) |^{2}$$ 
+where $x_h$ is horizontal coordinate of pixel $x$, $|X|_c$ is normalising factor and $M_h (c)$ 
+is the mean of the gaussian component:
+$$|X|_c = \sum_x p(c|I_x)\\M_h (c) = \frac{1}{|X|_c} \sum_{x} p(c|I_x) \cdot x_h$$
 
-The final colour spatial distribution feature for pixel $x$ is defined as a weighted sum of its color intensiveness $$f_s(x,I)\propto\SUM_c p(c|I_x)\cdot(1-V(c))$$
+Vertical variance $V_{v}(c)$ is defined similarly, and we equally combine the horizontal 
+and vertical variance to derive the unnormalised composite variance $V_h (c)$:
+$$V' (c) = V_h (c) + V_v (c) $$
+Then employ the min-max approach to normalise the composite covariance
+$$V (c) = \frac{V'(c) - min \big(V'(c)\big) }{max \big(V'(c)\big) - min \big(V'(c)\big)}$$
+where $V(c)$ is the normalised composite covariance of the $c^{th}$ component, contained between 0 and 1.
+
+And then we give penalty to the pixels with high-variance colour, according to the 
+supposition that the colour of salient object in one image tends to be intensive in the 
+spatial aspect. Thus, the ultimate colour spatial distribution feature for pixel $x$ is defined
+as a weighted sum of its color intensiveness $$f_s(x,I)\propto\SUM_c p(c|I_x)\cdot(1-V(c))$$
 
 The feature map $f_s (\cdot,I)$ is also normalized to the range $[0, 1]$. The following figure shows colour spatial distribution feature maps of several example images. The salient objects are well covered by this global feature. 
 
@@ -276,14 +297,13 @@ The feature map $f_s (\cdot,I)$ is also normalized to the range $[0, 1]$. The fo
     \includegraphics[width=0.72in,height=0.52in]{./CSD_image/3_CSD.jpg} 
     \includegraphics[width=0.72in,height=0.52in]{./CSD_image/4_CSD.jpg} \\
     \footnotesize \hspace{0.1cm} (a) \hs (b) \hs  (c) \hs (d) \\
-     \caption{Feature Maps of Color Spatial Distribution under various scenes}
+     \caption{Feature Maps of Color Spatial Distribution} \label{Fig:GlobalFeatureMap}
     \end{center}
 \end{figure}
 
-\BOLD{why it is a successful feature in detecting the saliency}
 It is evident that the global feature gains a huge success in mark up the saliency when the background is monotonous. As illustrated by the first three images in the above figure, the flying stuff is distinguished from the bichrome background - blue ocean and white tide, the sign card under the  background of ocean and tree leaves and in the third image the girl body before the fully white wall.
 
-However, in the case of colorful background, color spatial distribution, with a high probability, fails to distinguish the salient object in the image. The Fig.. (d) demonstrates us this undesired property of the global feature. 
+However, in the case of colorful background, color spatial distribution, with a high probability, fails to distinguish the salient object in the image. The Fig.\ref{Fig:GlobalFeatureMap} (d) demonstrates us this undesired property of the global feature. 
 
 One variation in our implementation is to create the component model from only a subset of the pixels in the image. The pixels in the subset is picked up with equal spatial distance. Specifically, we apply the "pydown" module in Opencv to dilute the pixels participating this unsupervised learning task. Such manipulation will not sacrifice too much accuracy, but greatly reduce  the running time of fitting the Mixture of Gaussians since the number of pixels provided for the fitting halves. 
 
@@ -302,24 +322,38 @@ One variation in our implementation is to create the component model from only a
     \includegraphics[width=0.72in,height=0.52in]{./Figures/pydownCompare/3PYDOWN.jpg} 
     \includegraphics[width=0.72in,height=0.52in]{./Figures/pydownCompare/3DOUBLEPYDOWN.jpg} \\
     \footnotesize (a) original (b) no pydown (c) one-level pydown (d) two-level pydown
-    \caption{Examples for global feature using diluted images}
+    \caption{Examples for global feature using diluted images} \label{Fig:GlobalPydown}
     \end{center}
 \end{figure}
 
-We test three levels of pixel dilution: no pydown, one-level pydown and two-level pydown. One-level pydown means reducing both of the width and height of one image to half of the original size,  such that only a quarter of pixels are available for fitting the mixture of gaussians. From the above figure, it is evident that one-level pydown, to some extent, increases the quality of  this global feature by marking the salient block softly or obscurely rather than in a strict way. 
+We test three levels of pixel dilution: no pydown, one-level pydown and two-level pydown. 
+One-level pydown means reducing both of the width and height of one image to half of the 
+original size,  such that only a quarter of pixels are available for fitting the mixture 
+of gaussians. From the above figure, it is evident that one-level pydown, to some extent, 
+increases the quality of  this global feature by marking the salient block softly or 
+obscurely rather than in a strict way. 
 
-Extraction for two-level pydown indicated in Fig. (d) is even faster, but generally it lost the effectiveness of this global feature.
+Extraction for two-level pydown indicated in Fig.\ref{Fig:GlobalPydown} (d) is even faster, but generally 
+it lost the effectiveness of this global feature.
 
-Hence, in our implementation of color spatial distribution, we employ the one-level pydown as a trick to both enhance quality of global feature and improve extraction time performance.
+Hence, in our implementation of color spatial distribution, we employ the one-level 
+pydown as a trick to both enhance quality of global feature and improve extraction time performance.
 
-Besides, the maximum number of iterations is limited $(100)$ and the convergence criterion is lowered $(10^{-1})$ in order to reduce the time taken to compute this feature.  This outcome of this global feature, after such simplification, will not get deteriorated since we only care about capturing  approximate component location, rather than precisely maximum likelihood of the coloured pixels.
+Besides, the maximum number of iterations is limited $(100)$ and the convergence criterion 
+is lowered $(10^{-1})$ in order to reduce the time taken to compute this feature.  This 
+outcome of this global feature, after such simplification, will not get deteriorated 
+since we only care about capturing  approximate component location, rather than precisely
+maximum likelihood of the coloured pixels.
 
-The number of gaussian components is another trade-off between the quality of feature extraction and computational cost. Our implementation uses five gaussians to softly capture color components in one image. 
+The number of gaussian components is another trade-off between the quality of 
+feature extraction and computational cost. Our implementation uses five gaussians 
+to softly capture color components in one image. 
 
 
 %% Learning (0.5 page)
 \subsection{Learning}
-Those three features aforementioned have their own strengthes and weaknesses in different areas. For example, the \BOLD{CONTINUE}
+Those three features aforementioned have their own strengthes and weaknesses in 
+different areas. For example, the \BOLD{CONTINUE}
 
 It goes without saying that incorporating all three features into the unary potential of the CRF model to complement each other. It would be oversimplistic and unpersuasive to treat three features in equal weight since one feature perhaps may be stronger than other two features and ought to be assigned with higher importance. Hence, one effective and reasonable approach is to adjustably determine the optimal weight to combine three features with the help of certain machine learning algorithm. 
 
@@ -432,7 +466,7 @@ The binary mask derived from the CRF inference can be used directly in a multitu
     \bibitem 7 Suzuki, S. and Abe, K., Topological Structural Analysis of Digitized Binary Images by Border Following. 
         \textit{CVGIP 30 1, pp 32-46 (1985)}.
 
-    \bibitem 7 Gould, Stephen. "DARWIN: A Framework for Machine Learning and Computer Vision Research and Development." 
+    \bibitem 8 Gould, Stephen. "DARWIN: A Framework for Machine Learning and Computer Vision Research and Development." 
         \textit{Journal of Machine Learning Research 13 (2012): 3533-3537}.
 
 \end{thebibliography}
