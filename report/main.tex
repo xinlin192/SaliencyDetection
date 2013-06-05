@@ -73,7 +73,7 @@ Making use of OpenCV, DARWIN and the MSRA dataset, we detect the saliency of by 
 
 A long-standing problem in the field of computer vision is how to calculate the saliency of objects in an image, that is, their prominence in the image when compared to their background and surrounds.  Human vision can accomplish this quite easily, since the human brain itself has mechanisms to direct attention to the main objects in the perceived image.  This ability of visual attention has been studied by researchers in multiple fields, from physiology and psychology to computer vision.  The property of detecting a salient object is important for the latter because it leads to the ability to single out individual areas of an image, for example in automatic image cropping and vision simulation in robotics, as well as 3D surface reconstruction in augmented reality displays.
 
-\begin{figure}
+\begin{figure}[h]
 \begin{center}
     \includegraphics[width=0.6in,height=0.4in]{./Figures/example_image/4_140_140907.jpg}
     \includegraphics[width=0.6in,height=0.4in]{./Figures/example_image/4_141_141474.jpg}
@@ -146,7 +146,7 @@ The pairwise feature $S(a_x,a_{x'},I)$ exploits the spatial relationship between
 
 The unary potential for combination of three features is specified as $$S_{unary}(a_x,I) = \SUM_{k=1}^K \lambda_k \cdot F_k(a_x,I)$$ where $\lambda_k$ is the weight of the $k^{th}$ feature conforming to $\sum_{k=1}^{K} \lambda_k = 1$.
 
-\begin{figure}
+\begin{figure}[h]
     \begin{center} %% image 5_156_156422
     \includegraphics[width=0.6in,height=0.8in]{./Figures/previews/raw.jpg}
     \includegraphics[width=0.6in,height=0.8in]{./Figures/previews/MC.jpg}
@@ -192,7 +192,7 @@ In our implementation, we choose the total number of pyramid level $N$ to be $6$
 
 It is evident that the multiscale contrast gives high distinction between the boundary and non-boundary region. This provides us a precise description of where the boundary of salient object exist in the output binary mask. For those salient object has relatively large contrast within its body, this feature works perfectly, such as the bird in the second image and the house in the third image. As to the pixels within the salient objects, they are usually given low marks, this weakness can be complemented by the regional feature - centre-surround histogram, which will be introduced later.
 
-\begin{figure}
+\begin{figure}[h]
     \begin{center}
     \includegraphics[width=0.7in,height=0.54in]{./Figures/contrast/1orig.jpg}
     \includegraphics[width=0.7in,height=0.54in]{./Figures/contrast/2orig.jpg}
@@ -203,7 +203,7 @@ It is evident that the multiscale contrast gives high distinction between the bo
     \includegraphics[width=0.7in,height=0.54in]{./Figures/contrast/3cont.jpg}
     \includegraphics[width=0.7in,height=0.54in]{./Figures/contrast/4cont.jpg}\\
     \footnotesize \hspace{0.1cm} (a) \hs (b) \hs  (c) \hs (d) \\
-\caption{Feature Maps of Multiscale Contrast under various scenes} \label{Fig:LocalFeatureMap}
+\caption{Feature Maps of Multiscale Contrast} \label{Fig:LocalFeatureMap}
     \end{center}
 \end{figure}
 
@@ -227,7 +227,7 @@ Here, we traverse through five template of rectangle with different aspect ratio
 The centre-surround histogram feature at each pixel $x$ is finally calculated by $$f_h(x,I)\propto\SUM_{x'|x\in R(x')}w_{xx'}\chi^2(R(x'),R_s(x'))$$
 Note that the centre-surround histogram feature reflects the distinguishability of each pixel, which is assigned from the distinguishability of the most outstanding area centred at each pixel of one image, with the weight of spatial closeness to the centre of that area. 
 
-\begin{figure}
+\begin{figure}[h]
     \begin{center}
     \includegraphics[width=0.7in,height=0.54in]{./Figures/CSH_image/1orig.jpg}
     \includegraphics[width=0.7in,height=0.54in]{./Figures/CSH_image/2orig.jpg}
@@ -286,7 +286,7 @@ as a weighted sum of its color intensiveness $$f_s(x,I)\propto\SUM_c p(c|I_x)\cd
 
 The feature map $f_s (\cdot,I)$ is also normalized to the range $[0, 1]$. The following figure shows colour spatial distribution feature maps of several example images. The salient objects are well covered by this global feature. 
 
-\begin{figure}
+\begin{figure}[h]
     \begin{center}
     \includegraphics[width=0.72in,height=0.52in]{./CSD_image/1.jpg}
     \includegraphics[width=0.72in,height=0.52in]{./CSD_image/2.jpg}
@@ -307,7 +307,7 @@ However, in the case of colorful background, color spatial distribution, with a 
 
 One variation in our implementation is to create the component model from only a subset of the pixels in the image. The pixels in the subset is picked up with equal spatial distance. Specifically, we apply the "pydown" module in Opencv to dilute the pixels participating this unsupervised learning task. Such manipulation will not sacrifice too much accuracy, but greatly reduce  the running time of fitting the Mixture of Gaussians since the number of pixels provided for the fitting halves. 
 
-\begin{figure}
+\begin{figure}[h]
     \begin{center}
     \includegraphics[width=0.72in,height=0.52in]{./Figures/pydownCompare/1.jpg}
     \includegraphics[width=0.72in,height=0.52in]{./Figures/pydownCompare/1NOPYDOWN.jpg}
@@ -373,7 +373,7 @@ TODO:add diagram and graph to illustrate our cross validation on various lambda}
 
 By cross validation above, the optimal parameter $\lambda_0$ we use for evaluating the binary mask is $\lambda_0 = 8$.
 
-\begin{figure}
+\begin{figure}[h]
 \begin{center}
     \includegraphics[width=0.8in,height=0.6in]{./Figures/CRFinference/5_159_159364.jpg}
     \includegraphics[width=0.8in,height=0.6in]{./Figures/CRFinference/5_159_159364_3.jpg}
@@ -399,7 +399,7 @@ The binary mask derived from the CRF inference can be used directly in a multitu
 
 %% TODO Specific algorithm for output bounding box
 
-\begin{figure}
+\begin{figure}[h]
 \begin{center}
     \includegraphics[width=0.6in,height=0.4in]{./Figures/boundingbox/5_145_145114RECT.jpg}
     \includegraphics[width=0.6in,height=0.4in]{./Figures/boundingbox/5_145_145275RECT.jpg}
@@ -433,15 +433,66 @@ The binary mask derived from the CRF inference can be used directly in a multitu
 % TODO add some analysis here.
 
 \subsection{Evaluation Criteria}
+%% why we need evaluation criteria
+The main functionality of evaluation criteria is to measure the effectiveness of our approach.
+In our project, evaluation will be applied, as well, in the cross validation while determining the 
+energy function parameter $\lambda_0$. 
+But what kind of criteria could effectively capture the goodness of our model?
+As to this project, we utilise the both the region-based and boundary-based measurements proposed by Tie. Liu.
 
-\subsubsection{Precision \& Recall}
-\subsubsection{Boudary Displacement Error}
+\subsubsection{Region-based measurement}
+Precision and Recall, both taking significant roles in the information retrival as performance indicator,
+are utilised in this project to evaluate the correctness of our output rectangle. 
+
+The precision represents the percentage of pixels that are correctly detected in ground truth, which 
+is the ratio of the number of pixels in overlapped region to pixel number contained in the ground truth box.
+And the recall reflects the percentage of pixels that are correctly detected in resulted detection, 
+which is the ratio of pixel number the overllapped region contained to the number of pixels.
+%% explain what is by graph and diagram
+
+\begin{figure}[h]
+\begin{center}
+    \includegraphics[width=1.0in,height=0.8in]{Figures/Creteria/B.jpg}
+    \includegraphics[width=1.0in,height=0.8in]{Figures/Creteria/C.jpg} 
+    \includegraphics[width=1.0in,height=0.8in]{Figures/Creteria/A.jpg} \\
+    \footnotesize (a) \hs \hspace*{0.8cm} (b)  \hs \hspace*{0.8cm} (c)
+    \caption{Examples with resulted detection and ground truth} \label{Fig:PrecisionANDRecall}
+    \footnotesize Red Box: ground truth label. Green Box: resulted detection
+\end{center} \end{figure}
+
+It is evident that all threes detections in Fig.\ref{Fig:PrecisionANDRecall} is far from satisfying. 
+The salient detection in the leftmost image, the precision is 100\% while the recall is small.
+Such detection is not desired because of the failure to detect all pixels within the true salient object.
+On top of that, the detection in the middle image has 100\% recall, however, 
+the precision is low in that a large portion of non-salient pixels are returned as the detection result.
+
+For an overall performance measurement, we use the F-measure indicator with $\alpha = 0.5$, which is the weighted 
+harmonic mean of precision and recall:
+$$
+    F_{0.5} = \frac{1.5\times Precision \times Recall}{ 0.5 \times Precision + Recall}
+$$
+
+\subsubsection{Boundary-based measurement}
+The Boundary Displacement Error (BDE) measures the average of positional difference 
+of ground truth and resulted detection. \\
+\BOLD{Add brief math description of BDE here?}
 
 %% Discussion (existing flaws and possible improvements) (0.5 page)
 \section{Conclusion and Discussion}
-%\subsection{Conclusion}
-%\subsection{Current Weaknesses}
-%\subsection{Possible Improvement}
+In this project, we have indicated a supervised approach for salient object detection 
+which is formulated as a binary labeling problem using a set of local, regional,
+and global salient object features.
+
+%% flaws in our project
+However, out of the limitation of time, one flaw of our project is the lack of comparison
+with other approaches using the numerical evaluation result, which may tremendously 
+enhance the persuasiveness of the approache utlised in this project. 
+
+\BOLD{Multiple object detection?}
+
+%% technical enhancement?
+There are still several remaining issues for further investigation. 
+\BOLD{multiple }
 
 %% acknowlegement and reference (0.5 page)
 \begin{thebibliography}{99} \fontsize{9pt}{50} \setlength{\itemsep}{-0.5pt} 
