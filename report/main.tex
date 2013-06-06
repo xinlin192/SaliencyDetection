@@ -355,18 +355,44 @@ Those three features aforementioned have their own strengthes and weaknesses in 
 For example, the multiscale contrast provides no emphasis on the central part of salient object even though 
 we compute the contrast at multiple scales to enlarge the scope the detected boundary, while 
 the center surround histogram does highlight the salient block, but the salient boundary is not distinguishably 
-resulted. 
+resulted. On the top of that, the color spatial distribution consider spatial distribution of color component in the
+global scope while two other features do not.
 
-It goes without saying that incorporating all three features into the unary potential of the CRF model to complement each other. It would be oversimplistic and unpersuasive to treat three features in equal weight since one feature perhaps may be stronger than other two features and ought to be assigned with higher importance. Hence, one effective and reasonable approach is to adjustably determine the optimal weight to combine three features with the help of certain machine learning algorithm. 
+Thus, the appropriate approache is to incorporate all three features into the unary potential
+of the CRF model, such that all three features extracted from raw images, could work together
+to derive the best result. However, it would be oversimplistic and unpersuasive to treat three
+features in equal weight since one feature perhaps may be stronger than other two features and
+ought to be assigned with higher importance. Hence, our goal here is to find an effective 
+Machine Learning algorithm to reasonably determine the optimal weight, according to which combining three
+features gives the sufficiently good result. 
 
 In this project, we implement logistic regression to decide the optimal weight under the help of training data.
 
 %% CRF Inference (0.5 - 1 page)
 %% images for inferred binary mask
 \subsection{CRF Inference}
-To infer the maximum likelihood assignment for pixelwise variables under the CRF framework, the usual message passing algorithm would be intractable. Therefore, we turn to the $\alpha$-expansion inference,
-which successively segments all and non-$\alpha$ pixels with graph cuts and the algorithm will change the value of $\alpha$ at each iteration with graph-cut algorithm. By this means, inferring maximum likelihood assignment for binary saliency variable, or equivalently, 
- minimal energy function would be much faster. 
+To infer the maximum likelihood assignment for pixelwise variables under the CRF framework,
+the usual message passing algorithm would be intractable. Therefore, we turn to the $\alpha$-expansion inference,
+which successively segments all and non-$\alpha$ pixels with graph cuts and the algorithm will
+change the value of $\alpha$ at each iteration with graph-cut algorithm. By this means,
+inferring maximum likelihood assignment for binary saliency variable, or equivalently,
+minimal energy function would be much faster. 
+
+\begin{figure}[h]
+\begin{center}
+    \includegraphics[width=0.8in,height=0.6in]{./Figures/Lambda/5_145_145612.jpg}
+    \includegraphics[width=0.8in,height=0.6in]{./Figures/Lambda/5_145_145612_2.jpg}
+    \includegraphics[width=0.8in,height=0.6in]{./Figures/Lambda/5_145_145612_3.jpg} \\
+    \includegraphics[width=0.8in,height=0.6in]{./Figures/Lambda/5_154_154292.jpg}
+    \includegraphics[width=0.8in,height=0.6in]{./Figures/Lambda/5_154_154292_2.jpg}
+    \includegraphics[width=0.8in,height=0.6in]{./Figures/Lambda/5_154_154292_3.jpg} \\
+    \includegraphics[width=0.8in,height=0.6in]{./Figures/Lambda/5_154_154732.jpg}
+    \includegraphics[width=0.8in,height=0.6in]{./Figures/Lambda/5_154_154732_2.jpg}
+    \includegraphics[width=0.8in,height=0.6in]{./Figures/Lambda/5_154_154732_3.jpg} \\
+    \footnotesize  (a) Raw Image (b) $\lambda_0 = 1$  (c) $\lambda_0 = 10$ (d) $\lambda_0 =100$ \\
+     \caption{Examples for Binary Mask with various Lambda $\lambda_0$}
+\end{center}
+\end{figure}
 
 But how to determine the parameter $\lambda_0$, which indicates to what extent, relative to the unary term (combined feature map), we ought to consider the pairwise potential in deciding the binary saliency of one pixel? And this parameter would influence the smoothness of resulting binary mask since pairwise term can be regarded as the penalty to adjacent pixels with different labels. Our solution is to determine the optimal $\lambda_0$ by applying the cross validation on $\lambda_0$ at various magnitudes. 
 
