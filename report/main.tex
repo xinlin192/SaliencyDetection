@@ -351,8 +351,11 @@ to softly capture color components in one image.
 
 %% Learning (0.5 page)
 \subsection{Learning}
-Those three features aforementioned have their own strengthes and weaknesses in 
-different areas. For example, the \BOLD{CONTINUE}
+Those three features aforementioned have their own strengthes and weaknesses in different areas. 
+For example, the multiscale contrast provides no emphasis on the central part of salient object even though 
+we compute the contrast at multiple scales to enlarge the scope the detected boundary, while 
+the center surround histogram does highlight the salient block, but the salient boundary is not distinguishably 
+resulted. 
 
 It goes without saying that incorporating all three features into the unary potential of the CRF model to complement each other. It would be oversimplistic and unpersuasive to treat three features in equal weight since one feature perhaps may be stronger than other two features and ought to be assigned with higher importance. Hence, one effective and reasonable approach is to adjustably determine the optimal weight to combine three features with the help of certain machine learning algorithm. 
 
