@@ -65,13 +65,14 @@ Canberra, Australia\\
 
 %%%%%%%%% ABSTRACT
 \begin{abstract}
-Making use of OpenCV, DARWIN and the MSRA dataset, we detect the saliency of an object in an image by extracting local, regional and global saliency features at the pixel level, then combine those features with pre-fitted weights derived by logistic regression. A conditional random field is then constructed to capture the spatial continuity of the salient object, with a weighting ratio of combined unary and pairwise terms that is determined by cross-validation \BOLD{LOGISTIC REGRESSION?}. The binary mask inferred by the conditional random field is then used to output a single bounding rectangle around a salient area through a winner-takes-all algorithm to label the detected salient object, by which the performance of our approach is evaluated through mean boundary displacement error. 
+Making use of OpenCV, DARWIN and the MSRA dataset, we detect the saliency of an object in an image by extracting local, regional and global features at the pixel level, then combine those features with pre-fitted weights derived by logistic regression. A conditional random field is then constructed to capture the spatial continuity of the salient object, with a weighting ratio of combined unary and pairwise terms that is determined by cross-validation. The binary mask inferred by the conditional random field is then used to output a single bounding rectangle around a salient area through a winner-takes-all algorithm to label the detected salient object, by which the performance of our approach is evaluated through mean boundary displacement error. 
 \end{abstract}
 
 %% Introduction & Related Works (1 page)
 \section{Introduction and Motivation}
 
-A long-standing problem in the field of computer vision is how to calculate the saliency of objects in an image, that is, their prominence in the image when compared to their background and surrounds.  Human vision can accomplish this quite easily, since the human brain has mechanisms to direct attention to the main objects in the perceived image.  This visual attention has been studied by researchers in multiple fields, from physiology and psychology to computer vision.  The property of detecting a salient object is important for the latter because it leads to the ability to single out individual areas of an image, for example in automatic image cropping and vision simulation in robotics, as well as 3D surface reconstruction in augmented reality displays.
+A long-standing problem in the field of computer vision is how to calculate the saliency of objects in an image, that is, their prominence in the image when compared to their background and surrounds.  Human vision can accomplish this quite easily, since the human brain has mechanisms to direct attention to the main objects in the perceived image.  This ability has been studied by researchers in multiple fields, from physiology and psychology, to computer science.  The property of detecting a salient object is important for the latter because it leads to the ability to single out individual areas of an image, for example in automatic image cropping and vision simulation in robotics, as well as 3D surface reconstruction in augmented reality displays.  Salient object detection is still a field of active research, with multiple avenues being currently researched.
+%\BOLD{CONTINUE? This leads on nicely to the next part}
 
 \begin{figure}[h]
 \begin{center}
@@ -100,30 +101,28 @@ A long-standing problem in the field of computer vision is how to calculate the 
     \includegraphics[width=0.6in,height=0.4in]{./Figures/example_image/4_144_144604.jpg}
     \includegraphics[width=0.6in,height=0.4in]{./Figures/example_image/4_134_134777.jpg}
     \includegraphics[width=0.6in,height=0.4in]{./Figures/example_image/4_134_134664.jpg}\\
-    \caption{Example images from MSRA dataset B}
+    \caption{Example images from MSRA dataset B} \label{fig:MSRA}
+
     \end{center}
 \end{figure}
 
 %% Related Works (0.5 page)
 \section{Related Works}
-Most existing approaches are based on a bottom-up computational framework, where the computer's simulation of visual attention is driven by low-level stimuli in the scene.  % as color intensity and contrast. 
-These approaches employ three steps.
-
-The first step is feature extraction, where multiple low-level visual features such as intensity, colour, orientation, texture, and motion are extracted from the image at multiple scales.
+Most existing approaches are based on a bottom-up computational framework, where the computer's simulation of visual attention is driven by low-level stimuli in the scene \cite{ittiphd}\cite{itti}\cite{fuzzy}. These approaches employ three steps, the first of which is feature extraction.  Multiple low-level visual features such as intensity, colour, orientation, texture, and motion are extracted from the image at multiple scales and are then incorporated into a framework to aid in the detection of the salient object.
 
 The second step is saliency computation. The saliency is computed by a centre-surround operation, self-information, or graph-based random walk using multiple features. After normalisation and linear/nonlinear combination, a master or saliency map is computed to represent the saliency of each pixel in the image. 
 
-The last step is label output, where a few key locations on the saliency map are identified by winner-take-all, or inhibition-of- return, or other nonlinear operations.
+Finally, a few key locations on the saliency map are identified by winner-take-all, inhibition-of-return, or other nonlinear operations and output as a label designating the salient area in the image.
 
 %% Formulation (1 page)
 \section{Our Approach}
-In our approach, we base our salient object detection on several suppositions that mimic how human vision differentiates salient objects from the rest of the perceived field of view.  As can be observed in \BOLD{REDO FIGURES}, people naturally pay more attention to salient objects in images, such as a person, a face, a car, an animal, or a road sign. This is because of several reasons.
+In our approach, we use the open source DARWIN machine learning framework \cite{drwn} as the basis for our code. We employ the MSRA dataset as the base images for our salient object detection, and build an algorithm using several suppositions that relate to how human vision differentiates salient objects from the rest of the perceived field of view.  People naturally pay more attention to salient objects in images, such as a person, a face, a car, an animal, or a road sign (Figure \ref{fig:MSRA}). This attention can be mimicked in computer vision through several factors, which were brought forward by Liu et. al in their research \cite{sal2007}\cite{sal2011}.
 
-First of all, it is likely that pixels with a high contrast difference to their near neighbours to be part of a salient object, since they could represent a contour or boundary around an object.  This is similar to how the human brain discovers boundaries between objects in its visual field by detecting differences in light intensity\BOLD{CITATION PSYCHBOOK}.
+First of all, it is likely that pixels with a high contrast difference to their near neighbours to be part of a salient object, since they could represent a contour or boundary around an object.  This is similar to how the human brain discovers boundaries between objects in its visual field by detecting differences in light intensity.
 
 Salient objects are more often than not quite distinct from their local surrounding region.  Calculating the distance between an object and its surrounds can therefore give us information about how salient that object is.  If we apply this concept over the entire image, we can gather information about how different various areas are to their surrounds and work out the likelihood that parts of an image are salient.
 
-Finally, humans perceive prominence in objects through how distinct they are from their surrounds.  Indeed, salient objects often demonstrate a marked difference in colour to the rest of a scene.  Therefore, the more widely distributed a colour is in an image, the less likely it is that the salient object will contain that colour.  This global colour distribution can therefore be used to describe the saliency of the pixels in an image.
+Finally, humans perceive object prominence through how distinctly coloured they are compared to the rest of the visual field.  Salient objects often demonstrate a marked difference in colour to the rest of a scene.  Therefore, the more widely distributed a colour is in an image, the less likely it is that the salient object will contain that colour.  This global colour distribution can therefore be used to describe the saliency of the pixels in an image.
 
 \subsection{Formulation}
 
@@ -142,7 +141,7 @@ To do this, we build up a probabilistic model $$P(A|I)=\frac{1}{Z}e^{-E(A|I)}$$ 
 
 Formally, the energy function can be represented as $$E(A|I) = \SUM_x S_{unary}(a_x,I) + \lambda_0 \SUM_{x,x'}S_{pair}(a_x,a_{x'},I)$$ where $\lambda$ is the relative weight between the sum of multiple unary  and pairwise features. 
 
-The unary potential, combining the three pixel features, is specified as $$S_{unary}(a_x,I) = \SUM_{k=1}^K \lambda_k \cdot F_k(a_x,I)$$ where $\lambda_k$ is the cross-validated \BOLD{LOGISTIC REGRESSION?} weight of the $k^{th}$ feature such that $\sum_{k=1}^{K} \lambda_k = 1$.
+The unary potential, combining the three pixel features, is specified as $$S_{unary}(a_x,I) = \SUM_{k=1}^K \lambda_k \cdot F_k(a_x,I)$$ where $\lambda_k$ is the cross-validated weight of the $k^{th}$ feature such that $\sum_{k=1}^{K} \lambda_k = 1$.
 
 The pairwise feature $S(a_x,a_{x'},I)$ exploits the spatial relationship between two adjacent pixels.  It can be viewed as a ``penalty'' for labelling adjacent pixels differently: $$S(a_x,a_{x'},I) = |a_x-a_{x'}| \cdot e^{-\beta d_{x,x'}}$$ where $x,x'$ represent two adjacent pixels, $d_{x,x'}$ is the L2-norm (standard norm) representing the colour difference between the two pixels, and $\beta=(2\langle||I_x-I_{x'}||^2\rangle)^{-1}$ is a robust parameter to weight the colour contrast.
 
@@ -163,13 +162,15 @@ The final value of each feature $F_k(a_x,I)$ comes from a normalised feature map
 
 %% Feature Extraction (2 pages)
 \subsection{Feature Extraction}
-Feature Extraction, widely acknowledged as the most significant component of a computer vision task, represents how we want the computer to interpret raw images. In this project, we focus on three features, each of which is capable of capturing saliency individually but in different level of scope. They are respectively multiscale contrast, centre-surround histograms  and colour-spatial distribution. \BOLD{MENTION OF CACHING}
+Feature Extraction, widely acknowledged as the most significant component of a computer vision task, represents how we want the computer to interpret raw images. In this project, we focus on three features capable of capturing saliency individually but in different levels of scope. They are respectively multiscale contrast, centre-surround histograms  and colour-spatial distribution.
+
+Because of the time expense required to calculate these features on an image, our approach caches the feature maps of each image and uses them for both training and testing.
 %% local feature
 \subsubsection{Multiscale Contrast}
 
-Constrast is commonly used as local feature because it simulates the human visual receptive fields. It acts on the fact that the boundary of salient objects tend to have a marked contrast to the surrounding region. Since we may have no prior knowledge about the size of salient object, we compute the contrast at multiple scales to then incorporate back into one map, since this will demarcate the various boundaries in the image.  This multiscale contrast map is thus a linear combination of image contrast at all levels of an N-level gaussian image pyramid, using the pixels $x$ in the image $I$.  Formally, this amounts to calculating $$f_c(x,I) = \SUM_{n = 1}^{N}\SUM_{x'\in W(x)}||I^n(x)-I^n(x')||^2$$ where W(x) is a window that delineates which area to consider as neighbouring pixels to compare contrast values.
+Constrast is commonly used as local feature because it simulates the human visual receptive fields. It acts on the fact that the boundary of salient objects tend to have a marked contrast to the surrounding region. Since we may have no prior knowledge about the size of salient object, we compute the contrast at multiple scales to then incorporate back into one map, since this will demarcate the various boundaries in the image.  This multiscale contrast map is thus a linear combination of image contrast at all levels of an N-level gaussian image pyramid, using the pixels $x$ in the image $I$.  Formally, this amounts to calculating $$f_c(x,I) = \SUM_{n = 1}^{N}\SUM_{x'\in W(x)}||I^n(x)-I^n(x')||^2$$ where W(x) is a window that delineates which area to consider as neighbouring pixels to compare contrast values.  The resulting map highlights the edges of different objects in the image, giving high prominence to the contours around the salient object.
 
-\BOLD{TODO ADD more technical analysis about why we should have multiple scales.}
+%\BOLD{TODO ADD more technical analysis about why we should have multiple scales.}
 
 \begin{figure}[ht]
 \begin{center}    
@@ -181,15 +182,15 @@ Constrast is commonly used as local feature because it simulates the human visua
  \includegraphics[width=0.040625in,height=0.0575in]{./Figures/pyramid/5_145_145839_p4.jpg} 
  \includegraphics[width=0.0203125in,height=0.02825in]{./Figures/pyramid/5_145_145839_p5.jpg} \hspace{1mm}
  \includegraphics[width=0.65in,height=0.9in]{./Figures/pyramid/5_145_145839.jpg} \\   
-\caption{Multiscale Contrast example.}\small{Leftmost: Original Image. Rightmost: Multiscale Feature Map. \\
-Immediate images: multiscale pyramids from level $1$ to $6$.}
+\caption{Multiscale Contrast.}\small{Left: Original Image. Right: Multiscale Feature Map. \\
+Middle: multiscale image pyramid from level $1$ to $6$.} \label{fig:multiscale}
 \end{center}
 \end{figure}
 
 
 In our implementation, we choose the total number of pyramid level $N$ to be $6$ and the size of the window to be $9 \times 9$. 
 
-As can be seen in \BOLD{CONTRAST FIGURE}, the derived multiscale contrast map provides a high distinction between boundary and non-boundary regions. This provides us a precise description of where the boundary of a salient object could exist in the output binary mask. When a salient object also has high contrast inside its boundaries, this feature works perfectl, such as the bird in \BOLD{FIG} and the house in \BOLD{FIG}.
+As can be seen in Figure \ref{fig:multiscale}, the derived multiscale contrast map provides a highly accurate distinction between boundary and non-boundary pixels. This provides us a precise description of where the boundary of a salient object could exist in the output binary mask. When a salient object also has high contrast inside its boundaries, this feature also manages to capture the inside of the salient object, such as the bird in Figure \ref{fig:multiscale} and the house in Figure \ref{Fig:LocalFeatureMap}.
 
 But there are some drawbacks that are tough to avoid. The boundaries of all objects are highlighted, which is not desirable when searching for a single salient object.  This is because we need to give a high probability to marking pixels that are relevant to the salient object rather than every boundary possible. If this doesn't happen, there is the possibility of a "saliency leak" into non-salient areas of the final result that could deteriorate the detector's precision.
 
@@ -204,16 +205,16 @@ But there are some drawbacks that are tough to avoid. The boundaries of all obje
     \includegraphics[width=0.7in,height=0.54in]{./Figures/contrast/3cont.jpg}
     \includegraphics[width=0.7in,height=0.54in]{./Figures/contrast/4cont.jpg}\\
     \footnotesize \hspace{0.1cm} (a) \hs (b) \hs  (c) \hs (d) \\
-\caption{Feature Maps of Multiscale Contrast} \label{Fig:LocalFeatureMap}
+\caption{Multiscale Contrast Feature Maps} \label{Fig:LocalFeatureMap}
     \end{center}
 \end{figure}
 
-Another disadvantage to only using multiscale contrast is that the inner regions of salient objects are poorly represented.  For example in the gorilla in \BOLD{FIG}, the teeth are labelled as higher contrast to their surroundings compared to that of the body of the gorilla to the grass. Since each entry of the output feature map is quantitatively normalised, the contrast of the gorilla's body to the grass is rendered trivial compared to the contrast of the tooth. The tooth is not what the human receptive field would label as salient because it is a smaller part of the animal, and thus it should not be labelled as the salient object. This flaw may result in low recall comparing to the ground truth data when contrast is used as the sole method to distinguish a salient object.
+Another disadvantage to only using multiscale contrast is that the inner regions of salient objects are poorly represented.  For example in the gorilla in Figure \ref{Fig:LocalFeatureMap}, the teeth are labelled as higher contrast to their surroundings compared to that of the body of the gorilla to the grass. Since each entry of the output feature map is quantitatively normalised, the contrast of the gorilla's body to the grass is rendered trivial compared to the contrast of the tooth. The tooth is not what the human receptive field would label as salient because it is a smaller part of the animal, and thus it should not be labelled as the salient object. This flaw may result in low recall comparing to the ground truth data when contrast is used as the sole method to distinguish a salient object.
 
 \subsubsection{Centre-Surround Histogram}
 %% regional feature
 
-As shown in \ref{Fig:LocalFeatureMap} , multiscale contrast only partially detects salient objects, since it is only sensitive to the boundaries. In order to detect the object as a whole, we make use of another static salient feature which captures the regional information of an area, computed using various low-level features in a centre-surround difference calculation. 
+Multiscale contrast only partially detects salient objects, since it is only sensitive to the boundaries. In order to detect the object as a whole, we make use of another static salient feature which captures the regional information of an area, computed using various low-level features in a centre-surround difference calculation. 
 
 To do this, we create a colour RGB histogram for both the rectangle and a surrounding frame with the same area as the rectangle, at a certain resolution (number of ``bins'' in the histogram). We then measure the difference between the area centred at each pixel $x$ and its surrounds by calculating the $\chi^2$ distance between the two histograms representative of those regions.  We do this for multiple aspect ratios $\{ 0.5, 0.75, 1.0, 1.25, 1.5\}$, and keep the largest (most distinct) $\chi^2$ value through the formula
 
@@ -237,12 +238,12 @@ This map reflects how distinct each pixel is from its surrounds, assigned from t
     \includegraphics[width=0.7in,height=0.54in]{./Figures/CSH_image/3cont.jpg}
     \includegraphics[width=0.7in,height=0.54in]{./Figures/CSH_image/4cont.jpg}\\
     \footnotesize \hspace{0.1cm} (a) \hs (b) \hs  (c) \hs (d) \\
-    \caption{Feature Maps of Centre-Surrond Histograms} \label{Fig:RegionalFeatureMap}
+    \caption{Centre-Surrond Histogram Feature Maps} \label{Fig:RegionalFeatureMap}
     \end{center}
 \end{figure}
 
 
-As we can see from Fig.\ref{Fig:RegionalFeatureMap}, the salient block within the image is given large emphasis comparing to its surrounds in the output feature map.  However, unlike multiscale contrast, the centre-surround histogram does not provide an accurate description of the boundary of the object -- an inherent drawback of this regional feature. Used together with the multiscale contrast map, the two features complement the other's weakness to create a stronger sense of the location of salient objects.
+As we can see from Figure \ref{Fig:RegionalFeatureMap}, the salient block within the image is given large emphasis comparing to its surrounds in the output feature map.  However, unlike multiscale contrast, the centre-surround histogram does not provide an accurate description of the boundary of the object -- an inherent drawback of this regional feature. Used together with the multiscale contrast map, the two features complement the other's weakness to create a stronger sense of the location of salient objects.
 
 %% global feature
 \subsubsection{Colour Spatial Distribution}
@@ -250,7 +251,7 @@ As we can see from Fig.\ref{Fig:RegionalFeatureMap}, the salient block within th
 The goal of using colour spatial distribution is to take into account the global colour information in the image, that is, the information about how widely the colours occur in 
 one image are distributed within it.  The computation of this feature is done in several parts.
 
-First of all, we create a Gaussian mixture model with 5 components in order to capture relative colour distribution in the image. This can be represented as $\{c, \mu_c, \Sigma_c\}$ with regards to the colour component $c$ and fit of these components, making use of only a subset of pixels from the whole image. This is done to save on computational time required to process the feature, while at the same time not losing much accuracy as can be seen in \BOLD{FIG}.  We reduce the resolution of the image to halve the number of pixels used in creating the gaussian mixture model.  The maximum number of iterations over the image is limited to 100 instances, and the convergence criterion is also lowered to $10^{-1}$ in order to reduce complexity without deteriorating the model.  Such simplification is possible only because the exact distribution is not required for capturing the approximate location of a salient object.
+First of all, we create a Gaussian mixture model with 5 components in order to capture relative colour distribution in the image. This can be represented as $\{c, \mu_c, \Sigma_c\}$ with regards to the colour component $c$ and fit of these components, making use of only a subset of pixels from the whole image. This is done to save on computational time required to process the feature, while at the same time not losing much accuracy as can be seen in \BOLD{FIG}.  We test three levels of pixel reduction via a Gaussian pyramid model: none, single-level reduction, and two-level reduction.  Single-level reduction halves the number of pixels used in creating the gaussian mixture model, whilst also providing a smoother distribution without sacrificing much accuracy.  The maximum number of iterations over the image is limited to 100 instances, and the convergence criterion is also lowered to $10^{-1}$ in order to reduce complexity without deteriorating the model.  Such simplification is possible only because the exact distribution is not required for capturing the approximate location of a salient object.
 
 Using this model, each pixel is associated to a colour component with the probability $$P(c|I_x) = \frac{\omega_c\mathcal{N}(I_x|\mu_c,\Sigma_c)}{\SUM_c \omega_c \mathcal{N}(I_x|\mu_c,\Sigma_c)}$$where $\omega_c$ is the weight, $\mu_c$ is the mean colour, $\Sigma_c$ is the covariance, and $\mathcal N(I_x|\mu_c,\Sigma_c)$ is the multivariate normal distribution of the $c^{th}$ component. 
 
@@ -273,11 +274,11 @@ The feature map $f_s (\cdot,I)$ is normalized to the range $[0, 1]$. The followi
     \includegraphics[width=0.72in,height=0.52in]{./CSD_image/3_CSD.jpg} 
     \includegraphics[width=0.72in,height=0.52in]{./CSD_image/4_CSD.jpg} \\
     \footnotesize \hspace{0.1cm} (a) \hs (b) \hs  (c) \hs (d) \\
-     \caption{Feature Maps of Color Spatial Distribution} \label{Fig:GlobalFeatureMap}
+     \caption{Colour Spatial Distribution Feature Maps} \label{Fig:GlobalFeatureMap}
     \end{center}
 \end{figure}
 
-It is evident that the global feature gives a huge amount of accuracy to the detection algorithm when the background is monotonous, as illustrated by the first three images in the above \BOLD{figure}. However, in the case of a varied and colourful background, the colour spatial distribution map fails to distinguish the salient object in the image. The Fig.\ref{Fig:GlobalFeatureMap} (d) demonstrates us this undesired property of the global feature. 
+It is evident that the global feature gives a huge amount of accuracy to the detection algorithm when the background is monotonous, as illustrated by the first three images in Figure \ref{Fig:GlobalFeatureMap}. However, in the case of a varied and colourful background, the colour spatial distribution map fails to distinguish the salient object in the image. Figure \ref{Fig:GlobalFeatureMap} (d) demonstrates us this undesired property of the global feature. 
 
 %One variation in our implementation is to create the component model from only a subset of the pixels in the image. The pixels in the subset is picked up with equal spatial distance. Specifically, we apply the "pydown" module in Opencv to dilute the pixels participating this unsupervised learning task. Such manipulation will not sacrifice too much accuracy, but greatly reduce  the running time of fitting the Mixture of Gaussians since the number of pixels provided for the fitting halves. 
 
@@ -295,9 +296,9 @@ It is evident that the global feature gives a huge amount of accuracy to the det
     \includegraphics[width=0.72in,height=0.52in]{./Figures/pydownCompare/3NOPYDOWN.jpg}
     \includegraphics[width=0.72in,height=0.52in]{./Figures/pydownCompare/3PYDOWN.jpg} 
     \includegraphics[width=0.72in,height=0.52in]{./Figures/pydownCompare/3DOUBLEPYDOWN.jpg} \\
-    \footnotesize (a) original (b) no pydown (c) one-level pydown (d) two-level pydown
-    \caption{Examples for global feature using diluted images} \label{Fig:GlobalPydown}
-    {\small We tested three levels of pixel dilution via a Gaussian pyramid: none, single-level dilution, and two-level dilution.  Single-level dilution increases the speed of computation, without sacrificing much accuracy in the feature map and also provides a smoother distribution.}
+    \footnotesize \hspace{0.1cm} (a) \hs (b) \hs  (c) \hs (d) \\
+    \footnotesize (a) Original (b) No reduction (c) Single Level Reduction (d) Two Level Reduction
+    \caption{Example Colour Spatial Distributions on Reduced Pixels} \label{Fig:GlobalPydown}
     \end{center}
 \end{figure}
 
@@ -323,7 +324,7 @@ The three features discussed beforehand all have strengths and weaknesses in dif
 %% CRF Inference (0.5 - 1 page)
 %% images for inferred binary mask
 \subsection{CRF Inference}
-The weighted unary potential made up from these weighted feature maps $$S_{unary}(a_x,I) = \SUM_{k=1}^K \lambda_k \cdot F_k(a_x,I)$$ is likely to already provide a good estimate of the salient area in the image.  However, to capture the spatial continuity of the salient area we infer the maximum likelihood assignment of pixel-wise variables under a conditional random field (CRF) framework.  A standard message-passing approach is infeasible when dealing with images at the pixel level, so we instead use $\alpha$-expansion inference, which successively segments all $\alpha$ and non-$\alpha$ pixels using graph cuts.  The algorithm changes the value of $\alpha$ at each iteration using the graph-cut algorithm; by this means, inferring the maximum likelihood assignment for each binary variable (or equivalently, the minimal energy function) is much faster. 
+The weighted unary potential made up from these weighted feature maps $$S_{unary}(a_x,I) = \SUM_{k=1}^K \lambda_k \cdot F_k(a_x,I)$$ is likely to already provide a good estimate of the salient area in the image.  However, to capture the spatial continuity of the salient area we infer the maximum likelihood assignment of pixel-wise variables under a conditional random field (CRF) framework.  A standard message-passing approach is infeasible when dealing with images at the pixel level, so we instead use $\alpha$-expansion inference, which successively segments all $\alpha$ and non-$\alpha$ pixels using graph cuts \cite{graphcut}.  The algorithm changes the value of $\alpha$ at each iteration using the graph cut algorithm; by this means, inferring the maximum likelihood assignment for each binary variable (or equivalently, the minimal energy function) is much faster. 
 
 \begin{figure}[h]
 \begin{center}
@@ -339,17 +340,16 @@ The weighted unary potential made up from these weighted feature maps $$S_{unary
     \includegraphics[width=0.7in,height=0.48in]{./Figures/Lambda/5_154_154732_2.jpg}
     \includegraphics[width=0.7in,height=0.48in]{./Figures/Lambda/5_154_154732_3.jpg} 
     \includegraphics[width=0.7in,height=0.48in]{./Figures/Lambda/5_154_154732_4.jpg} \\
+    \footnotesize \hspace{0.1cm} (a) \hs (b) \hs  (c) \hs (d) \\
     \footnotesize  (a) Raw Image (b) $\lambda_0 = 1$  (c) $\lambda_0 = 10$ (d) $\lambda_0 =100$ \\
      \caption{Examples for Binary Mask with various Lambda $\lambda_0$}
 \end{center}
 \end{figure}
 
 
-This requires a way to determine the parameter $\lambda_0$ which indicates to what extent, relative to the unary potential of the combined feature map, we ought to consider the pairwise potential in deciding the binary saliency of a pixel.  
+This requires a way to determine the parameter $\lambda_0$ which indicates to what extent, relative to the unary potential of the combined feature map, we ought to consider the pairwise potential in deciding the binary saliency of a pixel.  This parameter is key to influencing the smoothness of the resulting binary mask, since as discussed above it can be regarded as a penalty for labelling adjacent pixels with different values.
 
-This parameter is key to influencing the smoothness of the resulting binary mask, since as discussed above it can be regarded as a penalty for labelling adjacent pixels with different values.  To determine a suitable $\lambda_0$, we apply cross validation at various magnitudes.
-
-By this cross validation, the optimal parameter $\lambda_0$ we use for calculating the final binary mask is $\lambda_0 = 8$.
+To determine a suitable $\lambda_0$, we apply cross validation at various magnitudes.  Using this, the optimal parameter $\lambda_0$ for calculating the final binary mask is $\lambda_0 = 8$.
 
 
 \begin{figure}[h]
@@ -392,9 +392,7 @@ To evaluate our approach, we randomly pick 1000 images from the MSRA dataset B t
 We then choose another 500 images to form a testing set.
 
 \subsection{Bounding Box}
-The binary mask derived from the CRF inference can be used directly in a multitude of applications. However, in order to evaluate the accuracy of our approach, we make use of OpenCV's findContours algorithm \BOLD{TODO CHANGE?} to output a bounding box rectangle around the detected salient object, based on the derived pixel-wise binary mask. The dimensions of this bounding box are written to a text file holding all resultant labels for that image directory.
-
-\BOLD{TODO Specific algorithm for output bounding box}
+The binary mask derived from the CRF inference can be used directly in a multitude of applications. However, in order to evaluate the accuracy of our approach, we make use of OpenCV's findContours algorithm \cite{topological} to output a bounding box rectangle around the detected salient object, based on the derived pixel-wise binary mask. The dimensions of this bounding box are written to a text file holding all resultant labels for that image directory.
 
 \begin{figure}[h]
 \begin{center}
@@ -450,65 +448,59 @@ The precision represents the percentage of pixels that are correctly detected in
     \includegraphics[width=1.0in,height=0.8in]{Figures/Creteria/A.jpg} \\
     \footnotesize (a) \hs \hspace*{0.8cm} (b)  \hs \hspace*{0.8cm} (c)
     \caption{Examples with resulted detection and ground truth} \label{Fig:PrecisionANDRecall}
-    \footnotesize Red Box: ground truth label. Green Box: resulted detection
+    \footnotesize Red Box: ground truth label. Green Box: detected label.
 \end{center} \end{figure}
 
-It is evident that all threes detections in Fig.\ref{Fig:PrecisionANDRecall} are far from satisfying. The salient detection in the leftmost image, the precision is 100\% while the recall is small. Such detection is not desired because of the failure to detect all pixels within the true salient object. On top of that, the detection in the middle image has 100\% recall, however, the precision is low in that a large portion of non-salient pixels are returned as the detection result.
+It is evident that all three results in Figure \ref{Fig:PrecisionANDRecall} are far from satisfying. The salient detection in the leftmost image has high precision but the recall is very low, meaning that it has failed to detect all truly salient pixels.  The middle image is no better, with high recall but low precision, with a saliency leak into the surrounding region.
 
-For an overall performance measurement, we use the F-measure indicator with $\alpha = 0.5$, which is the weighted harmonic mean of precision and recall:$$F_{0.5} = \frac{1.5\times Precision \times Recall}{ 0.5 \times Precision + Recall}$$
+For an overall performance measurement, the F-measure indicator is suitable, with $\alpha = 0.5$ giving the weighted harmonic mean of precision and recall:$$F_{0.5} = \frac{1.5\times Precision \times Recall}{ 0.5 \times Precision + Recall}$$
 
 \subsubsection{Boundary-based measurement}
-The Boundary Displacement Error (BDE) measures the average of positional difference 
-of ground truth and resulted detection.
+Boundary Displacement Error (BDE) measures the average of positional difference of ground truth and resulted detection.  It does this by calculating the average minimum Euclidian distance between the set of pixels in one label $B_1$ and each pixel $x$ in the other label $B_2$ \cite{bde} $$BDE(B_1,B_2)=\frac{\SUM_{x\in B_1}\min\limits_{y\in B_2}\{d_E(x,y)\}}{|B_1|}$$  A perfect score is 0, where every point in the result output label is contained in the set of points in the truth label.  As the results differ more and more from the ground truth, the average BDE value becomes higher.
 
-\BOLD{Add brief math description of BDE here}
+\subsection{Results and Discussion}
+The average BDE score for our algorithm is \BOLD{ACTUALSCORE}, which is based on training and test sets from the MSRA dataset B.  We were not able to calculate the F-measure for performance.
 
-\BOLD{Result for the BDE}
+Part of the reason for this somewhat low score is that the contours around the saliency mask map are not always fully closed, leading to high precision with a bounding box rectangle around a single point since it is the largest discovered closed area.  Creating a bounding box around all salient points in an image has the opposite effect, with a large recall but multiple non-salient areas of the image contained within the bounding box because of small areas where a ``saliency leak'' has occurred.
 
 %% Discussion (existing flaws and possible improvements) (0.5 page)
-\section{Conclusion and Discussion}
-In this project, we have indicated a supervised approach for salient object detection 
-which is formulated as a binary labelling problem using a set of local, regional,
-and global salient object features.
+\section{Conclusion}
+In this project, we have demonstrated a supervised approach for salient object detection, formulated as a binary labelling problem using a set of local, regional, and global salient object features.  However, there is much room for improvement, especially in the labelling of the salient areas from the derived binary mask.  There is also a lack of comparison with other methods using numerical evaluations, which may demonstrate greater effectiveness of the approach in this report.
 
-%% flaws in our project
-However, out of the limitation of time, one flaw of our project is the lack of comparison
-with other approaches using the numerical evaluation result, which may tremendously 
-enhance the persuasiveness of the approache utlised in this project. 
+There are still several remaining issues for further investigation.  These include the ability to detect multiple salient areas in an image, improving on previous and current work to form a computational model capable of describing a scene.  Another application could be in real-time detection for use in robotics and recording or playback applications.  Failure cases can be remedied by creating a more adept algorithm that captures the closest 98\% of salient pixels, resulting in much higher accuracy overall.  There may also be better ways to derive a label from the raw binary mask of an image to pursue.
 
-\BOLD{Multiple object detection?}
-
-%% technical enhancement?
-There are still several remaining issues for further investigation. 
-\BOLD{multiple }
+%\cite{drwn}\cite{sal2007}\cite{sal2011}\cite{itti}\cite{ittiphd}\cite{graphcut}\cite{topological}\cite{fuzzy}
 
 %% acknowlegement and reference (0.5 page)
-\begin{thebibliography}{99} \fontsize{9pt}{50} \setlength{\itemsep}{-0.5pt} 
-    \bibitem 1 Liu, Tie, et al. "Learning to detect a salient object." 
-        \textit{Computer Vision and Pattern Recognition, 2007. CVPR07. IEEE Conference on. IEEE, 2007}.
+\bibliographystyle{ieee}
+\bibliography{main}
 
-    \bibitem 2 Liu, Tie, et al. "Learning to detect a salient object." 
-        \textit{Pattern Analysis and Machine Intelligence, IEEE Transactions on 33.2 (2011): 353-367}. 
-
-    \bibitem 3 Itti, Laurent, Christof Koch, and Ernst Niebur. "A model of saliency-based visual attention for rapid scene analysis."
-        \textit{Pattern Analysis and Machine Intelligence, IEEE Transactions on 20.11 (1998): 1254-1259}.
-
-    \bibitem 4 Ma, Yu-Fei, and Hong-Jiang Zhang. "Contrast-based image attention analysis by using fuzzy growing."
-        \textit{ Proceedings of the eleventh ACM international conference on Multimedia. ACM, 2003}. 
-
-    \bibitem 5 L. Itti. Models of Bottom-Up and Top-Down Visual Attention. PhD thesis, 
-        \textit{California Institute of Technology Pasadena, 2000}.
-
-    \bibitem 6 Boykov, Yuri, Olga Veksler, and Ramin Zabih. "Fast approximate energy minimization via graph cuts." 
-        \textit{Pattern Analysis and Machine Intelligence, IEEE Transactions on 23.11 (2001): 1222-1239}.
-
-    \bibitem 7 Suzuki, S. and Abe, K., Topological Structural Analysis of Digitized Binary Images by Border Following. 
-        \textit{CVGIP 30 1, pp 32-46 (1985)}.
-
-    \bibitem 8 Gould, Stephen. "DARWIN: A Framework for Machine Learning and Computer Vision Research and Development." 
-        \textit{Journal of Machine Learning Research 13 (2012): 3533-3537}.
-
-\end{thebibliography}
+%\begin{thebibliography}{99} \fontsize{9pt}{50} \setlength{\itemsep}{-0.5pt} 
+%    \bibitem 1 Liu, Tie, et al. "Learning to detect a salient object." 
+%        \textit{Computer Vision and Pattern Recognition, 2007. CVPR07. IEEE Conference on. IEEE, 2007}.
+%
+%    \bibitem 2 Liu, Tie, et al. "Learning to detect a salient object." 
+%        \textit{Pattern Analysis and Machine Intelligence, IEEE Transactions on 33.2 (2011): 353-367}. 
+%
+%    \bibitem 3 Itti, Laurent, Christof Koch, and Ernst Niebur. "A model of saliency-based visual attention for rapid scene analysis."
+%        \textit{Pattern Analysis and Machine Intelligence, IEEE Transactions on 20.11 (1998): 1254-1259}.
+%
+%    \bibitem 4 Ma, Yu-Fei, and Hong-Jiang Zhang. "Contrast-based image attention analysis by using fuzzy growing."
+%        \textit{ Proceedings of the eleventh ACM international conference on Multimedia. ACM, 2003}. 
+%
+%    \bibitem 5 L. Itti. Models of Bottom-Up and Top-Down Visual Attention. PhD thesis, 
+%        \textit{California Institute of Technology Pasadena, 2000}.
+%
+%    \bibitem 6 Boykov, Yuri, Olga Veksler, and Ramin Zabih. "Fast approximate energy minimization via graph cuts." 
+%        \textit{Pattern Analysis and Machine Intelligence, IEEE Transactions on 23.11 (2001): 1222-1239}.
+%
+%    \bibitem 7 Suzuki, S. and Abe, K., Topological Structural Analysis of Digitized Binary Images by Border Following. 
+%        \textit{CVGIP 30 1, pp 32-46 (1985)}.
+%
+%    \bibitem 8 Gould, Stephen. "DARWIN: A Framework for Machine Learning and Computer Vision Research and Development." 
+%        \textit{Journal of Machine Learning Research 13 (2012): 3533-3537}.
+%
+%\end{thebibliography}
 %-------------------------------------------------------------------------
 
 \end{document}
