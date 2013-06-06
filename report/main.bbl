@@ -1,0 +1,56 @@
+\begin{thebibliography}{1}\itemsep=-1pt
+
+\bibitem{graphcut}
+Y.~Boykov, O.~Veksler, and R.~Zabih.
+\newblock Fast approximate energy minimization via graph cuts.
+\newblock {\em Pattern Analysis and Machine Intelligence, IEEE Transactions on
+  23.11}, pages 1222--1239, 2001.
+
+\bibitem{bde}
+J.~Freixenet, X.~M. noz, D.~Raba, J.~Mart\'i, and X.~Cuf\'i.
+\newblock Yet another survey on image segmentation: Region and boundary
+  information integration.
+\newblock {\em Proc. European Conf. Computer Vision}, pages 408--422, 2002.
+
+\bibitem{drwn}
+S.~Gould.
+\newblock Darwin: A framework for machine learning and computer vision research
+  and development.
+\newblock {\em Journal of Machine Learning Research}, 13:3533--3537, 2012.
+
+\bibitem{ittiphd}
+L.~Itti.
+\newblock Models of bottom-up and top-down visual attention.
+\newblock Master's thesis, California Institute of Technology Pasadena, 2000.
+
+\bibitem{itti}
+L.~Itti, C.~Koch, and E.~Niebur.
+\newblock A model of saliency-based visual attention for rapid scene analysis.
+\newblock {\em IEEE Transactions on Pattern Analysis and Machine Intelligence},
+  20(11), November 1998.
+
+\bibitem{sal2007}
+T.~Liu, J.~Sun, N.-N. Zheng, X.~Tang, and H.-Y. Shum.
+\newblock Learning to detect a salient object.
+\newblock {\em Computer Vision and Pattern Recognition}, CVPR(7):IEEE
+  Conference on. IEEE, 2007.
+
+\bibitem{sal2011}
+T.~Liu, Z.~Yuan, J.~Sun, J.~Wang, N.~Zheng, X.~Tang, and H.-Y. Shum.
+\newblock Learning to detect a salient object.
+\newblock {\em Pattern Analysis and Machine Intelligence, IEEE Transactions on
+  33.2}, pages 353--367, 2011.
+
+\bibitem{fuzzy}
+Y.-F. Ma and H.-J. Zhang.
+\newblock Contrast-based image attention analysis by using fuzzy growing.
+\newblock {\em Proceedings of the eleventh ACM international conference on
+  Multimedia. ACM}, 2003.
+
+\bibitem{topological}
+S.~Suzuki and K.~Abe.
+\newblock Topological structural analysis of digitized binary images by border
+  following.
+\newblock {\em CVGIP}, 30(1):32--46, 1985.
+
+\end{thebibliography}
