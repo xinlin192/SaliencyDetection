@@ -392,7 +392,8 @@ By cross validation above, the optimal parameter $\lambda_0$ we use for evaluati
 %% Result evaluation in rectangle level (1 page)
 %% images for the output rectangle
 \section{Result Evaluation}
-We randomly pick up 500 images from MSRA dataset B to form the training set. And we choose another 500 images to form the testing set.
+We randomly pick up 1000 images from MSRA dataset B to form the training set.
+And we choose another 500 images to form the testing set.
 
 \subsection{Bounding Box}
 The binary mask derived from the CRF inference can be used directly in a multitude of applications. However, in order to evaluate the accuracy of our approach, we make use of OpenCV's findContours algorithm to output a bounding box around the salient object, based on the derived pixel-wise binary mask. The dimensions of this bounding box is output as a label for each image into a text file holding all resultant labels for that directory.
