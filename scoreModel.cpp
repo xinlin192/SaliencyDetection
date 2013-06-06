@@ -79,9 +79,7 @@ float BDEdistance(int largeLeft, int largeTop, int largeRight, int largeBottom, 
                 minDistance = 10000.0; // reset to a ridiculously large number to get the smaller value once more
 
             }
-        }
-        cout << ".";
-            
+        }            
     }
 
     return dist;
@@ -122,12 +120,9 @@ int main(int argc, char *argv[]){
     float avgDistance = 0.0;
     string currFile;
 
-
     // get the result and the truth labels for each file, calculate their Boundary-Displacement Error
     for (std::map<string, vector<int> >::iterator it = resultPairs.begin(); it != resultPairs.end(); ++it){
-        currFile = (it->first) + "g";
-        //cout << currFile << "," << (it->second)[0] << endl;
-        //cout << truthPairs.begin() -> first << "," << (truthPairs.begin() -> second)[0] << endl;
+        currFile = it->first;
         if(truthPairs.find(currFile) == truthPairs.end()){
             cerr << "ERROR FINDING MAP FROM " << currFile << " TO BOUNDING RECTANGLE IN TRUTH LABELS\n";
             return -1;
@@ -147,30 +142,6 @@ int main(int argc, char *argv[]){
 //         rightDisp = (rright-tright);
 //         bottomDisp = (rbottom-tbottom);
         // debugging
-        cout << currFile << "\n";
-        cout << leftDisp << " " << topDisp << " " << rightDisp << " " << bottomDisp << "\n";
-        
-        // get the largest rectangle, we'll use this to calculate the distance
-        int left, right, top, bottom, l, b, t, r;
-        if ((rright-rleft)*(rbottom-rtop)<(tright-tleft)*(tbottom-ttop)){
-            left = tleft;
-            right = tright;
-            top = ttop;
-            bottom = tbottom;
-            l = rleft;
-            b = rright;
-            t = rtop;
-            r = rbottom;
-        } else {
-            left = rleft;
-            right = rright;
-            top = rtop;
-            bottom = rbottom;
-            l = tleft;
-            b = tright;
-            t = ttop;
-            r = tbottom;
-        }
         //cout << it->first << "\n";
         //cout << leftDisp << " " << topDisp << " " << rightDisp << " " << bottomDisp << "\n\n";
         
@@ -179,13 +150,14 @@ int main(int argc, char *argv[]){
             avgDistance += (BDEdistance(rleft, rtop, rright, rbottom, tleft, ttop, tright, tbottom)/((rright-rleft)*(rbottom-rtop) ) );
         else avgDistance += (BDEdistance(tleft, ttop, tright, tbottom, rleft, rtop, rright, rbottom)/((tright-tleft)*(tbottom-ttop) ) );
 
-        cout << "Picture: " << currFile << endl;
-        cout << "avg Distance so far: " << avgDistance << endl << endl;
+        DRWN_LOG_MESSAGE("Scoring picture " +currFile + "...");
     }
     
-    // get the average BDE overal;
+    // get the average BDE overall;
     avgDistance /= (float)resultPairs.size();
     cout << "Average Boundary Displacement Error: " << avgDistance << "\n";
+    
+    // TODO Standard deviation if time
     
     // Clean up by freeing memory and printing profile information.
     cvDestroyAllWindows();
