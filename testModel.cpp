@@ -212,7 +212,7 @@ int main (int argc, char * argv[]) {
         outputLbls << baseNames[i].substr(0,1) << "\\" << baseNames[i] << ".jpg\r\n";
         outputLbls << img.cols << " " << img.rows << "\n";
         // we're getting the second labels so put bogus padding values as the first set
-        outputLbls << "0 0 0 0;" << pt1.x << " " << pt1.y << " " << pt2.x << " " << pt2.y << ";\n\n";
+        outputLbls << "0 0 0 0; " << pt1.x << " " << pt1.y << " " << pt2.x << " " << pt2.y << ";\n\n";
     }
     
     outputLbls.close();
