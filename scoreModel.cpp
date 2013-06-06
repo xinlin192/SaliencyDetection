@@ -85,9 +85,12 @@ int main(int argc, char *argv[]){
     float avgDistance, currDistance, minDistance;
     string currFile;
 
+
     // get the result and the truth labels for each file, calculate their Boundary-Displacement Error
     for (std::map<string, vector<int> >::iterator it = resultPairs.begin(); it != resultPairs.end(); ++it){
-        currFile = it->first;
+        currFile = (it->first) + "g";
+        //cout << currFile << "," << (it->second)[0] << endl;
+        //cout << truthPairs.begin() -> first << "," << (truthPairs.begin() -> second)[0] << endl;
         if(truthPairs.find(currFile) == truthPairs.end()){
             cerr << "ERROR FINDING MAP FROM " << currFile << " TO BOUNDING RECTANGLE IN TRUTH LABELS\n";
             return -1;
@@ -107,8 +110,8 @@ int main(int argc, char *argv[]){
         rightDisp = (rright-tright);
         bottomDisp = (rbottom-tbottom);
         // debugging
-        cout << it->first << "\n";
-        cout << leftDisp << " " << topDisp << " " << rightDisp << " " << bottomDisp << "\n\n";
+        cout << currFile << "\n";
+        cout << leftDisp << " " << topDisp << " " << rightDisp << " " << bottomDisp << "\n";
         
         // get the largest rectangle, we'll use this to calculate the distance
         int left, right, top, bottom, l, b, t, r;
