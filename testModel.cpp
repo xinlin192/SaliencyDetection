@@ -118,8 +118,6 @@ int main (int argc, char * argv[]) {
     vector< cv::Mat > unary(2);
     double grayscale;
     
-
-
     for (unsigned i = 0; i < baseNames.size(); i++) {
         String processedImage = baseNames[i] + ".jpg";
         DRWN_LOG_STATUS("...processing image " << baseNames[i]);
@@ -137,13 +135,28 @@ int main (int argc, char * argv[]) {
             cvReleaseImage(&canvas);
         }
         
+        // learning result for B5: 1.58137,-2.62738,-0.563939
+        // learning result for B4: 1.87324,-3.01328,-0.496132
+        cv::Mat tempMat(img.rows, img.cols, CV_64F);
+        double maxValue = -1e6, minValue = 1e6;
+        for (int y = 0; y < img.rows; y ++) {
+            for (int x = 0 ; x < img.cols; x ++) {
+                //grayscale = 0.22*msc.at<Vec3b>(y,x).val[0] + 0.54*csh.at<Vec3b>(y,x).val[0] + 0.24*csd.at<Vec3b>(y,x).val[0];
+                grayscale = 6.03232 * (msc.at<Vec3b>(y,x).val[0] / 255.0) + 
+                    1.73948* (csh.at<Vec3b>(y,x).val[0] / 255.0 ) + 7.58758 * (csd.at<Vec3b>(y,x).val[0] / 255.0 );
+                tempMat.at<double>(y,x) = grayscale;
+                maxValue = (maxValue < grayscale)?grayscale:maxValue;
+                minValue = (minValue > grayscale)?grayscale:minValue;
+            }
+        }
+
+        double range = maxValue - minValue;
         // get unary potential and combine them by pre-computed parameters 
         unary[0] = cv::Mat(img.rows, img.cols, CV_64F);
         unary[1] = cv::Mat(img.rows, img.cols, CV_64F);
         for (int y = 0; y < img.rows; y ++) {
             for (int x = 0 ; x < img.cols; x ++) {
-                grayscale = 0.22*msc.at<Vec3b>(y,x).val[0] + 0.54*csh.at<Vec3b>(y,x).val[0] + 0.24*csd.at<Vec3b>(y,x).val[0];
-                unary[0].at<double>(y,x) = grayscale / 255.0;
+                unary[0].at<double>(y,x) = (tempMat.at<double>(y,x) - minValue) / range;
                 unary[1].at<double>(y,x) = 1 - unary[0].at<double>(y,x);
             }
         }
@@ -163,7 +176,7 @@ int main (int argc, char * argv[]) {
         // present the derived binary mask
         IplImage pcvimg = (IplImage) pres;
         IplImage *present = cvCloneImage(&pcvimg);
-        //cv::imwrite(string(outputDir) + baseNames[i] + ".jpg", pres);
+        cv::imwrite(string(outputDir) + baseNames[i] + "BM.jpg", pres);
         
         if (bVisualize) { 
             // draw the processed feature map and display it on the screen

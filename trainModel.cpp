@@ -92,29 +92,26 @@ int main (int argc, char * argv[]) {
     DRWN_ASSERT_MSG(drwnDirExists(imgDir), "Colour Spatial Distribution directory " << csdDir << " does not exist");
     DRWN_ASSERT_MSG(drwnFileExists(lblFile), "Labels file " << lblFile << " does not exist");
 
+
     // Get a list of images from the image directory.
     vector<string> baseNames = drwnDirectoryListing(imgDir, ".jpg", false, false);
-    DRWN_LOG_MESSAGE("Loading " << baseNames.size() << " images and labels...");
+    const int nImages = baseNames.size();
+    DRWN_LOG_MESSAGE("Loading " << nImages << " images and labels...");
 
     map< string, vector<int> > fileLabelPairs = parseLabel(lblFile);
-    int left, top, right, bottom;
-    vector<int> tempRectangle;
     String processedImage;
-    vector<double> lambda(3, 0.0);
-
-    // Build a dataset by loading images and labels. For each image,
-    // find the salient area using the labels and then compute the set of features
-    // that determine this saliency
-    drwnClassifierDataset dataset;
 
     // initialise one 2-class logistic model, data dimension = 3
-    Classifier classifier;
-    classifier.initialize(3, 2);
+    const int nDimension = 3;
+    const int nClasses = 2;
 
-    for (unsigned i = 0; i < baseNames.size(); i++) {
+    vector<double> summation (nDimension, 0.0);
+
+    for (unsigned i = 0; i < baseNames.size(); i ++ ) {
         processedImage = baseNames[i] + ".jpg";
         DRWN_LOG_STATUS("...processing image " << baseNames[i]);
-        
+        Classifier classifier;
+        classifier.initialize(nDimension, nClasses);
         // read the image and draw the rectangle of labels of training data
         cv::Mat img = cv::imread(string(imgDir) + DRWN_DIRSEP + processedImage);
         cv::Mat msc = cv::imread(string(mscDir) + DRWN_DIRSEP + processedImage);
@@ -127,7 +124,7 @@ int main (int argc, char * argv[]) {
 
         // form feature vector for each pixel
         vector< vector<double> > features;
-        features.resize(H * W, vector<double>(3, 0.0));
+        features.resize(H * W, vector<double>(nDimension, 0.0));
         for (int y = 0 ; y < H ; y ++) {
             for (int x = 0 ; x < W ; x ++) {
                 features[ y * W + x ][0] = msc.at<Vec3b>(y,x).val[0] / 255.0;
@@ -135,9 +132,10 @@ int main (int argc, char * argv[]) {
                 features[ y * W + x ][2] = csd.at<Vec3b>(y,x).val[0] / 255.0;
             }
         }
-        
+
         // ground truth label
-        tempRectangle = fileLabelPairs.find(processedImage)->second ;
+        int left, top, right, bottom;
+        vector<int> tempRectangle = fileLabelPairs.find(processedImage)->second ;
         left =  tempRectangle [0];
         top = tempRectangle [1];
         right = tempRectangle [2];
@@ -150,13 +148,15 @@ int main (int argc, char * argv[]) {
                 if ( y >= top && y <= bottom && x >= left && x <= right)
                     targets[ y * W + x ] = 1;
             }
-        }
+        } 
+
         classifier.train(features, targets);
-        cout <<  "train finished.." << endl;
-        
-        lambda = classifier.getWeights();
-        cout << "get weights" << endl;
-        cout << lambda[0] << "," << lambda[1] << "," << lambda[2] << endl;
+
+        vector<double> lambda = classifier.getWeights();
+        cout << lambda[0] << "," << lambda[1] << "," << lambda[2]  << endl;
+        for (int k = 0; k < nDimension ; k ++) {
+            summation[k] += lambda[k];
+        }
 
         // show the image and feature maps 
         if (bVisualize) {
@@ -167,7 +167,10 @@ int main (int argc, char * argv[]) {
             cvReleaseImage(&canvas);
         }
     }
-        
+
+    cout << "average: "<< summation[0]/ (float)nImages << "," << summation[1]/ (float)nImages << 
+        "," << summation[2]/ (float)nImages  << endl;
+
     // Clean up by freeing memory and printing profile information.
     cvDestroyAllWindows();
     drwnCodeProfiler::print();
