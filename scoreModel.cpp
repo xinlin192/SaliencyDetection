@@ -49,6 +49,44 @@ void usage()
 	 << endl;
 }
 
+
+// BDEdistance ----------------------------------------------------------------
+
+float BDEdistance(int largeLeft, int largeTop, int largeRight, int largeBottom, int smallLeft, int smallTop, int smallRight, int smallBottom){
+
+    float dist = 0.0;
+    float currDistance, minDistance;
+    
+    // calculate the minimum distance between each point x in the results and all the points in the truth label
+    // add this result to the avgDistance for each point x
+    minDistance = 10000.0; // ridiculously large number, there will always be a smaller value to take!
+    
+    for(int x = largeLeft; x <= largeRight; x++){
+        for(int y = largeTop; y <= largeBottom; y++){
+            if(!(x >= smallLeft && x <= smallRight && y >= smallTop && y <= smallBottom)){
+                    
+                // we have a non-zero displacement
+                for(int smallx = smallLeft; smallx <= smallRight; smallx++){
+                    for (int smally = smallTop; smally <= smallBottom; smally++){
+                        currDistance = sqrt(pow((float)x-smallx,2) + pow((float)y-smally,2) );
+                        if(currDistance < minDistance) minDistance = currDistance;
+                        //cout << "CURR: " << currDistance << endl ;
+                        //cout << "MIN: " << minDistance << endl << endl;
+                    }
+                }
+                // add it to the accumulated distance
+                dist += minDistance;
+                minDistance = 10000.0; // reset to a ridiculously large number to get the smaller value once more
+
+            }
+        }
+        cout << ".";
+            
+    }
+
+    return dist;
+}
+
 // main ----------------------------------------------------------------------
 
 int main(int argc, char *argv[]){
@@ -79,10 +117,9 @@ int main(int argc, char *argv[]){
     map< string, vector<int> > resultPairs = parseLabel(resultLbls);
     map< string, vector<int> > truthPairs = parseLabel(truthLbls);
     vector<int> resultRect, truthRect;
-    float topDisp, leftDisp, rightDisp, bottomDisp;
+    // float topDisp, leftDisp, rightDisp, bottomDisp;
     int rleft, rtop, rright, rbottom, tleft, ttop, tright, tbottom;
-    float avgBDE = 0;
-    float avgDistance, currDistance, minDistance;
+    float avgDistance = 0.0;
     string currFile;
 
 
@@ -105,10 +142,10 @@ int main(int argc, char *argv[]){
         tright = truthRect.at(2);
         rbottom = resultRect.at(3);
         tbottom = truthRect.at(3);
-        leftDisp = (rleft-tleft);
-        topDisp = (rtop-ttop);
-        rightDisp = (rright-tright);
-        bottomDisp = (rbottom-tbottom);
+//         leftDisp = (rleft-tleft);
+//         topDisp = (rtop-ttop);
+//         rightDisp = (rright-tright);
+//         bottomDisp = (rbottom-tbottom);
         // debugging
         cout << currFile << "\n";
         cout << leftDisp << " " << topDisp << " " << rightDisp << " " << bottomDisp << "\n";
@@ -134,40 +171,22 @@ int main(int argc, char *argv[]){
             t = ttop;
             r = tbottom;
         }
+        //cout << it->first << "\n";
+        //cout << leftDisp << " " << topDisp << " " << rightDisp << " " << bottomDisp << "\n\n";
         
-        
-        // calculate the minimum distance between each point x in the results and all the points in the truth label
-        // add this result to the avgDistance for each point x
-        avgDistance = 0.0;
-        minDistance = 10000.0; // ridiculously large number, there will always be a smaller value to take!
-        for(int largeCol = left; largeCol < right; largeCol++){
-            for(int largeRow = top; largeRow < bottom; largeRow++){
-                if(!(largeCol > l && largeCol < r && largeRow > t && largeRow < b)){
-                    // non-zero displacement
-                    for(int smallCol = l; smallCol < r; smallCol++){
-                        for (int smallRow = t; smallRow < b; smallRow++){
-                            currDistance = sqrt(pow((float)largeCol-smallCol,2) + pow((float)largeRow-smallRow,2) );
-                            if(currDistance < minDistance) minDistance = currDistance;
-                        }
-                    }
-                    avgDistance += minDistance;
-                }
-                minDistance = 10000.0; // reset to a ridiculously large number to get the smaller value once more
-            }
-            
-        }
-        // average over the number of pixels then add this to the overall BDE (it will be 0 if a perfect label, else slightly off)
-        avgDistance /= ((right-left)*(bottom-top));
-        avgBDE += avgDistance;
+        // get the largest area rectangle, use this to calculate the distance
+        if((rright-rleft)*(rbottom-rtop) > (tright-tleft)*(tbottom-ttop))
+            avgDistance += (BDEdistance(rleft, rtop, rright, rbottom, tleft, ttop, tright, tbottom)/((rright-rleft)*(rbottom-rtop) ) );
+        else avgDistance += (BDEdistance(tleft, ttop, tright, tbottom, rleft, rtop, rright, rbottom)/((tright-tleft)*(tbottom-ttop) ) );
 
+        cout << "Picture: " << currFile << endl;
+        cout << "avg Distance so far: " << avgDistance << endl << endl;
     }
     
     // get the average BDE overal;
-    avgBDE /= (float)resultPairs.size();
-    cout << "Average Boundary Displacement Error: " << avgBDE << "\n";
+    avgDistance /= (float)resultPairs.size();
+    cout << "Average Boundary Displacement Error: " << avgDistance << "\n";
     
-
-
     // Clean up by freeing memory and printing profile information.
     cvDestroyAllWindows();
     drwnCodeProfiler::print();
