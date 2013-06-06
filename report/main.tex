@@ -167,9 +167,15 @@ Feature Extraction, widely acknowledged as the most significant component of a c
 %% local feature
 \subsubsection{Multiscale Contrast}
 
-Constrast is commonly used as local feature because it simulates the human visual receptive fields. It acts on the fact that the boundary of salient objects tend to have a marked contrast to the surrounding region. Since we may have no prior knowledge about the size of salient object, it is usual to compute the contrast at multiple scales to then incorporate back into one map, since this will demarcate the various boundaries in the image.  This multiscale contrast map is thus a linear combination of image contrast at all levels of an N-level gaussian image pyramid, using the pixels $x$ in the image $I$.  Formally, this amounts to calculating $$f_c(x,I) = \SUM_{n = 1}^{N}\SUM_{x'\in W(x)}||I^n(x)-I^n(x')||^2$$ where W(x) is a window that delineates which area to consider as neighbouring pixels to compare contrast values.
-
-\BOLD{TODO ADD more technical analysis about why we should have multiple scales.}
+Constrast is commonly used as local feature because it simulates the human visual receptive fields.
+It acts on the fact that the boundary of salient objects tend to have a marked contrast to the
+surrounding region. Since we may have no prior knowledge about the size of salient object,
+it is usual to compute the contrast at multiple scales to then incorporate back into one map, since
+this will demarcate the various boundaries in the image.  This multiscale contrast map is thus a
+linear combination of image contrast at all levels of an N-level gaussian image pyramid, using the
+pixels $x$ in the image $I$.  Formally, this amounts to calculating 
+$$f_c(x,I) = \SUM_{n = 1}^{N}\SUM_{x'\in W(x)}||I^n(x)-I^n(x')||^2$$ where W(x) is a window that
+delineates which area to consider as neighbouring pixels to compare contrast values.
 
 \begin{figure}[ht]
 \begin{center}    
@@ -183,13 +189,18 @@ Constrast is commonly used as local feature because it simulates the human visua
  \includegraphics[width=0.65in,height=0.9in]{./Figures/pyramid/5_145_145839.jpg} \\   
 \caption{Multiscale Contrast example.}\small{Leftmost: Original Image. Rightmost: Multiscale Feature Map. \\
 Immediate images: multiscale pyramids from level $1$ to $6$.}
+\label{Fig:MultiscaleContrast}
 \end{center}
 \end{figure}
 
 
 In our implementation, we choose the total number of pyramid level $N$ to be $6$ and the size of the window to be $9 \times 9$. 
 
-As can be seen in \BOLD{CONTRAST FIGURE}, the derived multiscale contrast map provides a high distinction between boundary and non-boundary regions. This provides us a precise description of where the boundary of a salient object could exist in the output binary mask. When a salient object also has high contrast inside its boundaries, this feature works perfectl, such as the bird in \BOLD{FIG} and the house in \BOLD{FIG}.
+As can be seen in Fig.\ref{Fig:MultiscaleContrast}, the derived multiscale contrast map provides 
+a high distinction between boundary and non-boundary regions. This provides us a precise description
+of where the boundary of a salient object could exist in the output binary mask. When a salient
+object also has high contrast inside its boundaries, this feature works perfectl, such as the bird
+in Fig.\ref{Fig:MultiscaleContrast}{(b)} and the house in Fig. \ref{Fig:MultiscaleContrast}{(c)}.
 
 But there are some drawbacks that are tough to avoid. The boundaries of all objects are highlighted, which is not desirable when searching for a single salient object.  This is because we need to give a high probability to marking pixels that are relevant to the salient object rather than every boundary possible. If this doesn't happen, there is the possibility of a "saliency leak" into non-salient areas of the final result that could deteriorate the detector's precision.
 
@@ -360,13 +371,20 @@ global scope while two other features do not.
 
 Thus, the appropriate approache is to incorporate all three features into the unary potential
 of the CRF model, such that all three features extracted from raw images, could work together
-to derive the best result. However, it would be oversimplistic and unpersuasive to treat three
+to derive the best result. 
+
+$$
+   S_{unary}(a_x,I) = \SUM_{k=1}^K \lambda_k \cdot F_k(a_x,I) 
+$$
+
+However, it would be oversimplistic and unpersuasive to treat three
 features in equal weight since one feature perhaps may be stronger than other two features and
 ought to be assigned with higher importance. Hence, our goal here is to find an effective 
 Machine Learning algorithm to reasonably determine the optimal weight, according to which combining three
 features gives the sufficiently good result. 
 
-In this project, we implement logistic regression to decide the optimal weight under the help of training data.
+In this project, we implement logistic regression to decide the optimal weights using the training dataset.
+
 
 %% CRF Inference (0.5 - 1 page)
 %% images for inferred binary mask
@@ -380,15 +398,18 @@ minimal energy function would be much faster.
 
 \begin{figure}[h]
 \begin{center}
-    \includegraphics[width=0.8in,height=0.6in]{./Figures/Lambda/5_145_145612.jpg}
-    \includegraphics[width=0.8in,height=0.6in]{./Figures/Lambda/5_145_145612_2.jpg}
-    \includegraphics[width=0.8in,height=0.6in]{./Figures/Lambda/5_145_145612_3.jpg} \\
-    \includegraphics[width=0.8in,height=0.6in]{./Figures/Lambda/5_154_154292.jpg}
-    \includegraphics[width=0.8in,height=0.6in]{./Figures/Lambda/5_154_154292_2.jpg}
-    \includegraphics[width=0.8in,height=0.6in]{./Figures/Lambda/5_154_154292_3.jpg} \\
-    \includegraphics[width=0.8in,height=0.6in]{./Figures/Lambda/5_154_154732.jpg}
-    \includegraphics[width=0.8in,height=0.6in]{./Figures/Lambda/5_154_154732_2.jpg}
-    \includegraphics[width=0.8in,height=0.6in]{./Figures/Lambda/5_154_154732_3.jpg} \\
+    \includegraphics[width=0.7in,height=0.48in]{./Figures/Lambda/5_145_145612.jpg}
+    \includegraphics[width=0.7in,height=0.48in]{./Figures/Lambda/5_145_145612_2.jpg}
+    \includegraphics[width=0.7in,height=0.48in]{./Figures/Lambda/5_145_145612_3.jpg} 
+    \includegraphics[width=0.7in,height=0.48in]{./Figures/Lambda/5_145_145612_4.jpg} \\
+    \includegraphics[width=0.7in,height=0.48in]{./Figures/Lambda/5_154_154292.jpg}
+    \includegraphics[width=0.7in,height=0.48in]{./Figures/Lambda/5_154_154292_2.jpg}
+    \includegraphics[width=0.7in,height=0.48in]{./Figures/Lambda/5_154_154292_3.jpg} 
+    \includegraphics[width=0.7in,height=0.48in]{./Figures/Lambda/5_154_154292_4.jpg} \\
+    \includegraphics[width=0.7in,height=0.48in]{./Figures/Lambda/5_154_154732.jpg}
+    \includegraphics[width=0.7in,height=0.48in]{./Figures/Lambda/5_154_154732_2.jpg}
+    \includegraphics[width=0.7in,height=0.48in]{./Figures/Lambda/5_154_154732_3.jpg} 
+    \includegraphics[width=0.7in,height=0.48in]{./Figures/Lambda/5_154_154732_4.jpg} \\
     \footnotesize  (a) Raw Image (b) $\lambda_0 = 1$  (c) $\lambda_0 = 10$ (d) $\lambda_0 =100$ \\
      \caption{Examples for Binary Mask with various Lambda $\lambda_0$}
 \end{center}
@@ -413,7 +434,7 @@ By cross validation above, the optimal parameter $\lambda_0$ we use for evaluati
     \includegraphics[width=0.8in,height=0.6in]{./Figures/CRFinference/5_162_162349_3.jpg}
     \includegraphics[width=0.8in,height=0.6in]{./Figures/CRFinference/5_162_162349_2.jpg} \\
     \footnotesize  (a) Raw Image (b) Combined Unary Map  (c) Binary Mask ($\lambda=8$)\\
-     \caption{Examples for CRF inference by $\alpha$-algorithm}
+     \caption{Examples for CRF inference by $\alpha$-expansion}
 \end{center}
 \end{figure}
 
@@ -421,7 +442,7 @@ By cross validation above, the optimal parameter $\lambda_0$ we use for evaluati
 %% images for the output rectangle
 \section{Result Evaluation}
 We randomly pick up 1000 images from MSRA dataset B to form the training set.
-And we choose another 500 images to form the testing set.
+And we randoml pick up another 500 images to form the testing set.
 
 \subsection{Bounding Box}
 The binary mask derived from the CRF inference can be used directly in a multitude of applications. However, in order to evaluate the accuracy of our approach, we make use of OpenCV's findContours algorithm to output a bounding box around the salient object, based on the derived pixel-wise binary mask. The dimensions of this bounding box is output as a label for each image into a text file holding all resultant labels for that directory.
@@ -500,11 +521,12 @@ harmonic mean of precision and recall:
 $$
     F_{0.5} = \frac{1.5\times Precision \times Recall}{ 0.5 \times Precision + Recall}
 $$
-
+\BOLD{Result for the F-measure}
 \subsubsection{Boundary-based measurement}
 The Boundary Displacement Error (BDE) measures the average of positional difference 
 of ground truth and resulted detection. \\
-\BOLD{Add brief math description of BDE here?}
+\BOLD{Add brief math description of BDE here?} \\
+\BOLD{Result for the BDE}
 
 %% Discussion (existing flaws and possible improvements) (0.5 page)
 \section{Conclusion and Discussion}
