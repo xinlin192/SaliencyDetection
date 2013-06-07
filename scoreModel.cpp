@@ -6,7 +6,9 @@
 **
 ******************************************************************************
 ** FILENAME:    scoreModel.cpp
-** AUTHOR(S):   Chris Claoue-Long (u5183532@anu.edu.au)
+** AUTHOR(S):   
+**    Jimmy Lin (linxin@gmail.com)
+**    Chris Claoue-Long (u5183532@anu.edu.au)
 **
 *****************************************************************************/
 
@@ -85,6 +87,7 @@ float BDEdistance(int largeLeft, int largeTop, int largeRight, int largeBottom, 
     return dist;
 }
 
+
 // main ----------------------------------------------------------------------
 
 int main(int argc, char *argv[]){
@@ -119,6 +122,7 @@ int main(int argc, char *argv[]){
     int rleft, rtop, rright, rbottom, tleft, ttop, tright, tbottom;
     float avgDistance = 0.0;
     string currFile;
+    double FMeasureSum = 0.0, precisionSum = 0.0 , recallSum = 0.0;
 
     // get the result and the truth labels for each file, calculate their Boundary-Displacement Error
     for (std::map<string, vector<int> >::iterator it = resultPairs.begin(); it != resultPairs.end(); ++it){
@@ -137,27 +141,60 @@ int main(int argc, char *argv[]){
         tright = truthRect.at(2);
         rbottom = resultRect.at(3);
         tbottom = truthRect.at(3);
-//         leftDisp = (rleft-tleft);
-//         topDisp = (rtop-ttop);
-//         rightDisp = (rright-tright);
-//         bottomDisp = (rbottom-tbottom);
         // debugging
         //cout << it->first << "\n";
         //cout << leftDisp << " " << topDisp << " " << rightDisp << " " << bottomDisp << "\n\n";
         
+        // to avoid case of exception.
+        if ( rleft < 0 || tleft < 0 || rtop < 0 || ttop < 0) {
+            continue;
+        }
+        if ( rright > 500 || tright > 500 || rbottom > 500 || ttop > 500) {
+            continue;
+        }
         // get the largest area rectangle, use this to calculate the distance
         if((rright-rleft)*(rbottom-rtop) > (tright-tleft)*(tbottom-ttop))
             avgDistance += (BDEdistance(rleft, rtop, rright, rbottom, tleft, ttop, tright, tbottom)/((rright-rleft)*(rbottom-rtop) ) );
         else avgDistance += (BDEdistance(tleft, ttop, tright, tbottom, rleft, rtop, rright, rbottom)/((tright-tleft)*(tbottom-ttop) ) );
 
+        // compute the overlapped region, used for precision and recall computation
+        int nDetectedPixels = 0;
+        if (rtop == 0 && rbottom == 0 && rleft == 0 && rright == 0) {
+            continue;
+        }
+        for (int y = rtop ; y < rbottom ; y ++) {
+            for (int x = rleft ; x < rright ; x ++) {
+                // is in overlapped region: in the grounth rectangle?
+                if ( x <= tright && x >= tleft && y <= tbottom && y >= ttop) {
+                    nDetectedPixels += 1;
+                }
+            }
+        }
+        double recall = nDetectedPixels / (1.0 * (tbottom - ttop) * (tright - tleft) );
+        double precision = nDetectedPixels / (1.0 * (rbottom - rtop) * (rright - rleft) );
+        double FMeasure;
+        if (recall == 0 && precision == 0 ) {
+            FMeasure += 0;
+        } else {
+            FMeasure = (1.5 * precision * recall) / (0.5 * precision + recall);
+        }
+        recallSum += recall;
+        precisionSum += precision;
+        FMeasureSum += FMeasure;
+        // debugging
+        //cout << "Recall: " << recall << " , Precision: " <<  precision << ", F-Measure:" << FMeasure << endl;
+
         DRWN_LOG_MESSAGE("Scoring picture " +currFile + "...");
     }
     
     // get the average BDE overall;
-    avgDistance /= (float)resultPairs.size();
+    avgDistance /= (float) resultPairs.size();
     cout << "Average Boundary Displacement Error: " << avgDistance << "\n";
-    
-    // TODO Standard deviation if time
+
+    // get the average F-Measure overall;
+    cout << "Average Recall: " <<  recallSum/(float)resultPairs.size() << endl;
+    cout << "Average Precision: " <<  precisionSum/(float)resultPairs.size() << endl;
+    cout << "Average F-Measure: " <<  FMeasureSum/(float)resultPairs.size() << endl;
     
     // Clean up by freeing memory and printing profile information.
     cvDestroyAllWindows();

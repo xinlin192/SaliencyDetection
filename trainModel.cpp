@@ -6,10 +6,11 @@
 **
 ******************************************************************************
 ** MODULE: trainModel.cpp
-** VERSION: 1.0
+** VERSION: 1.5
 ** SINCE 2013-04-24
-** AUTHOR(S) Jimmy Lin (u5223173) - u5223173@uds.anu.edu.au
-**           Chris Claoue-Long (u5183532) - u5183532@anu.edu.au
+** AUTHOR(S) :
+**      Jimmy Lin (u5223173) - u5223173@uds.anu.edu.au
+**      Chris Claoue-Long (u5183532) - u5183532@anu.edu.au
 **
 *****************************************************************************/
 

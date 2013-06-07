@@ -6,7 +6,9 @@
 **
 ******************************************************************************
 ** FILENAME:    testCOMP3130Model.cpp
-** AUTHOR(S):   Chris Claoue-Long (u5183532) - u5183532@anu.edu.au
+** AUTHOR(S):   
+**     Jimmy Lin (u5223173) - linxin@gmail.com
+**     Chris Claoue-Long (u5183532) - u5183532@anu.edu.au
 **
 *****************************************************************************/
 
@@ -137,13 +139,15 @@ int main (int argc, char * argv[]) {
         
         // learning result for B5: 1.58137,-2.62738,-0.563939
         // learning result for B4: 1.87324,-3.01328,-0.496132
+        // 1.85905,-2.88057,-0.470537
         cv::Mat tempMat(img.rows, img.cols, CV_64F);
         double maxValue = -1e6, minValue = 1e6;
         for (int y = 0; y < img.rows; y ++) {
             for (int x = 0 ; x < img.cols; x ++) {
                 //grayscale = 0.22*msc.at<Vec3b>(y,x).val[0] + 0.54*csh.at<Vec3b>(y,x).val[0] + 0.24*csd.at<Vec3b>(y,x).val[0];
-                grayscale = 6.03232 * (msc.at<Vec3b>(y,x).val[0] / 255.0) + 
-                    1.73948* (csh.at<Vec3b>(y,x).val[0] / 255.0 ) + 7.58758 * (csd.at<Vec3b>(y,x).val[0] / 255.0 );
+                grayscale = 1.58137 * (msc.at<Vec3b>(y,x).val[0] / 255.0) +  
+                    2.62738 * (csh.at<Vec3b>(y,x).val[0] / 255.0 )  + 
+                       0.563939 * (csd.at<Vec3b>(y,x).val[0] / 255.0 );
                 tempMat.at<double>(y,x) = grayscale;
                 maxValue = (maxValue < grayscale)?grayscale:maxValue;
                 minValue = (minValue > grayscale)?grayscale:minValue;
