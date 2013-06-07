@@ -274,7 +274,7 @@ As shown in Figure \ref{Fig:RegionalFeatureMap}, the salient block within the im
 %% global feature
 \subsubsection{Colour Spatial Distribution}
 
-+The goal of using colour spatial distribution is to take into account the global colour information in the image, that is, the information about how widely the colours that occur in one image are distributed within it.  The computation of this feature is done in several parts.
+The goal of using colour spatial distribution is to take into account the global colour information in the image, that is, the information about how widely the colours that occur in one image are distributed within it.  The computation of this feature is done in several parts.
 
 \begin{figure}[t]
     \begin{center}
@@ -362,11 +362,11 @@ $$ y_x = p ( A_x = 1 | \bphix) = \frac{1}{1 + exp(-\bl \cdot \bphix)}$$
 where the vector $\bphix$ contains three normalised energy parameters $F_k (x, I)$ for each pixel $x$, and the vector $\bl = \{ \lambda_1, \lambda_2, \lambda_3\}$ indicates how the three extracted features form the unary term in the energy function are used in the inference model.
 
 
-+The likelihood function of an image with given human label $\bt$ can be defined as such:
+The likelihood function of an image with given human label $\bt$ can be defined as such:
 $$ p( \bt | \bl) = \prod_{x} y_{x}^{t_{x}} (1 - y_{x})^{1-t_x} $$
 where the target variable $\bt$ is the ground truth map, and $\btx$ indicates the human-labelled binary saliency in the pixel $x$. 
 
-We apply the maxmum likelihood estimation to evaluate the parameter $\bl$, based on the above likelihood function. Under this logistic regression framework, the ultimately learned parameter $\bl$ is $\{ 1.58137, 2.62738, 0.563939 \}$. 
+We apply the maxmum likelihood estimation to evaluate the parameter $\bl$, based on the above likelihood function. Under this logistic regression framework, the ultimately learned parameter $\bl$ is $( 1.58137, 2.62738, 0.563939 )$. 
 %% CRF Inference (0.5 - 1 page)
 %% images for inferred binary mask
 \subsection{CRF Inference}
@@ -399,10 +399,10 @@ This requires a way to determine the parameter $\lambda_0$ which indicates to wh
 \begin{tabular}{|c|c|c|c|c|}
     \hline
     $\lambda_0$ & 0.1 & 1   & 10 & 50 \\ \hline
-    Precision   & 0.0 & 0.0 & 0.0 & 0.0 \\
-    Recall      & 0.0 & 0.0 & 0.0 & 0.0 \\
-    F-Measure   & 0.0 & 0.0 & 0.0 & 0.0 \\
-    BDE & 0.0   & 0.0 & 37.78 &0.0 \\ \hline
+    Precision   & 0.694 & 0.761 & 0.0 & 0.0 \\
+    Recall      & 0.520 & 0.618 & 0.0 & 0.0 \\
+    F-Measure   & 0.589 & 0.659 & 0.0 & 0.0 \\
+    BDE         & 57.09 & 37.78 & 0.0 & 0.0 \\ \hline
 \end{tabular}
 \end{center}
 
@@ -431,7 +431,7 @@ The accuracy of the approach taken is shown visually in Figure \ref{fig:results}
 
 
 \subsection{Bounding Box}
-The binary mask derived from the CRF inference can be used directly in a multitude of applications. However, in order to evaluate the accuracy of our approach, we make use of OpenCV's findContours algorithm \cite{topological} to output a bounding box rectangle around the detected salient object, based on the derived pixel-wise binary mask. The dimensions of this bounding box are written to a text file holding all resultant labels for that image directory.
+The binary mask derived from the CRF inference can be used directly in a multitude of applications. However, in order to evaluate the accuracy of our approach, we make use of OpenCV's findContours algorithm \cite{topological} to output a bounding box rectangle around the detected salient object, based on the derived pixel-wise binary mask. The dimensions of this bounding box are written to a text file holding all resultant labels for that image directory, based on which the following evaluation methods are applied to score the performance of our approach.
 
 \begin{figure}[t]
 \begin{center}
@@ -460,7 +460,7 @@ The binary mask derived from the CRF inference can be used directly in a multitu
     \includegraphics[width=0.6in,height=0.4in]{./Figures/boundingbox/5_155_155333RECT.jpg}
     \includegraphics[width=0.6in,height=0.4in]{./Figures/boundingbox/5_155_155196RECT.jpg}
     \includegraphics[width=0.6in,height=0.4in]{./Figures/boundingbox/5_155_155459RECT.jpg} \\
-    \caption{Examples images for bounding box output}
+    \caption{Examples images for bounding box output} \label{fig:results}
 \end{center}
 \end{figure}
 
@@ -472,8 +472,8 @@ The binary mask derived from the CRF inference can be used directly in a multitu
 %In our project, evaluation will be applied, as well, in the cross validation while determining the 
 %energy function parameter $\lambda_0$. 
 %But what kind of criteria could effectively capture the goodness of our model?
-As to this project, we utilise the both approaches to evaluate our result:
-region-based and boundary-based measurements.
+As to this project, we utilise two approaches to evaluate our result:
+region-based measurement and boundary-based measurement.
 
 \subsubsection{Region-based measurement}
 Precision and Recall both take significant roles in the information retrieval as a performance indicator.  They are used in this project in evaluating the correctness of the output rectangle.
@@ -494,6 +494,7 @@ The precision represents the percentage of pixels that are correctly detected in
 It is evident that all three results in Figure \ref{Fig:PrecisionANDRecall} are far from satisfying. The salient detection in the leftmost image has high precision but the recall is very low, meaning that it has failed to detect all truly salient pixels.  The middle image is no better, with high recall but low precision, with a saliency leak into the surrounding region.
 
 For an overall performance measurement, the F-measure indicator is suitable, with $\alpha = 0.5$ giving the weighted harmonic mean of precision and recall:$$F_{0.5} = \frac{1.5\times Precision \times Recall}{ 0.5 \times Precision + Recall}$$
+where obviously puts more emphasis on precision than recall since we prefer rectangles of overly restricted size, which fails to detect thecomplete salient objects, rather than those of boxing the whole image, in which case, no saliency information is detected.
 
 \subsubsection{Boundary-based measurement}
 The boundary-based measurement we used is Boundary displacement error (BDE), which measures the average positional difference between the ground truth and result labels \cite{bde}.  It does this by calculating the minimum Euclidian distance between the set of pixels in one label $B_1$ and each pixel $x$ in the other label $B_2$ $$BDE(B_1,B_2)=\frac{\SUM_{x\in B_1}\min\limits_{y\in B_2}\{d_E(x,y)\}}{|B_1|}$$  A perfect score is 0, where every point in the result output label is contained in the set of points in the truth label.  As the result labels differ more and more from the ground truth, the average BDE value becomes higher.  The value itself represents the average number of pixels the result label boundaries have been displaced by as a whole, when compared to what they should be.  This does not necessarily mean that the label's bounding box dimensions are proportionally the same to those of the ground truth, because smaller, larger, and offset labels can have the same boundary displacement. 
@@ -502,7 +503,9 @@ The boundary-based measurement we used is Boundary displacement error (BDE), whi
 \subsection{Results and Discussion}
 The average recall and precision in our test set is 0.628987 anda 0.847835 respectively. And the average harmonic measurement F-Measure is 0.705468. Besides, for the boundary-based measurement, the average BDE score for our algorithm is 28.4735, which is based on training and test sets from the MSRA dataset B.  We were not able to calculate the F-measure for performance.
 
-Part of the reason for this somewhat low score is that the contours around the saliency mask map are not always fully closed, leading to high precision with a bounding box rectangle around a single point of the salient area since it is the largest discovered closed surface.  Creating a bounding box around all salient points in an image has the opposite effect on certain images, with a large recall but multiple non-salient areas of the image contained within the bounding box because of small areas in the image where a ``saliency leak'' has occurred, even after CRF  inference. \BOLD{\Huge{MORE DISCUSSION HERE}}
+Part of the reason for this somewhat low score is that the contours around the saliency mask map are not always fully closed, leading to high precision with a bounding box rectangle around a single point of the salient area since it is the largest discovered closed surface.  Creating a bounding box around all salient points in an image has the opposite effect on certain images, with a large recall but multiple non-salient areas of the image contained within the bounding box because of small areas in the image where a ``saliency leak'' has occurred, even after CRF inference. 
+
+
 
 
 %% Discussion (existing flaws and possible improvements) (0.5 page)
@@ -510,6 +513,8 @@ Part of the reason for this somewhat low score is that the contours around the s
 In this project, we have demonstrated a supervised approach for salient object detection, formulated as a binary labelling problem using a set of local, regional, and global salient object features.  However, there is much room for improvement, especially in the labelling of the salient areas from the derived binary mask.  There is also a lack of comparison with other methods using numerical evaluations, which may demonstrate greater effectiveness of the approach in this report.
 
 There are still several remaining issues for further investigation.  These include the ability to detect multiple salient areas in an image, improving on previous and current work to form a computational model capable of describing a scene.  Another application could be in real-time detection for use in robotics and recording or playback applications.  Failure cases of the algorithm can be remedied by creating a more adept manner of finding the largest salient portion of the image, that captures the closest 98\% of salient pixels.  This would result in much higher numerical accuracy overall when interpreting the binary mask.  There may also be better ways to derive a label from the raw binary mask of an image than finding contours or largely salient areas.
+
+Last but not in the least, the negative effect of inherent drawback of such pixelwise learning, coming from the pseudo-correctness of ground truth data, is not removed. That is, the human-labeled rectangle may sometimes contain a large portion of pixels that are not, from the perspective of its graphic characteristics, belonging to the real salient object. For example, in the Fig.\ref{Fig:PrecisionANDRecall}, the ground truth label (red box) encompasses a number of blue pixels corresponding to the sky, which evidently should not be within the salient object. Such noise might be enlarged when the brisk of true salient object is a tip. As a consequence of that, the logistic regression in this project may learn from a set of essentially erroneous pair of feature vector $\bphix$ and target variable $\btx$ and thus, the resulted parameter $\bl$ could be not precisely optimal.
 
 
 %\cite{drwn}\cite{sal2007}\cite{sal2011}\cite{itti}\cite{ittiphd}\cite{graphcut}\cite{topological}\cite{fuzzy}
