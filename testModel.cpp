@@ -65,7 +65,7 @@ int main (int argc, char * argv[]) {
     DRWN_END_CMDLINE_PROCESSING(usage());
 
     // Check for the correct number of required arguments
-    if (DRWN_CMDLINE_ARGC != 7) {
+    if (DRWN_CMDLINE_ARGC != 10) {
         usage();
         return -1;
     }
@@ -82,7 +82,10 @@ int main (int argc, char * argv[]) {
     const char *csdDir = DRWN_CMDLINE_ARGV[3]; // directory restores color spatial distribution feature map
     const char *outputDir = DRWN_CMDLINE_ARGV[4]; // directory for resulting images
     const char *outLbls = DRWN_CMDLINE_ARGV[5]; // output labels file
-    const double lambda = atof(DRWN_CMDLINE_ARGV[6]); // lambda calculation
+    const double lambda1 = atof(DRWN_CMDLINE_ARGV[6]); // lambda for local feature
+    const double lambda2 = atof(DRWN_CMDLINE_ARGV[7]); // lambda for regional feature 
+    const double lambda3 = atof(DRWN_CMDLINE_ARGV[8]); // lambda for global feature
+    const double lambda0 = atof(DRWN_CMDLINE_ARGV[9]); // lambda for pairwise term
     
     // Check for existence of the directory containing orginal images
     DRWN_ASSERT_MSG(drwnDirExists(imgDir), "image directory " << imgDir << " does not exist");
@@ -137,17 +140,13 @@ int main (int argc, char * argv[]) {
             cvReleaseImage(&canvas);
         }
         
-        // learning result for B5: 1.58137,-2.62738,-0.563939
-        // learning result for B4: 1.87324,-3.01328,-0.496132
-        // 1.85905,-2.88057,-0.470537
         cv::Mat tempMat(img.rows, img.cols, CV_64F);
         double maxValue = -1e6, minValue = 1e6;
         for (int y = 0; y < img.rows; y ++) {
             for (int x = 0 ; x < img.cols; x ++) {
-                //grayscale = 0.22*msc.at<Vec3b>(y,x).val[0] + 0.54*csh.at<Vec3b>(y,x).val[0] + 0.24*csd.at<Vec3b>(y,x).val[0];
-                grayscale = 1.58137 * (msc.at<Vec3b>(y,x).val[0] / 255.0) +  
-                    2.62738 * (csh.at<Vec3b>(y,x).val[0] / 255.0 )  + 
-                       0.563939 * (csd.at<Vec3b>(y,x).val[0] / 255.0 );
+                grayscale = lambda1 * (msc.at<Vec3b>(y,x).val[0] / 255.0) +  
+                    lambda2 * (csh.at<Vec3b>(y,x).val[0] / 255.0 )  + 
+                       lambda3 * (csd.at<Vec3b>(y,x).val[0] / 255.0 );
                 tempMat.at<double>(y,x) = grayscale;
                 maxValue = (maxValue < grayscale)?grayscale:maxValue;
                 minValue = (minValue > grayscale)?grayscale:minValue;
@@ -160,13 +159,13 @@ int main (int argc, char * argv[]) {
         unary[1] = cv::Mat(img.rows, img.cols, CV_64F);
         for (int y = 0; y < img.rows; y ++) {
             for (int x = 0 ; x < img.cols; x ++) {
-                unary[0].at<double>(y,x) = (tempMat.at<double>(y,x) - minValue) / range;
-                unary[1].at<double>(y,x) = 1 - unary[0].at<double>(y,x);
+                unary[1].at<double>(y,x) = (tempMat.at<double>(y,x) - minValue) / range;
+                unary[0].at<double>(y,x) = 1 - unary[1].at<double>(y,x);
             }
         }
 
         // compute binary mask of each pixel
-        binaryMask = mexFunction(img, unary, lambda);
+        binaryMask = mexFunction(img, unary, lambda0);
 
         // interpret the binary mask as a two-color image
         cv::Mat pres(img.rows, img.cols, CV_8UC3);
@@ -193,7 +192,7 @@ int main (int argc, char * argv[]) {
         cvtColor(pres, bounding, CV_BGR2GRAY);
         
         // find the contours, returning only extreme external bounds, find the largest contour area.
-        // TODO change to getting a bounding box around all white pixels
+        // FIXME change to getting a bounding box around all white pixels
         findContours(bounding,contours,CV_RETR_EXTERNAL,CV_CHAIN_APPROX_SIMPLE);
         
         // find the largest contour area

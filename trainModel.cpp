@@ -103,7 +103,7 @@ int main (int argc, char * argv[]) {
     String processedImage;
 
     // initialise one 2-class logistic model, data dimension = 3
-    const int nDimension = 3;
+    const int nDimension = 4;
     const int nClasses = 2;
 
     vector<double> summation (nDimension, 0.0);
@@ -131,6 +131,7 @@ int main (int argc, char * argv[]) {
                 features[ y * W + x ][0] = msc.at<Vec3b>(y,x).val[0] / 255.0;
                 features[ y * W + x ][1] = csh.at<Vec3b>(y,x).val[0] / 255.0;
                 features[ y * W + x ][2] = csd.at<Vec3b>(y,x).val[0] / 255.0;
+                features[ y * W + x ][3] = 1;
             }
         }
 
@@ -154,7 +155,7 @@ int main (int argc, char * argv[]) {
         classifier.train(features, targets);
 
         vector<double> lambda = classifier.getWeights();
-        cout << lambda[0] << "," << lambda[1] << "," << lambda[2]  << endl;
+        cout << lambda[0] << "," << lambda[1] << "," << lambda[2] << "," << lambda[3]  << endl;
         for (int k = 0; k < nDimension ; k ++) {
             summation[k] += lambda[k];
         }
@@ -170,7 +171,7 @@ int main (int argc, char * argv[]) {
     }
 
     cout << "average: "<< summation[0]/ (float)nImages << "," << summation[1]/ (float)nImages << 
-        "," << summation[2]/ (float)nImages  << endl;
+        "," << summation[2]/ (float)nImages << summation[3]/ (float)nImages << endl;
 
     // Clean up by freeing memory and printing profile information.
     cvDestroyAllWindows();
