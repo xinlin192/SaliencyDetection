@@ -357,17 +357,22 @@ It is evident that this global feature allows the detector to find salient objec
 
 %% Learning (0.5 page)
 \subsection{Learning}
-The three features discussed beforehand all have strengths and weaknesses in different areas, adding them together provides an accurate description of the salient area in an image.  It would be over-simplistic to weight these features equally, since one feature may be better than the others at providing information about image saliency. One effective and reasonable approach to determine the optimal weights to combine the three features with is through the help of a machine learning algorithm.  In this report, we use logistic regression to decide the optimal weight on training data.
+The three features discussed beforehand all have strengths and weaknesses in different areas, adding them together provides an accurate description of the salient area in an image.  It would be over-simplistic to weight these features equally, since one feature may be better than the others at providing information about image saliency. One effective and reasonable approach to determine the optimal weights to combine the three features with is through the help of a machine learning algorithm. 
+
+However, the direct learning for both unary parameter and pairse parameter is overly complicated. Thus, we simplify the problem by relating the logistic regression and the unary term in CRF with the special treatment of viewing the discriminant function $\bl \cdot \bphix$ as the unary energy. Apply the simple maximum likelihood on the logistic regression task to decide the optimal weight on training data and after that determine the pairwise parameter by cross validation.
 
 As mentioned before, the salient object detection is formulated as a binary decision problem. From this perspective, we can directly compute the posterior distribution over the binary saliency variable $A_x$ as a sigmoid function
-$$ y_x = p ( A_x = 1 | \bphix) = \frac{1}{1 + \exp(-\bl \cdot \bphix)}$$
-where the vector $\bphix$ contains three normalised energy parameters $F_k (x, I)$ for each pixel $x$, and the vector $\bl = \{ \lambda_1, \lambda_2, \lambda_3\}$ indicates how the three extracted features form the unary term in the energy function are used in the inference model.
+$$ y_x = p ( A_x = 1 | \bphix) = \frac{1}{1 + \exp(-\bl \cdot \bphix + \lambda_4)}$$
+where the vector $\bphix$ contains three normalised energy parameters $F_k (x, I)$ for each pixel $x$, and the vector $\bl = \{ \lambda_1, \lambda_2, \lambda_3\}$ indicates how the three extracted features form the unary term in the energy function are used in the inference model. And the $\lambda_4$ is the bias term in discriminant function $\lambda \cdot \bphix$.
 
 The likelihood function of an image with given human label $\bt$ can be defined as
 $$ p( \bt | \bl) = \prod_{x} y_{x}^{t_{x}} (1 - y_{x})^{1-t_x} $$
 where the target variable $\bt$ is the ground truth map, and $\btx$ indicates the human label of the saliency of the pixel $x$. 
 
-We apply a maximum likelihood estimation to evaluate the parameter $\bl$, based on the above likelihood function. Under this logistic regression framework, the optimal value of $\bl$ is $\{1.58137,2.62738,0.563939\}$.
+We apply a maximum likelihood estimation to evaluate the parameter $\bl$, based on the above likelihood function.  Under this logistic regression framework, the optimal value of $\bl$ is $\{-8.30338 ,-7.95561, -2.50623, 5.35052\}$. 
+
+And since in CRF framwork, we do not take the constant energy into account (they will be eliminated even if considered), the parameter $\lambda_4$ can be thrown away without being combined into the CRF energy function.
+
 %% CRF Inference (0.5 - 1 page)
 %% images for inferred binary mask
 \subsection{CRF Inference}
