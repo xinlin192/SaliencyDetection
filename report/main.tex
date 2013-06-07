@@ -391,6 +391,17 @@ The combined unary potential made up from these weighted feature maps is likely 
 
 This requires a way to determine the parameter $\lambda_0$ which indicates to what extent, relative to the unary potential of the combined feature map, the algorithm should consider the pairwise potential in deciding the binary saliency of a pixel.  This parameter is key to influencing the smoothness of the resulting binary mask, since as discussed above it can be regarded as a penalty for labelling adjacent pixels with different values.
 
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|}
+    \hline
+    $\lambda_0$ & 0.1 & 1   & 10 & 50 \\ \hline
+    Precision   & 0.0 & 0.0 & 0.0 & 0.0 \\
+    Recall      & 0.0 & 0.0 & 0.0 & 0.0 \\
+    F-Measure   & 0.0 & 0.0 & 0.0 & 0.0 \\
+    BDE & 0.0   & 0.0 & 37.78 &0.0 \\ \hline
+\end{tabular}
+\end{center}
+
 To determine a suitable value for $\lambda_0$, we apply cross validation at various magnitudes.  Using this, the optimal parameter $\lambda_0$ for calculating the final binary mask is $\lambda_0 = 8$.
 
 
