@@ -359,13 +359,13 @@ It is evident that this global feature allows the detector to find salient objec
 \subsection{Learning}
 The three features discussed beforehand all have strengths and weaknesses in different areas, so adding them together provides an accurate description of the salient area in an image.  However, it would be over-simplistic to weight these features equally, since one feature may be better than the others at providing information about image saliency. One effective and reasonable approach to determine the optimal weights to combine the three features with is through the help of a machine learning algorithm.  
 
-However, directly learning both the unary parameter and the pairwise parameter is overly complicated. We therefore simplify the problem by relating the logistic regression and the unary term in the conditional random field to the discriminant function $\bl \cdot \bphix$ as the unary energy parameter. We apply a simple maximum likelihood algorithm on the logistic regression task to decide the optimal weight on training data and using that, we determine the pairwise parameter by cross-validation.
+However, directly learning both the unary parameter and the pairwise parameter is overly complicated. In order to simplify the problem, we relate the logistic regression to the unary term parameter learning in the conditional random field by viewing discriminant function $\bl \cdot \bphix$ as negative unary energy. And then the simple maximum likelihood algorithm can be applied to the logistic regression task to decide the optimal weight on training data and using that, we determine the pairwise parameter by cross-validation.
 
 % with the special treatment of viewing the discriminant function $\bl \cdot \bphix$ as the unary energy. Apply the simple maximum likelihood on the logistic regression task to decide the optimal weight on training data and after that determine the pairwise parameter by cross validation.
 
 As mentioned before, the salient object detection is formulated as a binary decision problem. From this perspective, we can directly compute the posterior distribution over the binary saliency variable $A_x$ as a sigmoid function
-$$ y_x = p ( A_x = 1 | \bphix) = \frac{1}{1 + \exp(-\bl \cdot \bphix + \lambda_4)}$$
-where the vector $\bphix$ contains three normalised energy parameters $F_k (x, I)$ for each pixel $x$, and the vector $\bl = \{ \lambda_1, \lambda_2, \lambda_3\}$ indicates how the three extracted features form the unary term in the energy function are used in the inference model. $\lambda_4$ is the bias term obtained from discriminant function $\lambda \cdot \bphix$.
+$$ y_x = p ( A_x = 1 | \bphix) = \frac{1}{1 + \exp(-\bl \cdot \bphix)}$$
+where the vector $\bphix$ contains three normalised energy parameters $F_k (x, I)$ for each pixel $x$, and the vector $\bl = \{ \lambda_1, \lambda_2, \lambda_3, \lambda_4\}$ indicates how the three extracted features form the unary term in the energy function are used in the inference model. Note that $\lambda_4$ within the discriminant function $\lambda \cdot \bphix$ is the weight for bias term.
 
 The likelihood function of an image with given human label $\bt$ can be defined as
 $$ p( \bt | \bl) = \prod_{x} y_{x}^{t_{x}} (1 - y_{x})^{1-t_x} $$
