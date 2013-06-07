@@ -400,10 +400,10 @@ This requires a way to determine the parameter $\lambda_0$ which indicates to wh
 \begin{tabular}{||c||c|c|c|c|}
     \hline
     $\lambda_0$ & 0.1 & 1   & 10 & 50 \\ \hline
-    Precision   & 0.694 & 0.761 & 0.866 & 0.0 \\
-    Recall      & 0.520 & 0.618 & 0.619 & 0.0 \\
-    F-Measure   & 0.589 & 0.659 & 0.704 & 0.0 \\
-    BDE         & 57.09 & 37.78 & 28.56 & 0.0 \\ \hline
+    Precision   & 0.694 & 0.761 & 0.866 & 0.890 \\
+    Recall      & 0.520 & 0.618 & 0.619 & 0.323 \\
+    F-Measure   & 0.589 & 0.659 & 0.704 & 0.399 \\
+    BDE         & 57.09 & 37.78 & 28.56 & 67.96 \\ \hline
 \end{tabular}
 \caption{The table showing results of cross validaton}
 \end{table}
@@ -503,7 +503,8 @@ The boundary-based measurement we used is Boundary displacement error (BDE), whi
 
 
 \subsection{Results and Discussion}
-The average recall and precision in our test set is 0.628987 anda 0.847835 respectively. And the average harmonic measurement F-Measure is 0.705468. Besides, for the boundary-based measurement, the average BDE score for our algorithm is 28.4735, which is based on training and test sets from the MSRA dataset B.  We were not able to calculate the F-measure for performance.
+The final performance evaluation is based on the test sets constructed from the MSRA dataset B.
+The average recall and precision in our test set is 0.629 anda 0.848 respectively. And the average harmonic measurement F-Measure is 0.705. Besides, for the boundary-based measurement, the average BDE score for our algorithm is 28.47, which means there are about 28 pixels in the \BOLD{..blahblah}. 
 
 Part of the reason for this somewhat low score is that the contours around the saliency mask map are not always fully closed, leading to high precision with a bounding box rectangle around a single point of the salient area since it is the largest discovered closed surface.  Creating a bounding box around all salient points in an image has the opposite effect on certain images, with a large recall but multiple non-salient areas of the image contained within the bounding box because of small areas in the image where a ``saliency leak'' has occurred, even after CRF inference. 
 
