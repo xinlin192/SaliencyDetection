@@ -505,7 +505,7 @@ Boundary displacement error (BDE) measures the average positional difference bet
 
 \subsection{Results and Discussion}
 
-The average recall and precision for our test set are 0.628987 and 0.847835 respectively.  The corresponding harmonic F-measure is 0.705468 and the average BDE score is 28.4735.  These scores show that the precision of our algorithm is quite high, at the cost of recall on salient objects.  The BDE score demonstrates that the labels returned are off by about 28 pixels on average, which is good bot not particularly accurate.
+The average recall and precision for our test set are 0.629 and 0.848 respectively.  The corresponding harmonic F-measure is 0.705 and the average BDE score is 28.47.  These scores show that the precision of our algorithm is quite high, at the cost of recall on salient objects.  The BDE score demonstrates that the labels returned are off by about 28 pixels on average, which is good but not particularly accurate.
 
 Part of the reason for this displacement is that the contours formed around the salient area of the image are not always fully closed, leading to a highly precise bounding box rectangle around a single point of the salient area.  This is due to findContours labelling it as the largest discovered closed surface.  Creating a bounding box around all salient points in an image has the opposite effect in certain cases, with a large recall but multiple non-salient areas of the image contained within the bounding box because of small areas in the image where a ``saliency leak'' has occurred, even after CRF  inference.
 
