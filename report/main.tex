@@ -112,7 +112,7 @@ Most existing approaches are based on a bottom-up computational framework, where
 
 The second step is saliency computation. The saliency is computed by a centre-surround operation, self-information, or graph-based random walk using multiple features. After normalisation and linear/nonlinear combination, a master or saliency map is computed to represent the saliency of each pixel in the image. 
 
-Finally, a few key locations on the saliency map are identified by winner-take-all, inhibition-of-return, or other nonlinear operations and are returned as a label designating the salient area in the image.
+Finally, a few key locations on the saliency map are identified by winner-takes-all, inhibition-of-return, or other nonlinear operations and are returned as a label designating the salient area in the image.
 
 %% Formulation (1 page)
 \section{Our Approach}
@@ -357,13 +357,15 @@ It is evident that this global feature allows the detector to find salient objec
 
 %% Learning (0.5 page)
 \subsection{Learning}
-The three features discussed beforehand all have strengths and weaknesses in different areas, adding them together provides an accurate description of the salient area in an image.  It would be over-simplistic to weight these features equally, since one feature may be better than the others at providing information about image saliency. One effective and reasonable approach to determine the optimal weights to combine the three features with is through the help of a machine learning algorithm. 
+The three features discussed beforehand all have strengths and weaknesses in different areas, so adding them together provides an accurate description of the salient area in an image.  However, it would be over-simplistic to weight these features equally, since one feature may be better than the others at providing information about image saliency. One effective and reasonable approach to determine the optimal weights to combine the three features with is through the help of a machine learning algorithm.  
 
-However, the direct learning for both unary parameter and pairse parameter is overly complicated. Thus, we simplify the problem by relating the logistic regression and the unary term in CRF with the special treatment of viewing the discriminant function $\bl \cdot \bphix$ as the unary energy. Apply the simple maximum likelihood on the logistic regression task to decide the optimal weight on training data and after that determine the pairwise parameter by cross validation.
+However, directly learning both the unary parameter and the pairwise parameter is overly complicated. We therefore simplify the problem by relating the logistic regression and the unary term in the conditional random field to the discriminant function $\bl \cdot \bphix$ as the unary energy parameter. We apply a simple maximum likelihood algorithm on the logistic regression task to decide the optimal weight on training data and using that, we determine the pairwise parameter by cross-validation.
+
+% with the special treatment of viewing the discriminant function $\bl \cdot \bphix$ as the unary energy. Apply the simple maximum likelihood on the logistic regression task to decide the optimal weight on training data and after that determine the pairwise parameter by cross validation.
 
 As mentioned before, the salient object detection is formulated as a binary decision problem. From this perspective, we can directly compute the posterior distribution over the binary saliency variable $A_x$ as a sigmoid function
 $$ y_x = p ( A_x = 1 | \bphix) = \frac{1}{1 + \exp(-\bl \cdot \bphix + \lambda_4)}$$
-where the vector $\bphix$ contains three normalised energy parameters $F_k (x, I)$ for each pixel $x$, and the vector $\bl = \{ \lambda_1, \lambda_2, \lambda_3\}$ indicates how the three extracted features form the unary term in the energy function are used in the inference model. And the $\lambda_4$ is the bias term in discriminant function $\lambda \cdot \bphix$.
+where the vector $\bphix$ contains three normalised energy parameters $F_k (x, I)$ for each pixel $x$, and the vector $\bl = \{ \lambda_1, \lambda_2, \lambda_3\}$ indicates how the three extracted features form the unary term in the energy function are used in the inference model. $\lambda_4$ is the bias term obtained from discriminant function $\lambda \cdot \bphix$.
 
 The likelihood function of an image with given human label $\bt$ can be defined as
 $$ p( \bt | \bl) = \prod_{x} y_{x}^{t_{x}} (1 - y_{x})^{1-t_x} $$
@@ -371,7 +373,7 @@ where the target variable $\bt$ is the ground truth map, and $\btx$ indicates th
 
 We apply a maximum likelihood estimation to evaluate the parameter $\bl$, based on the above likelihood function.  Under this logistic regression framework, the optimal value of $\bl$ is $\{-8.30338 ,-7.95561, -2.50623, 5.35052\}$. 
 
-And since in CRF framwork, we do not take the constant energy into account (they will be eliminated even if considered), the parameter $\lambda_4$ can be thrown away without being combined into the CRF energy function.
+Since we do not take the constant energy parameter into account in the conditional random field, the parameter $\lambda_4$ can be discarded from the energy function.
 
 %% CRF Inference (0.5 - 1 page)
 %% images for inferred binary mask
@@ -403,13 +405,13 @@ This requires a way to determine the parameter $\lambda_0$ which indicates to wh
 
 \begin{table}[h]
 \begin{center}
-\begin{tabular}{||c||c|c|c|c|}
+\begin{tabular}{|c||c|c|c|c|}
     \hline
-    $\lambda_0$ & 0.1 & 1   & 10 & 50 \\ \hline
-    Precision   & 0.694 & 0.761 & 0.866 & 0.890 \\
-    Recall      & 0.520 & 0.618 & 0.619 & 0.323 \\
-    F-Measure   & 0.589 & 0.659 & 0.704 & 0.399 \\
-    BDE         & 57.09 & 37.78 & 28.56 & 67.96 \\ \hline
+    $\lambda_0$ & 0.1 & 1   & \BOLD{10} & 50 \\ \hline
+    Precision   & 0.694 & 0.761 & \BOLD{0.866} & 0.890 \\
+    Recall      & 0.520 & 0.618 & \BOLD{0.619} & 0.323 \\
+    F-Measure   & 0.589 & 0.659 & \BOLD{0.704} & 0.399 \\
+    BDE         & 57.09 & 37.78 & \BOLD{28.56} & 67.96 \\ \hline
 \end{tabular}
 
 \caption{Cross-validation example with four values}
@@ -505,6 +507,8 @@ Precision represents the accuracy that pixels that are correctly detected in the
 
 For an overall performance measurement, the F-measure indicator with $\alpha = 0.5$ is suitable, returning the weighted harmonic mean of precision and recall:$$F_{0.5} = \frac{1.5\times Precision \times Recall}{ 0.5 \times Precision + Recall}$$
 
+This approach puts more emphasis on the algorithm's recall over its precision, however since the three features we are using enable an accurate detection of the salient area, we need to evaluate the algorithm's recall capability in order to ensure that it does not label too small an area.
+
 \subsubsection{Boundary Displacement Error}
 Boundary displacement error (BDE) measures the average positional difference between the ground truth and result labels \cite{bde}.  It does this by calculating the minimum Euclidian distance between the set of pixels in one label $B_1$ and each pixel $x$ in the other label $B_2$, averaging this result over the number of pixels in the set $B_1$. $$BDE(B_1,B_2)=\frac{\SUM_{x\in B_1}\min\limits_{y\in B_2}\{d_E(x,y)\}}{|B_1|}$$  A perfect score is 0, where every point in the result output label is contained in the set of points in the truth label.  As the result labels differ more and more from the ground truth, the average BDE value becomes higher.  The value itself represents the average number of pixels the result label boundaries have been displaced by as a whole, when compared to what they should be.  This does not necessarily mean that the label's bounding box dimensions are proportionally the same to those of the ground truth, because smaller, larger, and offset labels can have the same boundary displacement. 
 
@@ -514,7 +518,7 @@ The average recall and precision for our test set are 0.629 and 0.848 respective
 
 Part of the reason for this displacement is that the contours formed around the salient area of the image are not always fully closed, leading to a highly precise bounding box rectangle around a single point of the salient area.  This is due to findContours labelling it as the largest discovered closed surface.  Creating a bounding box around all salient points in an image has the opposite effect in certain cases, with a large recall but multiple non-salient areas of the image contained within the bounding box because of small areas in the image where a ``saliency leak'' has occurred, even after CRF  inference.
 
-Another issue is that the saliency map returned from the CRF inference on images with text tend to only mark the letters in the text as salient, missing the larger area of the sign or billboard.  This is a byproduct of our feature set since the letters are seen as the most distinct objects in the image.  Saliency leak into the background areas is also a problem, and occurs when the salient object has a similar colour to the background of the image -- this is due to the major use of colour in our feature extraction algorithms.
+Another issue is that the saliency map returned from the CRF inference on images with text tends to only mark the letters in the text as salient, missing the larger area of the sign or billboard.  This is a byproduct of our feature set since the letters are seen as the most distinct objects in the image.  Saliency leak into the background areas is also a problem, and occurs when the salient object has a similar colour to the background of the image -- this is due to the major use of colour in our feature extraction algorithms.
 
 %% Discussion (existing flaws and possible improvements) (0.5 page)
 \section{Conclusion}
