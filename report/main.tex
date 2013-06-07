@@ -348,7 +348,7 @@ Thus, the likelihood function of this whole image with given human label $\bt$ i
 $$ p( \bt | \bl) = \prod_{x} y_{x}^{t_{x}} (1 - y_{x})^{1-t_x} $$
 where the target variable $\bt$ is the ground truth map, and $\btx$ indicates the human-labelled binary saliency in the pixel $x$. 
 
-We apply the maxmum likelihood estimation to evaluate the parameter $\bl$, based on the above likelihood function. Under this logistic regression framework, the ultimately learned parameter $\bl$ is $\{ \}$.
+We apply the maxmum likelihood estimation to evaluate the parameter $\bl$, based on the above likelihood function. Under this logistic regression framework, the ultimately learned parameter $\bl$ is $\{ 1.58137, 2.62738, 0.563939 \}$.
 %% CRF Inference (0.5 - 1 page)
 %% images for inferred binary mask
 \subsection{CRF Inference}
@@ -376,6 +376,18 @@ The weighted unary potential made up from these weighted feature maps $$S_{unary
 
 
 This requires a way to determine the parameter $\lambda_0$ which indicates to what extent, relative to the unary potential of the combined feature map, we ought to consider the pairwise potential in deciding the binary saliency of a pixel.  This parameter is key to influencing the smoothness of the resulting binary mask, since as discussed above it can be regarded as a penalty for labelling adjacent pixels with different values.
+
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|}
+    \hline
+    $\lambda_0$ & 0.1 & 1   & 10 & 50 \\ \hline
+    Precision   & 0.0 & 0.0 & 0.0 & 0.0 \\
+    Recall      & 0.0 & 0.0 & 0.0 & 0.0 \\
+    F-Measure   & 0.0 & 0.0 & 0.0 & 0.0 \\
+    BDE & 0.0   & 0.0 & 37.78 &0.0 \\ \hline
+\end{tabular}
+
+\end{center}
 
 To determine a suitable $\lambda_0$, we apply cross validation at various magnitudes.  Using this, the optimal parameter $\lambda_0$ for calculating the final binary mask is $\lambda_0 = 8$.
 
